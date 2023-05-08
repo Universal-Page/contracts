@@ -1,0 +1,32 @@
+{
+  "address": "0xA0260828430969DBd995794180B904BFE0b88c9b",
+  "claims": {
+    "0": {
+      "amount": 1,
+      "index": 0,
+      "profile": "0x37Fa9FB05C2E3e9541a59B891321E9c4b8246442",
+      "proof": [
+        "0xec66453ce4a43e93253436b481c9481974fd3de9d654d1936cddafe8c93f5130",
+        "0x5523ff0100f4ee5ec131edccd5b0b6a7d07926fc3b5c0c0d96a8cb6a257a42f3"
+      ]
+    },
+    "1": {
+      "amount": 2,
+      "index": 1,
+      "profile": "0x07F15aB9F47A004A21552E6b8C81ad2b37ff52D5",
+      "proof": [
+        "0xd7862617e4e919ce949243f5d85404b6b10f5c09b173fe2ab99a1fd46acee801",
+        "0x5523ff0100f4ee5ec131edccd5b0b6a7d07926fc3b5c0c0d96a8cb6a257a42f3"
+      ]
+    },
+    "2": {
+      "amount": 3,
+      "index": 2,
+      "profile": "0x64f134CfF78A8A6EC55eF1992A36798C84460b26",
+      "proof": [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x4b5c387764f24a9b6cb6e13c1452bf8b6f3691b1f3867ffb30128629c49bcea9"
+      ]
+    }
+  }
+}
