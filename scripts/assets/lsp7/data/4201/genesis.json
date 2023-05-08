@@ -1,0 +1,16 @@
+{
+  "claims": [
+    {
+      "profile": "0x30B3f161Ee7A6b5E449cB5Ad4eeABEFcd8288362",
+      "amount": 1
+    },
+    {
+      "profile": "0x07F15aB9F47A004A21552E6b8C81ad2b37ff52D5",
+      "amount": 2
+    },
+    {
+      "profile": "0x64f134CfF78A8A6EC55eF1992A36798C84460b26",
+      "amount": 3
+    }
+  ]
+}
