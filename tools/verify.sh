@@ -59,7 +59,7 @@ verify() {
   echo "Verifying ${name} at ${address}"
 
   forge verify-contract \
-    --compiler-version 'v0.8.17+commit.8df45f5f' \
+    --compiler-version 'v0.8.17+commit.a1b79de6' \
     --optimizer-runs 1000 \
     --chain-id ${CHAIN_ID} \
     --verifier blockscout \
