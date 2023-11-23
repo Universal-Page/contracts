@@ -4,7 +4,7 @@
 
 | network | contract / library    | address                                    |
 | ------- | --------------------- | ------------------------------------------ |
-| mainnet | PageName              |                                            |
+| mainnet | PageName              | 0xaebcc2c80abacb7e4d928d4c0a52c7bbeba4c4be |
 | mainnet | GenesisDigitalAsset   |                                            |
 | mainnet | Participant           | 0xa29aeaabb5da0cc3635576933a66c1b714f058c1 |
 | mainnet | LSP7Listings          | 0xe7f5c709d62bcc3701f4c0cb871eb77e301283b5 |
