@@ -6,16 +6,16 @@
 | ------- | --------------------- | ------------------------------------------ |
 | mainnet | PageName              |                                            |
 | mainnet | GenesisDigitalAsset   |                                            |
-| mainnet | Participant           |                                            |
-| mainnet | LSP7Listings          |                                            |
-| mainnet | LSP7Offers            |                                            |
-| mainnet | LSP7Marketplace       |                                            |
-| mainnet | LSP8Listings          |                                            |
-| mainnet | LSP8Offers            |                                            |
-| mainnet | LSP8Auctions          |                                            |
-| mainnet | LSP8Marketplace       |                                            |
-| mainnet | Points                |                                            |
-| mainnet | Royalties             |                                            |
+| mainnet | Participant           | 0xa29aeaabb5da0cc3635576933a66c1b714f058c1 |
+| mainnet | LSP7Listings          | 0xe7f5c709d62bcc3701f4c0cb871eb77e301283b5 |
+| mainnet | LSP7Offers            | 0xb2379f3f3c623cd2ed18e97e407cdda8fe6c6da6 |
+| mainnet | LSP7Marketplace       | 0xe04cf97440cd191096c4103f9c48abd96184fb8d |
+| mainnet | LSP8Listings          | 0x4faab47b234c7f5da411429ee86cb15cb0754354 |
+| mainnet | LSP8Offers            | 0xed189b51455c9714aa49b0c55529469c512b10b6 |
+| mainnet | LSP8Auctions          | 0x6eee8a19198bf39f2cefc24713acbdcc3c016dec |
+| mainnet | LSP8Marketplace       | 0x6807c995602eaf523a95a6b97acc4da0d3894655 |
+| mainnet | Points                | 0x157668416776c78EaB825D0d3969d75DC7dD7C0D |
+| mainnet | Royalties             | 0x391B24e80d85587C1cb698f0cD7Dfb7191D6875F |
 | testnet | PageName              | 0x8b08eeb9183081de7e2d4ae49fad4afb56e31ab4 |
 | testnet | GenesisDigitalAsset   | 0x86488e1c57115f6a7cad26a4f83367cb1e117911 |
 | testnet | CollectorDigitalAsset | 0x9eb7a7666fc33e7a68a061ac6de2e239f865658b |

@@ -19,7 +19,7 @@ contract Deploy is Script {
     function run() external {
         address admin = vm.envAddress("ADMIN_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
-        address beneficiary = vm.envAddress("BENEFICIARY_ADDRESS");
+        address treasury = vm.envAddress("TREASURY_ADDRESS");
         address listings = vm.envAddress("CONTRACT_LSP7_LISTINGS_ADDRESS");
         address offers = vm.envAddress("CONTRACT_LSP7_OFFERS_ADDRESS");
         address auctions = vm.envAddress("CONTRACT_LSP8_AUCTIONS_ADDRESS");
@@ -36,7 +36,7 @@ contract Deploy is Script {
                 new TransparentUpgradeableProxy(
                     address(marketplace),
                     admin,
-                    abi.encodeWithSelector(LSP8Marketplace.initialize.selector, owner, beneficiary, listings, offers, auctions, participant)
+                    abi.encodeWithSelector(LSP8Marketplace.initialize.selector, owner, treasury, listings, offers, auctions, participant)
                 )
             );
             console.log(string.concat("LSP8Marketplace: deploy ", Strings.toHexString(address(proxy))));

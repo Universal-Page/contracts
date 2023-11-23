@@ -21,7 +21,7 @@ contract Deploy is Script {
     function run() external {
         address admin = vm.envAddress("ADMIN_ADDRESS");
         address profile = vm.envAddress("PROFILE_ADDRESS");
-        address beneficiary = vm.envAddress("BENEFICIARY_ADDRESS");
+        address treasury = vm.envAddress("TREASURY_ADDRESS");
         address controller = vm.envAddress("PAGE_NAME_CONTROLLER_ADDRESS");
         address marketplace = vm.envAddress("CONTRACT_LSP8_MARKETPLACE_ADDRESS");
 
@@ -41,7 +41,7 @@ contract Deploy is Script {
                       "Universal Page Name",
                       "UPN",
                       profile,
-                      beneficiary,
+                      treasury,
                       controller,
                       PRICE,
                       MINIMUM_LENGTH,

@@ -38,7 +38,7 @@ contract Configure is Script {
 
     function run() external {
         address owner = vm.envAddress("OWNER_ADDRESS");
-        address beneficiary = vm.envAddress("BENEFICIARY_ADDRESS");
+        address treasury = vm.envAddress("TREASURY_ADDRESS");
         address controller = vm.envAddress("COLLECTOR_CONTROLLER_ADDRESS");
         CollectorIdentifiableDigitalAsset asset =
             CollectorIdentifiableDigitalAsset(payable(vm.envAddress("CONTRACT_COLLECTOR_DIGITAL_ASSET_ADDRESS")));
@@ -60,11 +60,11 @@ contract Configure is Script {
             );
         }
 
-        if (asset.beneficiary() != beneficiary) {
+        if (asset.beneficiary() != treasury) {
             vm.broadcast(owner);
-            asset.setBeneficiary(beneficiary);
+            asset.setBeneficiary(treasury);
             console.log(
-                string.concat("CollectorIdentifiableDigitalAsset: setBeneficiary ", Strings.toHexString(beneficiary))
+                string.concat("CollectorIdentifiableDigitalAsset: setBeneficiary ", Strings.toHexString(treasury))
             );
         }
 
