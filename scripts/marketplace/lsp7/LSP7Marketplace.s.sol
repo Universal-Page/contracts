@@ -47,6 +47,18 @@ contract Deploy is Script {
     }
 }
 
+contract Claim is Script {
+    function run() external {
+        address owner = vm.envAddress("OWNER_ADDRESS");
+        LSP7Marketplace marketplace = LSP7Marketplace(payable(vm.envAddress("CONTRACT_LSP7_MARKETPLACE_ADDRESS")));
+
+        if (address(marketplace).balance > 0) {
+            vm.broadcast(owner);
+            marketplace.withdraw(address(marketplace).balance);
+        }
+    }
+}
+
 contract Configure is Script {
     function run() external {
         address owner = vm.envAddress("OWNER_ADDRESS");
@@ -84,11 +96,6 @@ contract Configure is Script {
         if (address(marketplace.participant()) != address(participant)) {
             vm.broadcast(owner);
             marketplace.setParticipant(participant);
-        }
-
-        if (address(marketplace).balance > 0) {
-            vm.broadcast(owner);
-            marketplace.withdraw(address(marketplace).balance);
         }
     }
 }

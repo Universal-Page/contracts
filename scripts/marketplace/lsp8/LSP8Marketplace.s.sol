@@ -48,6 +48,18 @@ contract Deploy is Script {
     }
 }
 
+contract Claim is Script {
+    function run() external {
+        address owner = vm.envAddress("OWNER_ADDRESS");
+        LSP8Marketplace marketplace = LSP8Marketplace(payable(vm.envAddress("CONTRACT_LSP8_MARKETPLACE_ADDRESS")));
+
+        if (address(marketplace).balance > 0) {
+            vm.broadcast(owner);
+            marketplace.withdraw(address(marketplace).balance);
+        }
+    }
+}
+
 contract Configure is Script {
     function run() external {
         address owner = vm.envAddress("OWNER_ADDRESS");
@@ -97,11 +109,6 @@ contract Configure is Script {
         if (address(marketplace.participant()) != address(participant)) {
             vm.broadcast(owner);
             marketplace.setParticipant(participant);
-        }
-
-        if (address(marketplace).balance > 0) {
-            vm.broadcast(owner);
-            marketplace.withdraw(address(marketplace).balance);
         }
     }
 }
