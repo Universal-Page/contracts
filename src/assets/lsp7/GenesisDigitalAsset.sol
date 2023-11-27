@@ -37,6 +37,10 @@ contract GenesisDigitalAsset is LSP7DigitalAsset {
     }
 
     function release(uint256 amount) external {
+        uint256 allowance = authorizedAmountFor(msg.sender, beneficiary);
+        if (allowance < amount) {
+            revert UnathorizedAccount(msg.sender);
+        }
         _burn(beneficiary, amount, "");
     }
 }

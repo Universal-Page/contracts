@@ -84,6 +84,16 @@ contract Drop is Script {
         );
         vm.stopBroadcast();
 
+        // // release drop
+        // {
+        //     uint256 releaseAmount = genesisAsset.balanceOf(address(drop));
+        //     console.log("Release drop:", releaseAmount);
+        //     vm.startBroadcast(controller);
+        //     drop.dispose(address(profile));
+        //     genesisAsset.release(releaseAmount);
+        //     vm.stopBroadcast();
+        // }
+
         // generate proofs
         {
             string memory claimsJson = "{}";
@@ -95,18 +105,18 @@ contract Drop is Script {
                 vm.serializeUint(object, "index", i);
                 vm.serializeAddress(object, "profile", claim.profile);
                 vm.serializeUint(object, "amount", claim.amount);
-                string memory json = vm.serializeBytes32(object, "proof", proof);
+                string memory claimJson = vm.serializeBytes32(object, "proof", proof);
 
-                claimsJson = vm.serializeString("claims", Strings.toString(i), json);
+                claimsJson = vm.serializeString("claims", Strings.toString(i), claimJson);
             }
 
             vm.serializeString("", "claims", claimsJson);
-            string memory json = vm.serializeAddress("", "address", address(drop));
+            string memory dropJson = vm.serializeAddress("", "address", address(drop));
 
             string memory outputDir =
                 string.concat(vm.projectRoot(), "/artifacts/data/", Strings.toString(block.chainid));
             vm.createDir(outputDir, true);
-            vm.writeJson(json, string.concat(outputDir, "/genesis.json"));
+            vm.writeJson(dropJson, string.concat(outputDir, "/genesis.json"));
         }
     }
 }
