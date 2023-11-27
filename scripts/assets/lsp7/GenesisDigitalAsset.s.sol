@@ -21,6 +21,49 @@ contract Deploy is Script {
     }
 }
 
+contract Dispose is Script {
+    function run() external {
+        address controller = vm.envAddress("PROFILE_CONTROLLER_ADDRESS");
+        UniversalProfile profile = UniversalProfile(payable(vm.envAddress("PROFILE_ADDRESS")));
+        GenesisDigitalAsset genesisAsset =
+            GenesisDigitalAsset(payable(vm.envAddress("CONTRACT_GENESIS_DIGITAL_ASSET_ADDRESS")));
+
+        DigitalAssetDrop drop = DigitalAssetDrop(address(0));
+
+        uint256 releaseAmount = genesisAsset.balanceOf(address(drop));
+        if (releaseAmount == 0) {
+            console.log("Drop is empty");
+            return;
+        }
+
+        console.log("Release drop:", releaseAmount);
+        vm.startBroadcast(controller);
+        drop.dispose(address(profile));
+        genesisAsset.release(releaseAmount);
+        vm.stopBroadcast();
+    }
+}
+
+contract Reserve is Script {
+    function run() external {
+        address controller = vm.envAddress("PROFILE_CONTROLLER_ADDRESS");
+        UniversalProfile profile = UniversalProfile(payable(vm.envAddress("PROFILE_ADDRESS")));
+        GenesisDigitalAsset genesisAsset =
+            GenesisDigitalAsset(payable(vm.envAddress("CONTRACT_GENESIS_DIGITAL_ASSET_ADDRESS")));
+
+        uint256 reserveAmount = 0;
+
+        vm.startBroadcast(controller);
+        profile.execute(
+            OPERATION_0_CALL,
+            address(genesisAsset),
+            0,
+            abi.encodeWithSelector(genesisAsset.reserve.selector, reserveAmount)
+        );
+        vm.stopBroadcast();
+    }
+}
+
 contract Drop is Script {
     struct Claim {
         uint256 amount;
@@ -83,16 +126,6 @@ contract Drop is Script {
             )
         );
         vm.stopBroadcast();
-
-        // // release drop
-        // {
-        //     uint256 releaseAmount = genesisAsset.balanceOf(address(drop));
-        //     console.log("Release drop:", releaseAmount);
-        //     vm.startBroadcast(controller);
-        //     drop.dispose(address(profile));
-        //     genesisAsset.release(releaseAmount);
-        //     vm.stopBroadcast();
-        // }
 
         // generate proofs
         {
