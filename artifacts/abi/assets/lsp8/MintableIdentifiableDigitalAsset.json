@@ -23,6 +23,11 @@
         "internalType": "uint256"
       },
       {
+        "name": "lsp8TokenIdSchema_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
         "name": "tokenSupplyCap_",
         "type": "uint256",
         "internalType": "uint256"
@@ -82,6 +87,25 @@
   },
   {
     "type": "function",
+    "name": "batchCalls",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "results",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "getData",
     "inputs": [
       {
@@ -133,6 +157,54 @@
         "name": "",
         "type": "address[]",
         "internalType": "address[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getTokenIdData",
+    "inputs": [
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataKey",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "dataValues",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getTokenIdDataBatch",
+    "inputs": [
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "dataKeys",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "dataValues",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
       }
     ],
     "stateMutability": "view"
@@ -272,6 +344,52 @@
     ],
     "outputs": [],
     "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "setTokenIdData",
+    "inputs": [
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataKey",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataValue",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setTokenIdDataBatch",
+    "inputs": [
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "dataKeys",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "dataValues",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -456,7 +574,26 @@
   },
   {
     "type": "event",
-    "name": "AuthorizedOperator",
+    "name": "DataChanged",
+    "inputs": [
+      {
+        "name": "dataKey",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataValue",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OperatorAuthorizationChanged",
     "inputs": [
       {
         "name": "operator",
@@ -487,16 +624,34 @@
   },
   {
     "type": "event",
-    "name": "DataChanged",
+    "name": "OperatorRevoked",
     "inputs": [
       {
-        "name": "dataKey",
+        "name": "operator",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
         "type": "bytes32",
         "indexed": true,
         "internalType": "bytes32"
       },
       {
-        "name": "dataValue",
+        "name": "notified",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "operatorNotificationData",
         "type": "bytes",
         "indexed": false,
         "internalType": "bytes"
@@ -525,20 +680,8 @@
   },
   {
     "type": "event",
-    "name": "RevokedOperator",
+    "name": "TokenIdDataChanged",
     "inputs": [
-      {
-        "name": "operator",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "tokenOwner",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
       {
         "name": "tokenId",
         "type": "bytes32",
@@ -546,13 +689,13 @@
         "internalType": "bytes32"
       },
       {
-        "name": "notified",
-        "type": "bool",
-        "indexed": false,
-        "internalType": "bool"
+        "name": "dataKey",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
       },
       {
-        "name": "operatorNotificationData",
+        "name": "dataValue",
         "type": "bytes",
         "indexed": false,
         "internalType": "bytes"
@@ -649,6 +792,22 @@
     "type": "error",
     "name": "LSP4TokenSymbolNotEditable",
     "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP4TokenTypeNotEditable",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8BatchCallFailed",
+    "inputs": [
+      {
+        "name": "callIndex",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
   },
   {
     "type": "error",
@@ -800,7 +959,17 @@
   },
   {
     "type": "error",
-    "name": "LSP8TokenIdTypeNotEditable",
+    "name": "LSP8TokenIdSchemaNotEditable",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8TokenIdsDataEmptyArray",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8TokenIdsDataLengthMismatch",
     "inputs": []
   },
   {

@@ -53,7 +53,7 @@ contract LSP8MarketplaceTest is Test {
         owner = vm.addr(2);
         beneficiary = vm.addr(3);
 
-        asset = new LSP8DigitalAssetMock("Mock", "MCK", owner, 0);
+        asset = new LSP8DigitalAssetMock("Mock", "MCK", owner, 0, 0);
 
         participant = Participant(
             payable(
@@ -218,7 +218,7 @@ contract LSP8MarketplaceTest is Test {
     }
 
     function test_BuyWithDiscount() public {
-        LSP7DigitalAssetMock discountAsset = new LSP7DigitalAssetMock("Discount", "DSC", owner, true);
+        LSP7DigitalAssetMock discountAsset = new LSP7DigitalAssetMock("Discount", "DSC", owner, 0, true);
         vm.prank(owner);
         participant.setGenesisAsset(discountAsset);
 

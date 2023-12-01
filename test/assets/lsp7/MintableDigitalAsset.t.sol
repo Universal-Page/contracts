@@ -3,6 +3,10 @@ pragma solidity 0.8.17;
 
 import {Test} from "forge-std/Test.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
+import {
+    _LSP4_TOKEN_TYPE_TOKEN,
+    _LSP4_TOKEN_TYPE_NFT
+} from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {MintableDigitalAsset} from "../../../src/assets/lsp7/MintableDigitalAsset.sol";
 
 contract MintableDigitalAssetTest is Test {
@@ -13,7 +17,7 @@ contract MintableDigitalAssetTest is Test {
     }
 
     function test_NonDivisble() public {
-        MintableDigitalAsset asset = new MintableDigitalAsset("Test", "TST", owner, true, 100);
+        MintableDigitalAsset asset = new MintableDigitalAsset("Test", "TST", owner, _LSP4_TOKEN_TYPE_NFT, true, 100);
         assertEq(0, asset.totalSupply());
         assertEq(100, asset.tokenSupplyCap());
         assertEq(owner, asset.owner());
@@ -21,7 +25,7 @@ contract MintableDigitalAssetTest is Test {
     }
 
     function test_Divisible() public {
-        MintableDigitalAsset asset = new MintableDigitalAsset("Test", "TST", owner, false, 100);
+        MintableDigitalAsset asset = new MintableDigitalAsset("Test", "TST", owner, _LSP4_TOKEN_TYPE_TOKEN, false, 100);
         assertEq(0, asset.totalSupply());
         assertEq(100, asset.tokenSupplyCap());
         assertEq(owner, asset.owner());

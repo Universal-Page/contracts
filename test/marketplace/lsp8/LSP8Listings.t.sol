@@ -36,7 +36,7 @@ contract LSP8ListingsTest is Test {
         admin = vm.addr(1);
         owner = vm.addr(2);
 
-        asset = new LSP8DigitalAssetMock("Mock", "MCK", owner, 0);
+        asset = new LSP8DigitalAssetMock("Mock", "MCK", owner, 0, 0);
 
         listings = LSP8Listings(
             address(

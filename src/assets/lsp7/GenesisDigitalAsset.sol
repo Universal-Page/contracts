@@ -2,6 +2,7 @@
 pragma solidity 0.8.17;
 
 import {LSP7DigitalAsset} from "@lukso/lsp-smart-contracts/contracts/LSP7DigitalAsset/LSP7DigitalAsset.sol";
+import {_LSP4_TOKEN_TYPE_NFT} from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 
 contract GenesisDigitalAsset is LSP7DigitalAsset {
     error InvalidBeneficiary();
@@ -12,7 +13,7 @@ contract GenesisDigitalAsset is LSP7DigitalAsset {
     address public beneficiary;
 
     constructor(string memory name_, string memory symbol_, address newOwner_, address newBeneficiary_)
-        LSP7DigitalAsset(name_, symbol_, newOwner_, true)
+        LSP7DigitalAsset(name_, symbol_, newOwner_, _LSP4_TOKEN_TYPE_NFT, true)
     {
         _setBeneficiary(newBeneficiary_);
     }

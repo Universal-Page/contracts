@@ -9,6 +9,7 @@ import {LSP8CappedSupply} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/extensions/LSP8CappedSupply.sol";
 import {LSP8Enumerable} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/extensions/LSP8Enumerable.sol";
+import {_LSP4_TOKEN_TYPE_NFT} from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {DropsDigitalAsset} from "./DropsDigitalAsset.sol";
 
 contract LSP8DropsDigitalAsset is LSP8CappedSupply, LSP8Enumerable, DropsDigitalAsset {
@@ -35,7 +36,7 @@ contract LSP8DropsDigitalAsset is LSP8CappedSupply, LSP8Enumerable, DropsDigital
         uint256 tokenSupplyCap_,
         uint32 serviceFeePoints_
     )
-        LSP8IdentifiableDigitalAsset(name_, symbol_, newOwner_, _LSP8_TOKEN_ID_TYPE_UNIQUE_NUMBER)
+        LSP8IdentifiableDigitalAsset(name_, symbol_, newOwner_, _LSP4_TOKEN_TYPE_NFT, _LSP8_TOKEN_ID_TYPE_UNIQUE_NUMBER)
         LSP8CappedSupply(tokenSupplyCap_)
         DropsDigitalAsset(service_, verifier_, serviceFeePoints_)
     {

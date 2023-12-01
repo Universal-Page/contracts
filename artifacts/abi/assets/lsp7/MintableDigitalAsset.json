@@ -18,6 +18,11 @@
         "internalType": "address"
       },
       {
+        "name": "lsp4TokenType_",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
         "name": "isNonDivisible_",
         "type": "bool",
         "internalType": "bool"
@@ -103,6 +108,25 @@
       }
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "batchCalls",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "results",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -453,7 +477,26 @@
   },
   {
     "type": "event",
-    "name": "AuthorizedOperator",
+    "name": "DataChanged",
+    "inputs": [
+      {
+        "name": "dataKey",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataValue",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OperatorAuthorizationChanged",
     "inputs": [
       {
         "name": "operator",
@@ -484,16 +527,28 @@
   },
   {
     "type": "event",
-    "name": "DataChanged",
+    "name": "OperatorRevoked",
     "inputs": [
       {
-        "name": "dataKey",
-        "type": "bytes32",
+        "name": "operator",
+        "type": "address",
         "indexed": true,
-        "internalType": "bytes32"
+        "internalType": "address"
       },
       {
-        "name": "dataValue",
+        "name": "tokenOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "notified",
+        "type": "bool",
+        "indexed": true,
+        "internalType": "bool"
+      },
+      {
+        "name": "operatorNotificationData",
         "type": "bytes",
         "indexed": false,
         "internalType": "bytes"
@@ -516,37 +571,6 @@
         "type": "address",
         "indexed": true,
         "internalType": "address"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "RevokedOperator",
-    "inputs": [
-      {
-        "name": "operator",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "tokenOwner",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "notified",
-        "type": "bool",
-        "indexed": false,
-        "internalType": "bool"
-      },
-      {
-        "name": "operatorNotificationData",
-        "type": "bytes",
-        "indexed": false,
-        "internalType": "bytes"
       }
     ],
     "anonymous": false
@@ -643,6 +667,11 @@
   },
   {
     "type": "error",
+    "name": "LSP4TokenTypeNotEditable",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "LSP7AmountExceedsAuthorizedAmount",
     "inputs": [
       {
@@ -683,6 +712,17 @@
       },
       {
         "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP7BatchCallFailed",
+    "inputs": [
+      {
+        "name": "callIndex",
         "type": "uint256",
         "internalType": "uint256"
       }

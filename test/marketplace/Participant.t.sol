@@ -37,7 +37,7 @@ contract ParticipantTest is Test {
         controllerKey = 4;
         controller = vm.addr(controllerKey);
 
-        genesisAsset = new LSP7DigitalAssetMock("Mock", "MCK", assetOwner, true);
+        genesisAsset = new LSP7DigitalAssetMock("Mock", "MCK", assetOwner, 0, true);
         collectorAsset =
             new CollectorIdentifiableDigitalAsset("Universal Page Collector", "UPC", assetOwner, controller, 1000);
 

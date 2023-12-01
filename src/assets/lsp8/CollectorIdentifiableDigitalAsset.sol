@@ -12,10 +12,11 @@ import {LSP8Enumerable} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/extensions/LSP8Enumerable.sol";
 import {LSP8IdentifiableDigitalAssetCore} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8IdentifiableDigitalAssetCore.sol";
+import {_LSP8_TOKENID_SCHEMA_UNIQUE_ID} from
+    "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8Constants.sol";
+import {_LSP4_TOKEN_TYPE_NFT} from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {Withdrawable} from "../../common/Withdrawable.sol";
 import {ICollectorIdentifiableDigitalAsset} from "./ICollectorIdentifiableDigitalAsset.sol";
-
-uint256 constant _LSP8_TOKEN_ID_TYPE_UNIQUE_IDENTIFIER = 2;
 
 contract CollectorIdentifiableDigitalAsset is
     ICollectorIdentifiableDigitalAsset,
@@ -52,7 +53,7 @@ contract CollectorIdentifiableDigitalAsset is
         address controller_,
         uint256 tokenSupplyCap_
     )
-        LSP8IdentifiableDigitalAsset(name_, symbol_, newOwner_, _LSP8_TOKEN_ID_TYPE_UNIQUE_IDENTIFIER)
+        LSP8IdentifiableDigitalAsset(name_, symbol_, newOwner_, _LSP4_TOKEN_TYPE_NFT, _LSP8_TOKENID_SCHEMA_UNIQUE_ID)
         LSP8CappedSupply(tokenSupplyCap_)
     {
         _setController(controller_);

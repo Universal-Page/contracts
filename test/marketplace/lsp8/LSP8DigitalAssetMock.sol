@@ -5,9 +5,13 @@ import {LSP8IdentifiableDigitalAsset} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8IdentifiableDigitalAsset.sol";
 
 contract LSP8DigitalAssetMock is LSP8IdentifiableDigitalAsset {
-    constructor(string memory name_, string memory symbol_, address newOwner_, uint256 tokenIdType_)
-        LSP8IdentifiableDigitalAsset(name_, symbol_, newOwner_, tokenIdType_)
-    {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        address newOwner_,
+        uint256 tokenIdType_,
+        uint256 lsp8TokenIdSchema_
+    ) LSP8IdentifiableDigitalAsset(name_, symbol_, newOwner_, tokenIdType_, lsp8TokenIdSchema_) {
         // noop
     }
 

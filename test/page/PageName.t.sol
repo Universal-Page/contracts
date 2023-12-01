@@ -5,15 +5,19 @@ import {Test} from "forge-std/Test.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {
     _LSP4_TOKEN_NAME_KEY,
-    _LSP4_TOKEN_SYMBOL_KEY
+    _LSP4_TOKEN_SYMBOL_KEY,
+    _LSP4_TOKEN_TYPE_KEY,
+    _LSP4_TOKEN_TYPE_NFT
 } from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
+import {
+    _LSP8_TOKENID_SCHEMA_KEY,
+    _LSP8_TOKENID_SCHEMA_STRING
+} from "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8Constants.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
 import {IPageNameMarketplace, PendingSale} from "../../src/page/IPageNameMarketplace.sol";
 import {PageName} from "../../src/page/PageName.sol";
 import {deployProfile} from "../utils/profile.sol";
 import {PageNameMarketplaceMock} from "./PageNameMarketplaceMock.sol";
-
-bytes32 constant _LSP8_TOKEN_ID_TYPE_KEY = 0x715f248956de7ce65e94d9d836bfead479f7e70d69b718d47bfe7b00e05b4fe4;
 
 contract PageNameTest is Test {
     event ValueReceived(address indexed sender, uint256 indexed value);
@@ -63,7 +67,8 @@ contract PageNameTest is Test {
         assertTrue(!name.paused());
         assertEq("Universal Page Name", name.getData(_LSP4_TOKEN_NAME_KEY));
         assertEq("UPN", name.getData(_LSP4_TOKEN_SYMBOL_KEY));
-        assertEq(1, /* string */ uint256(bytes32(name.getData(_LSP8_TOKEN_ID_TYPE_KEY))));
+        assertEq(_LSP4_TOKEN_TYPE_NFT, uint256(bytes32(name.getData(_LSP4_TOKEN_TYPE_KEY))));
+        assertEq(_LSP8_TOKENID_SCHEMA_STRING, uint256(bytes32(name.getData(_LSP8_TOKENID_SCHEMA_KEY))));
         assertEq(owner, name.owner());
         assertEq(beneficiary, name.beneficiary());
         assertEq(controller, name.controller());

@@ -10,9 +10,10 @@ contract MintableDigitalAsset is LSP7Mintable, LSP7CappedSupply {
         string memory name_,
         string memory symbol_,
         address newOwner_,
+        uint256 lsp4TokenType_,
         bool isNonDivisible_,
         uint256 tokenSupplyCap_
-    ) LSP7Mintable(name_, symbol_, newOwner_, isNonDivisible_) LSP7CappedSupply(tokenSupplyCap_) {}
+    ) LSP7Mintable(name_, symbol_, newOwner_, lsp4TokenType_, isNonDivisible_) LSP7CappedSupply(tokenSupplyCap_) {}
 
     function _mint(address to, uint256 amount, bool allowNonLSP1Recipient, bytes memory data)
         internal

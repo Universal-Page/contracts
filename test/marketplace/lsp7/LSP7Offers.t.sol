@@ -30,7 +30,7 @@ contract LSP7OffersTest is Test {
         admin = vm.addr(1);
         owner = vm.addr(2);
 
-        asset = new LSP7DigitalAssetMock("Mock", "MCK", owner, true);
+        asset = new LSP7DigitalAssetMock("Mock", "MCK", owner, 0, true);
 
         listings = LSP7Listings(
             address(

@@ -13,7 +13,7 @@ contract MintableIdentifiableDigitalAssetTest is Test {
     }
 
     function test() public {
-        MintableIdentifiableDigitalAsset asset = new MintableIdentifiableDigitalAsset("Test", "TST", owner, 1, 100);
+        MintableIdentifiableDigitalAsset asset = new MintableIdentifiableDigitalAsset("Test", "TST", owner, 1, 1, 100);
         assertEq(0, asset.totalSupply());
         assertEq(100, asset.tokenSupplyCap());
         assertEq(owner, asset.owner());

@@ -5,12 +5,16 @@ import {Test} from "forge-std/Test.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
 import {
     _LSP4_TOKEN_NAME_KEY,
-    _LSP4_TOKEN_SYMBOL_KEY
+    _LSP4_TOKEN_SYMBOL_KEY,
+    _LSP4_TOKEN_TYPE_KEY,
+    _LSP4_TOKEN_TYPE_NFT
 } from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
+import {
+    _LSP8_TOKENID_SCHEMA_KEY,
+    _LSP8_TOKENID_SCHEMA_UNIQUE_ID
+} from "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8Constants.sol";
 import {CollectorIdentifiableDigitalAsset} from "../../../src/assets/lsp8/CollectorIdentifiableDigitalAsset.sol";
 import {deployProfile} from "../../utils/profile.sol";
-
-bytes32 constant _LSP8_TOKEN_ID_TYPE_KEY = 0x715f248956de7ce65e94d9d836bfead479f7e70d69b718d47bfe7b00e05b4fe4;
 
 contract CollectorIdentifiableDigitalAssetTest is Test {
     event TokensPurchased(address indexed recipient, bytes32[] tokenIds, uint256 totalPaid);
@@ -35,7 +39,8 @@ contract CollectorIdentifiableDigitalAssetTest is Test {
     function test_Initialize() public {
         assertEq("Universal Page Collector", asset.getData(_LSP4_TOKEN_NAME_KEY));
         assertEq("UPC", asset.getData(_LSP4_TOKEN_SYMBOL_KEY));
-        assertEq(2, /* unuque identifier/sequence */ uint256(bytes32(asset.getData(_LSP8_TOKEN_ID_TYPE_KEY))));
+        assertEq(_LSP4_TOKEN_TYPE_NFT, uint256(bytes32(asset.getData(_LSP4_TOKEN_TYPE_KEY))));
+        assertEq(_LSP8_TOKENID_SCHEMA_UNIQUE_ID, uint256(bytes32(asset.getData(_LSP8_TOKENID_SCHEMA_KEY))));
         assertEq(0, asset.totalSupply());
         assertEq(100, asset.tokenSupplyCap());
         assertEq(0, asset.tokenSupplyLimit());

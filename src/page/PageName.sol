@@ -4,14 +4,15 @@ pragma solidity 0.8.17;
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import {_LSP4_TOKEN_TYPE_NFT} from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
+import {_LSP8_TOKENID_SCHEMA_STRING} from
+    "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8Constants.sol";
 import {LSP8EnumerableInitAbstract} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/extensions/LSP8EnumerableInitAbstract.sol";
 import {LSP8IdentifiableDigitalAssetInitAbstract} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8IdentifiableDigitalAssetInitAbstract.sol";
 import {Withdrawable} from "../common/Withdrawable.sol";
 import {IPageNameMarketplace, PendingSale} from "./IPageNameMarketplace.sol";
-
-uint256 constant _LSP8_TOKEN_ID_TYPE_UNIQUE_NAME = 1;
 
 contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, PausableUpgradeable, Withdrawable {
     error InvalidController();
@@ -52,7 +53,7 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
         uint16 profileLimit_,
         IPageNameMarketplace marketplace_
     ) external initializer {
-        super._initialize(name_, symbol_, newOwner_, _LSP8_TOKEN_ID_TYPE_UNIQUE_NAME);
+        super._initialize(name_, symbol_, newOwner_, _LSP4_TOKEN_TYPE_NFT, _LSP8_TOKENID_SCHEMA_STRING);
         __ReentrancyGuard_init();
         __Pausable_init();
         _setBeneficiary(beneficiary_);

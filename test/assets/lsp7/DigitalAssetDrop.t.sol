@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 import {Test} from "forge-std/Test.sol";
 import {Merkle} from "murky/Merkle.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
+import {_LSP4_TOKEN_TYPE_NFT} from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {DigitalAssetDrop} from "../../../src/assets/lsp7/DigitalAssetDrop.sol";
 import {deployProfile} from "../../utils/profile.sol";
 import {DigitalAssetMock} from "./DigitalAssetMock.sol";
@@ -24,7 +25,7 @@ contract DigitalAssetDropTest is Test {
         dropOwner = vm.addr(3);
 
         merkle = new Merkle();
-        asset = new DigitalAssetMock("Mock", "MCK", assetOwner, true);
+        asset = new DigitalAssetMock("Mock", "MCK", assetOwner, _LSP4_TOKEN_TYPE_NFT, true);
     }
 
     function test_Claim() public {

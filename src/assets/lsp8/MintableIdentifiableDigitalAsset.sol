@@ -15,8 +15,9 @@ contract MintableIdentifiableDigitalAsset is LSP8Mintable, LSP8Enumerable, LSP8C
         string memory symbol_,
         address newOwner_,
         uint256 tokenIdType_,
+        uint256 lsp8TokenIdSchema_,
         uint256 tokenSupplyCap_
-    ) LSP8Mintable(name_, symbol_, newOwner_, tokenIdType_) LSP8CappedSupply(tokenSupplyCap_) {
+    ) LSP8Mintable(name_, symbol_, newOwner_, tokenIdType_, lsp8TokenIdSchema_) LSP8CappedSupply(tokenSupplyCap_) {
         // noop
     }
 

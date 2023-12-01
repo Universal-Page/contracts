@@ -6,6 +6,7 @@ import {
     LSP7DigitalAssetCore
 } from "@lukso/lsp-smart-contracts/contracts/LSP7DigitalAsset/LSP7DigitalAsset.sol";
 import {LSP7CappedSupply} from "@lukso/lsp-smart-contracts/contracts/LSP7DigitalAsset/extensions/LSP7CappedSupply.sol";
+import {_LSP4_TOKEN_TYPE_NFT} from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {DropsDigitalAsset} from "./DropsDigitalAsset.sol";
 
 contract LSP7DropsDigitalAsset is LSP7CappedSupply, DropsDigitalAsset {
@@ -20,7 +21,7 @@ contract LSP7DropsDigitalAsset is LSP7CappedSupply, DropsDigitalAsset {
         uint256 tokenSupplyCap_,
         uint32 serviceFeePoints_
     )
-        LSP7DigitalAsset(name_, symbol_, newOwner_, true)
+        LSP7DigitalAsset(name_, symbol_, newOwner_, _LSP4_TOKEN_TYPE_NFT, true)
         LSP7CappedSupply(tokenSupplyCap_)
         DropsDigitalAsset(service_, verifier_, serviceFeePoints_)
     {}

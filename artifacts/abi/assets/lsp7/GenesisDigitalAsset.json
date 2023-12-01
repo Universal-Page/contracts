@@ -101,6 +101,25 @@
   },
   {
     "type": "function",
+    "name": "batchCalls",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "results",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "beneficiary",
     "inputs": [],
     "outputs": [
@@ -459,37 +478,6 @@
   },
   {
     "type": "event",
-    "name": "AuthorizedOperator",
-    "inputs": [
-      {
-        "name": "operator",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "tokenOwner",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "amount",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "operatorNotificationData",
-        "type": "bytes",
-        "indexed": false,
-        "internalType": "bytes"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
     "name": "BeneficiaryChanged",
     "inputs": [
       {
@@ -528,26 +516,38 @@
   },
   {
     "type": "event",
-    "name": "OwnershipTransferred",
+    "name": "OperatorAuthorizationChanged",
     "inputs": [
       {
-        "name": "previousOwner",
+        "name": "operator",
         "type": "address",
         "indexed": true,
         "internalType": "address"
       },
       {
-        "name": "newOwner",
+        "name": "tokenOwner",
         "type": "address",
         "indexed": true,
         "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "operatorNotificationData",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
       }
     ],
     "anonymous": false
   },
   {
     "type": "event",
-    "name": "RevokedOperator",
+    "name": "OperatorRevoked",
     "inputs": [
       {
         "name": "operator",
@@ -564,7 +564,7 @@
       {
         "name": "notified",
         "type": "bool",
-        "indexed": false,
+        "indexed": true,
         "internalType": "bool"
       },
       {
@@ -572,6 +572,25 @@
         "type": "bytes",
         "indexed": false,
         "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "name": "previousOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
       }
     ],
     "anonymous": false
@@ -673,6 +692,11 @@
   },
   {
     "type": "error",
+    "name": "LSP4TokenTypeNotEditable",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "LSP7AmountExceedsAuthorizedAmount",
     "inputs": [
       {
@@ -713,6 +737,17 @@
       },
       {
         "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP7BatchCallFailed",
+    "inputs": [
+      {
+        "name": "callIndex",
         "type": "uint256",
         "internalType": "uint256"
       }
