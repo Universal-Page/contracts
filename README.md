@@ -4,8 +4,9 @@
 
 | network | contract / library    | address                                    |
 | ------- | --------------------- | ------------------------------------------ |
-| mainnet | PageName              | 0xaebcc2c80abacb7e4d928d4c0a52c7bbeba4c4be |
-| mainnet | GenesisDigitalAsset   |                                            |
+| mainnet | PageName              | 0x39456bcd4d450e55f851f97c30df828a4e1f6c66 |
+| mainnet | GenesisDigitalAsset   | 0x8da488c29fb873c9561ccf5ff44dda6c1deddc37 |
+| testnet | CollectorDigitalAsset | 0xe9f0feab3d50ccbe40d99f669fe1e89172908cdf |
 | mainnet | Participant           | 0xa29aeaabb5da0cc3635576933a66c1b714f058c1 |
 | mainnet | LSP7Listings          | 0xe7f5c709d62bcc3701f4c0cb871eb77e301283b5 |
 | mainnet | LSP7Offers            | 0xb2379f3f3c623cd2ed18e97e407cdda8fe6c6da6 |
@@ -16,9 +17,9 @@
 | mainnet | LSP8Marketplace       | 0x6807c995602eaf523a95a6b97acc4da0d3894655 |
 | mainnet | Points                | 0x157668416776c78EaB825D0d3969d75DC7dD7C0D |
 | mainnet | Royalties             | 0x391B24e80d85587C1cb698f0cD7Dfb7191D6875F |
-| testnet | PageName              | 0x8b08eeb9183081de7e2d4ae49fad4afb56e31ab4 |
-| testnet | GenesisDigitalAsset   | 0x86488e1c57115f6a7cad26a4f83367cb1e117911 |
-| testnet | CollectorDigitalAsset | 0x9eb7a7666fc33e7a68a061ac6de2e239f865658b |
+| testnet | PageName              | 0x288d83c922b2424dba195df40756b63f7cd9ef0d |
+| testnet | GenesisDigitalAsset   | 0xc06bcd7a286308861bd99da220acbc8901949fbd |
+| testnet | CollectorDigitalAsset | 0x60cf27c6ca1ff842511256029fc5f723c1b296ee |
 | testnet | Participant           | 0x5a485297a1b909032a6b7000354f3322047028ee |
 | testnet | LSP7Listings          | 0x44cd7d06ceb509370b75e426ea3c12824a665e36 |
 | testnet | LSP7Offers            | 0xdf9defd55365b7b073cae009cf53dd830902c5a7 |
