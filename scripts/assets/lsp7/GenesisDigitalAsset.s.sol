@@ -28,7 +28,11 @@ contract Dispose is Script {
         GenesisDigitalAsset genesisAsset =
             GenesisDigitalAsset(payable(vm.envAddress("CONTRACT_GENESIS_DIGITAL_ASSET_ADDRESS")));
 
-        DigitalAssetDrop drop = DigitalAssetDrop(address(0));
+        string memory json = vm.readFile(
+            string.concat(vm.projectRoot(), "/artifacts/data/", Strings.toString(block.chainid), "/genesis.json")
+        );
+
+        DigitalAssetDrop drop = DigitalAssetDrop(vm.parseJsonAddress(json, ".address"));
 
         uint256 releaseAmount = genesisAsset.balanceOf(address(drop));
         if (releaseAmount == 0) {
@@ -38,8 +42,18 @@ contract Dispose is Script {
 
         console.log("Release drop:", releaseAmount);
         vm.startBroadcast(controller);
-        drop.dispose(address(profile));
-        genesisAsset.release(releaseAmount);
+        profile.execute(
+            OPERATION_0_CALL,
+            address(drop),
+            0,
+            abi.encodeWithSelector(DigitalAssetDrop.dispose.selector, address(profile))
+        );
+        profile.execute(
+            OPERATION_0_CALL,
+            address(genesisAsset),
+            0,
+            abi.encodeWithSelector(GenesisDigitalAsset.release.selector, releaseAmount)
+        );
         vm.stopBroadcast();
     }
 }
