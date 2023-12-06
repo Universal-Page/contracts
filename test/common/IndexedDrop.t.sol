@@ -52,9 +52,8 @@ contract IndexedDropTest is Test {
         address alice = vm.addr(1);
 
         bytes32[] memory data = new bytes32[](2);
-        data[0] = keccak256(bytes.concat(keccak256(abi.encodePacked(uint256(0), abi.encode(alice, uint256(1 ether))))));
-        data[1] =
-            keccak256(bytes.concat(keccak256(abi.encodePacked(uint256(1), abi.encode(alice, uint256(1.5 ether))))));
+        data[0] = keccak256(bytes.concat(keccak256(abi.encode(uint256(0), abi.encode(alice, uint256(1 ether))))));
+        data[1] = keccak256(bytes.concat(keccak256(abi.encode(uint256(1), abi.encode(alice, uint256(1.5 ether))))));
         drop.setup(merkle.getRoot(data));
 
         bytes32[] memory proof = merkle.getProof(data, 0);

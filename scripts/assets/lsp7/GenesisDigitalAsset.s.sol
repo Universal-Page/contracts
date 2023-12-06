@@ -109,7 +109,7 @@ contract Drop is Script {
         for (uint256 i = 0; i < jsonData.claims.length; i++) {
             Claim memory claim = jsonData.claims[i];
             console.log("-", i, claim.profile, claim.amount);
-            data[i] = keccak256(abi.encodePacked(i, claim.profile, claim.amount));
+            data[i] = keccak256(bytes.concat(keccak256(abi.encode(i, abi.encode(claim.profile, claim.amount)))));
             console.logBytes32(data[i]);
             fundAmount += claim.amount;
         }

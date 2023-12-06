@@ -1,13 +1,13 @@
 {
-  "address": "0xd13c678E19f734C78097250a1392bb25128e83E8",
+  "address": "0xA0260828430969DBd995794180B904BFE0b88c9b",
   "claims": {
     "0": {
       "amount": 1,
       "index": 0,
-      "profile": "0x30B3f161Ee7A6b5E449cB5Ad4eeABEFcd8288362",
+      "profile": "0x37Fa9FB05C2E3e9541a59B891321E9c4b8246442",
       "proof": [
-        "0x5b4f1479a7c282efc27e19dc088e89707dca6fcefab84b20d2a1c67a3c0bb8c3",
-        "0xf1d4014fd880a1aba10c63467a9dbbb7180a04763acb24d692ffab4b1829a0d8"
+        "0xec66453ce4a43e93253436b481c9481974fd3de9d654d1936cddafe8c93f5130",
+        "0x5523ff0100f4ee5ec131edccd5b0b6a7d07926fc3b5c0c0d96a8cb6a257a42f3"
       ]
     },
     "1": {
@@ -15,8 +15,8 @@
       "index": 1,
       "profile": "0x07F15aB9F47A004A21552E6b8C81ad2b37ff52D5",
       "proof": [
-        "0xd02435c5bba3eae5a583b45114ce6f493a215da9600637cfae109599fdd096a6",
-        "0xf1d4014fd880a1aba10c63467a9dbbb7180a04763acb24d692ffab4b1829a0d8"
+        "0xd7862617e4e919ce949243f5d85404b6b10f5c09b173fe2ab99a1fd46acee801",
+        "0x5523ff0100f4ee5ec131edccd5b0b6a7d07926fc3b5c0c0d96a8cb6a257a42f3"
       ]
     },
     "2": {
@@ -25,7 +25,7 @@
       "profile": "0x64f134CfF78A8A6EC55eF1992A36798C84460b26",
       "proof": [
         "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "0xb2f631ec33f45c0ed159f3d0f1b5e53ed91e458e1a7a8065714455c8d009a085"
+        "0x4b5c387764f24a9b6cb6e13c1452bf8b6f3691b1f3867ffb30128629c49bcea9"
       ]
     }
   }
