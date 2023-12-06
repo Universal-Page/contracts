@@ -8,6 +8,7 @@ import {
     _LSP4_TOKEN_SYMBOL_KEY
 } from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
+import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {IndexedDrop} from "../../src/common/IndexedDrop.sol";
 import {LSP8DropsDigitalAsset, DropsDigitalAsset} from "../../src/drops/LSP8DropsDigitalAsset.sol";
 import {deployProfile} from "../utils/profile.sol";
@@ -66,9 +67,11 @@ contract LSP8DropsDigitalAssetTest is Test {
     }
 
     function test_Revert_IfConfigureNotOwner() public {
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         drop.configure(block.timestamp, 1 ether, 3, 0);
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         drop.setDefaultTokenUri(new bytes(0));
     }
 

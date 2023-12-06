@@ -7,6 +7,7 @@ import {
     TransparentUpgradeableProxy
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
+import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {Module, MARKETPLACE_ROLE} from "../../../src/marketplace/common/Module.sol";
 import {LSP7Listings, LSP7Listing} from "../../../src/marketplace/lsp7/LSP7Listings.sol";
 import {LSP7Offers, LSP7Offer} from "../../../src/marketplace/lsp7/LSP7Offers.sol";
@@ -34,12 +35,18 @@ contract LSP7OffersTest is Test {
 
         listings = LSP7Listings(
             address(
-                new TransparentUpgradeableProxy(address(new LSP7Listings()), admin, abi.encodeWithSelector(LSP7Listings.initialize.selector, owner))
+                new TransparentUpgradeableProxy(
+                    address(new LSP7Listings()), admin, abi.encodeWithSelector(LSP7Listings.initialize.selector, owner)
+                )
             )
         );
         offers = LSP7Offers(
             address(
-                new TransparentUpgradeableProxy(address(new LSP7Offers()), admin, abi.encodeWithSelector(LSP7Offers.initialize.selector, owner, listings))
+                new TransparentUpgradeableProxy(
+                    address(new LSP7Offers()),
+                    admin,
+                    abi.encodeWithSelector(LSP7Offers.initialize.selector, owner, listings)
+                )
             )
         );
     }
@@ -57,13 +64,20 @@ contract LSP7OffersTest is Test {
     }
 
     function test_Revert_IfConfigureNotOwner() public {
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         offers.grantRole(address(100), MARKETPLACE_ROLE);
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         offers.revokeRole(address(100), MARKETPLACE_ROLE);
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         offers.pause();
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         offers.unpause();
     }
 

@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
 import {ILSP7DigitalAsset} from "@lukso/lsp-smart-contracts/contracts/LSP7DigitalAsset/ILSP7DigitalAsset.sol";
+import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {
     Participant,
     GENESIS_DISCOUNT,
@@ -44,10 +45,11 @@ contract ParticipantTest is Test {
         participant = Participant(
             payable(
                 address(
-                    new TransparentUpgradeableProxy(address(new Participant()), admin, abi.encodeWithSelector(
-                        Participant.initialize.selector,
-                        owner
-                    ))
+                    new TransparentUpgradeableProxy(
+                        address(new Participant()),
+                        admin,
+                        abi.encodeWithSelector(Participant.initialize.selector, owner)
+                    )
                 )
             )
         );
@@ -68,13 +70,20 @@ contract ParticipantTest is Test {
     }
 
     function test_Revert_IfConfigureNotOwner() public {
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         participant.setCollectorAsset(ICollectorIdentifiableDigitalAsset(vm.addr(1)));
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         participant.setGenesisAsset(ILSP7DigitalAsset(vm.addr(1)));
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         participant.pause();
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         participant.unpause();
     }
 

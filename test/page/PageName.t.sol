@@ -10,10 +10,11 @@ import {
     _LSP4_TOKEN_TYPE_NFT
 } from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {
-    _LSP8_TOKENID_SCHEMA_KEY,
-    _LSP8_TOKENID_SCHEMA_STRING
+    _LSP8_TOKENID_FORMAT_KEY,
+    _LSP8_TOKENID_FORMAT_STRING
 } from "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8Constants.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
+import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {IPageNameMarketplace, PendingSale} from "../../src/page/IPageNameMarketplace.sol";
 import {PageName} from "../../src/page/PageName.sol";
 import {deployProfile} from "../utils/profile.sol";
@@ -46,18 +47,22 @@ contract PageNameTest is Test {
         name = PageName(
             payable(
                 address(
-                    new TransparentUpgradeableProxy(address(new PageName()), admin, abi.encodeWithSelector(
-                        PageName.initialize.selector,
-                        "Universal Page Name",
-                        "UPN",
-                        owner,
-                        beneficiary,
-                        controller,
-                        1 ether,
-                        3,
-                        2,
-                        marketplace
-                    ))
+                    new TransparentUpgradeableProxy(
+                        address(new PageName()),
+                        admin,
+                        abi.encodeWithSelector(
+                            PageName.initialize.selector,
+                            "Universal Page Name",
+                            "UPN",
+                            owner,
+                            beneficiary,
+                            controller,
+                            1 ether,
+                            3,
+                            2,
+                            marketplace
+                        )
+                    )
                 )
             )
         );
@@ -68,7 +73,7 @@ contract PageNameTest is Test {
         assertEq("Universal Page Name", name.getData(_LSP4_TOKEN_NAME_KEY));
         assertEq("UPN", name.getData(_LSP4_TOKEN_SYMBOL_KEY));
         assertEq(_LSP4_TOKEN_TYPE_NFT, uint256(bytes32(name.getData(_LSP4_TOKEN_TYPE_KEY))));
-        assertEq(_LSP8_TOKENID_SCHEMA_STRING, uint256(bytes32(name.getData(_LSP8_TOKENID_SCHEMA_KEY))));
+        assertEq(_LSP8_TOKENID_FORMAT_STRING, uint256(bytes32(name.getData(_LSP8_TOKENID_FORMAT_KEY))));
         assertEq(owner, name.owner());
         assertEq(beneficiary, name.beneficiary());
         assertEq(controller, name.controller());
@@ -90,19 +95,32 @@ contract PageNameTest is Test {
     }
 
     function test_Revert_IfConfigureNotOwner() public {
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         name.setProfileLimit(10);
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         name.setMinimumLength(4);
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         name.setPrice(0 ether);
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         name.setController(address(100));
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         name.pause();
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         name.unpause();
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         name.withdraw(0 ether);
     }
 

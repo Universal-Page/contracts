@@ -7,6 +7,7 @@ import {
     TransparentUpgradeableProxy
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
+import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {Module, MARKETPLACE_ROLE} from "../../../src/marketplace/common/Module.sol";
 import {LSP8Listings, LSP8Listing} from "../../../src/marketplace/lsp8/LSP8Listings.sol";
 import {LSP8Auctions, LSP8Auction, LSP8Bid} from "../../../src/marketplace/lsp8/LSP8Auctions.sol";
@@ -63,12 +64,18 @@ contract LSP8AuctionsTest is Test {
 
         listings = LSP8Listings(
             address(
-                new TransparentUpgradeableProxy(address(new LSP8Listings()), admin, abi.encodeWithSelector(LSP8Listings.initialize.selector, owner))
+                new TransparentUpgradeableProxy(
+                    address(new LSP8Listings()), admin, abi.encodeWithSelector(LSP8Listings.initialize.selector, owner)
+                )
             )
         );
         auctions = LSP8Auctions(
             address(
-                new TransparentUpgradeableProxy(address(new LSP8Auctions()), admin, abi.encodeWithSelector(LSP8Auctions.initialize.selector, owner, listings))
+                new TransparentUpgradeableProxy(
+                    address(new LSP8Auctions()),
+                    admin,
+                    abi.encodeWithSelector(LSP8Auctions.initialize.selector, owner, listings)
+                )
             )
         );
 
@@ -94,17 +101,28 @@ contract LSP8AuctionsTest is Test {
     }
 
     function test_Revert_IfConfigureNotOwner() public {
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         auctions.grantRole(address(100), MARKETPLACE_ROLE);
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         auctions.revokeRole(address(100), MARKETPLACE_ROLE);
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         auctions.pause();
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         auctions.unpause();
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         auctions.setMinBidDetlaPoints(5_000);
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         auctions.setBidTimeExtension(5 minutes);
     }
 

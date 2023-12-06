@@ -8,6 +8,7 @@ import {
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {_INTERFACEID_LSP0} from "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0Constants.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
+import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {Module, MARKETPLACE_ROLE} from "../../../src/marketplace/common/Module.sol";
 import {Points} from "../../../src/common/Points.sol";
 import {Royalties, RoyaltiesInfo} from "../../../src/common/Royalties.sol";
@@ -55,27 +56,40 @@ contract LSP7MarketplaceTest is Test {
         participant = Participant(
             payable(
                 address(
-                    new TransparentUpgradeableProxy(address(new Participant()), admin, abi.encodeWithSelector(
-                        Participant.initialize.selector,
-                        owner
-                    ))
+                    new TransparentUpgradeableProxy(
+                        address(new Participant()),
+                        admin,
+                        abi.encodeWithSelector(Participant.initialize.selector, owner)
+                    )
                 )
             )
         );
         listings = LSP7Listings(
             address(
-                new TransparentUpgradeableProxy(address(new LSP7Listings()), admin, abi.encodeWithSelector(LSP7Listings.initialize.selector, owner))
+                new TransparentUpgradeableProxy(
+                    address(new LSP7Listings()), admin, abi.encodeWithSelector(LSP7Listings.initialize.selector, owner)
+                )
             )
         );
         offers = LSP7Offers(
             address(
-                new TransparentUpgradeableProxy(address(new LSP7Offers()), admin, abi.encodeWithSelector(LSP7Offers.initialize.selector, owner, listings))
+                new TransparentUpgradeableProxy(
+                    address(new LSP7Offers()),
+                    admin,
+                    abi.encodeWithSelector(LSP7Offers.initialize.selector, owner, listings)
+                )
             )
         );
         marketplace = LSP7Marketplace(
             payable(
                 address(
-                    new TransparentUpgradeableProxy(address(new LSP7Marketplace()), admin, abi.encodeWithSelector(LSP7Marketplace.initialize.selector, owner, beneficiary, listings, offers, participant))
+                    new TransparentUpgradeableProxy(
+                        address(new LSP7Marketplace()),
+                        admin,
+                        abi.encodeWithSelector(
+                            LSP7Marketplace.initialize.selector, owner, beneficiary, listings, offers, participant
+                        )
+                    )
                 )
             )
         );
@@ -108,13 +122,20 @@ contract LSP7MarketplaceTest is Test {
     }
 
     function test_Revert_IfConfigureNotOwner() public {
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         marketplace.pause();
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         marketplace.unpause();
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         marketplace.setFeePoints(0);
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         marketplace.setRoyaltiesThresholdPoints(0);
     }
 

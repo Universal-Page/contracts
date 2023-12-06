@@ -10,9 +10,10 @@ import {
     _LSP4_TOKEN_TYPE_NFT
 } from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {
-    _LSP8_TOKENID_SCHEMA_KEY,
-    _LSP8_TOKENID_SCHEMA_UNIQUE_ID
+    _LSP8_TOKENID_FORMAT_KEY,
+    _LSP8_TOKENID_FORMAT_UNIQUE_ID
 } from "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8Constants.sol";
+import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {CollectorIdentifiableDigitalAsset} from "../../../src/assets/lsp8/CollectorIdentifiableDigitalAsset.sol";
 import {deployProfile} from "../../utils/profile.sol";
 
@@ -40,7 +41,7 @@ contract CollectorIdentifiableDigitalAssetTest is Test {
         assertEq("Universal Page Collector", asset.getData(_LSP4_TOKEN_NAME_KEY));
         assertEq("UPC", asset.getData(_LSP4_TOKEN_SYMBOL_KEY));
         assertEq(_LSP4_TOKEN_TYPE_NFT, uint256(bytes32(asset.getData(_LSP4_TOKEN_TYPE_KEY))));
-        assertEq(_LSP8_TOKENID_SCHEMA_UNIQUE_ID, uint256(bytes32(asset.getData(_LSP8_TOKENID_SCHEMA_KEY))));
+        assertEq(_LSP8_TOKENID_FORMAT_UNIQUE_ID, uint256(bytes32(asset.getData(_LSP8_TOKENID_FORMAT_KEY))));
         assertEq(0, asset.totalSupply());
         assertEq(100, asset.tokenSupplyCap());
         assertEq(0, asset.tokenSupplyLimit());
@@ -60,17 +61,28 @@ contract CollectorIdentifiableDigitalAssetTest is Test {
     }
 
     function test_Revert_IfNotOwner() public {
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         asset.setPrice(0 ether);
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         asset.setController(address(100));
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         asset.pause();
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         asset.unpause();
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         asset.withdraw(0 ether);
-        vm.expectRevert("Ownable: caller is not the owner");
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         bytes32[] memory tokenIds = new bytes32[](1);
         tokenIds[0] = bytes32(uint256(1));
         asset.reserve(address(100), tokenIds);

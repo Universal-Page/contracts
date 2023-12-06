@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {Merkle} from "murky/Merkle.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
 import {_LSP4_TOKEN_TYPE_NFT} from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
+import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {DigitalAssetDrop} from "../../../src/assets/lsp7/DigitalAssetDrop.sol";
 import {deployProfile} from "../../utils/profile.sol";
 import {DigitalAssetMock} from "./DigitalAssetMock.sol";
@@ -115,7 +116,8 @@ contract DigitalAssetDropTest is Test {
 
         DigitalAssetDrop drop = new DigitalAssetDrop(asset, merkle.getRoot(data), dropOwner);
 
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         drop.dispose(address(1));
     }
 }
