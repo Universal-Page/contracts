@@ -105,6 +105,9 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
     }
 
     function profileLimitOf(address tokenOwner) public view returns (uint256) {
+        if (tokenOwner == owner()) {
+            return type(uint256).max;
+        }
         return profileLimit + _paidProfileLimit[tokenOwner];
     }
 
@@ -121,13 +124,15 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
         if (!_isValidName(name)) {
             revert IncorrectReservationName(recipient, name);
         }
-        if (balanceOf(recipient) >= profileLimitOf(recipient)) {
-            if (msg.value != price) {
+        if (msg.sender != owner()) {
+            if (balanceOf(recipient) >= profileLimitOf(recipient)) {
+                if (msg.value != price) {
+                    revert InvalidReservationPrice(recipient, name, msg.value);
+                }
+                _paidProfileLimit[recipient] += 1;
+            } else if (msg.value != 0) {
                 revert InvalidReservationPrice(recipient, name, msg.value);
             }
-            _paidProfileLimit[recipient] += 1;
-        } else if (msg.value != 0) {
-            revert InvalidReservationPrice(recipient, name, msg.value);
         }
         bytes32 tokenId = bytes32(bytes(name));
         _mint(recipient, tokenId, false, "");
