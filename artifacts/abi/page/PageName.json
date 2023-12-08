@@ -90,27 +90,6 @@
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "recipient",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "price",
-        "type": "uint256"
-      }
-    ],
-    "name": "InvalidReservationPrice",
-    "type": "error"
-  },
-  {
     "inputs": [],
     "name": "LSP4TokenNameNotEditable",
     "type": "error"

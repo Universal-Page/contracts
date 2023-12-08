@@ -20,7 +20,6 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
     error UnauthorizedRelease(address account, bytes32 tokenId);
 
     error IncorrectReservationName(address recipient, string name);
-    error InvalidReservationPrice(address recipient, string name, uint256 price);
     error UnauthorizedReservation(address recipient, string name, uint256 price);
 
     error TransferExceedLimit(address from, address to, bytes32 tokenId, uint256 limit);
@@ -31,7 +30,7 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
     event ReservedName(address indexed account, bytes32 indexed tokenId, uint256 price);
     event ReleasedName(address indexed account, bytes32 indexed tokenId);
 
-    mapping(address => uint256) private _paidProfileLimit;
+    mapping(address => uint256) private _profileLimit;
     uint256 public price;
     uint8 public minimumLength;
     uint16 public profileLimit;
@@ -105,10 +104,7 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
     }
 
     function profileLimitOf(address tokenOwner) public view returns (uint256) {
-        if (tokenOwner == owner()) {
-            return type(uint256).max;
-        }
-        return profileLimit + _paidProfileLimit[tokenOwner];
+        return profileLimit + _profileLimit[tokenOwner];
     }
 
     function reserve(address recipient, string calldata name, uint8 v, bytes32 r, bytes32 s)
@@ -124,15 +120,8 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
         if (!_isValidName(name)) {
             revert IncorrectReservationName(recipient, name);
         }
-        if (msg.sender != owner()) {
-            if (balanceOf(recipient) >= profileLimitOf(recipient)) {
-                if (msg.value != price) {
-                    revert InvalidReservationPrice(recipient, name, msg.value);
-                }
-                _paidProfileLimit[recipient] += 1;
-            } else if (msg.value != 0) {
-                revert InvalidReservationPrice(recipient, name, msg.value);
-            }
+        if (balanceOf(recipient) >= profileLimitOf(recipient)) {
+            _profileLimit[recipient] += 1;
         }
         bytes32 tokenId = bytes32(bytes(name));
         _mint(recipient, tokenId, false, "");
@@ -177,7 +166,7 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
                     if (sale.totalPaid < price) {
                         revert TransferInvalidSale(from, to, tokenId, sale.totalPaid);
                     }
-                    _paidProfileLimit[to] += 1;
+                    _profileLimit[to] += 1;
                 } else {
                     revert TransferInvalidSale(from, to, tokenId, 0);
                 }

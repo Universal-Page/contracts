@@ -15,7 +15,7 @@ import {PageName} from "../../src/page/PageName.sol";
 
 uint16 constant PROFILE_LIMIT = 1;
 uint8 constant MINIMUM_LENGTH = 3;
-uint256 constant PRICE = 5 ether;
+uint256 constant PRICE = 1 ether;
 
 contract Deploy is Script {
     function run() external {

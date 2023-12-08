@@ -279,19 +279,6 @@ contract PageNameTest is Test {
             name.reserve(address(profile), "test2", v, r, s);
             assertEq(2, name.balanceOf(address(profile)));
         }
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(profile), "test3", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(profile));
-            vm.expectRevert(
-                abi.encodeWithSelector(
-                    PageName.InvalidReservationPrice.selector, address(profile), "test3", uint256(0 ether)
-                )
-            );
-            name.reserve(address(profile), "test3", v, r, s);
-            assertEq(2, name.balanceOf(address(profile)));
-        }
     }
 
     function test_ReserveWhenExceedProfileLimit() public {
@@ -321,26 +308,6 @@ contract PageNameTest is Test {
             assertEq(1.5 ether, address(name).balance);
             assertEq(0.5 ether, address(profile).balance);
         }
-    }
-
-    function test_Revert_ReserveIfInvalidPrice(uint256 price, uint256 totalPaid) public {
-        vm.assume(price > 0 ether);
-        vm.assume(price != totalPaid);
-
-        (UniversalProfile profile,) = deployProfile();
-        vm.prank(owner);
-        name.setProfileLimit(0);
-        vm.prank(owner);
-        name.setPrice(price);
-
-        bytes32 hash = keccak256(abi.encodePacked(address(name), block.chainid, address(profile), "test", totalPaid));
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-        vm.deal(address(profile), totalPaid);
-        vm.prank(address(profile));
-        vm.expectRevert(
-            abi.encodeWithSelector(PageName.InvalidReservationPrice.selector, address(profile), "test", totalPaid)
-        );
-        name.reserve{value: totalPaid}(address(profile), "test", v, r, s);
     }
 
     function test_Release() public {
