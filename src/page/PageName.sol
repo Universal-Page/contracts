@@ -120,9 +120,6 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
         if (!_isValidName(name)) {
             revert IncorrectReservationName(recipient, name);
         }
-        if (balanceOf(recipient) >= profileLimitOf(recipient)) {
-            _profileLimit[recipient] += 1;
-        }
         bytes32 tokenId = bytes32(bytes(name));
         _mint(recipient, tokenId, false, "");
         emit ReservedName(recipient, tokenId, msg.value);
@@ -166,7 +163,6 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
                     if (sale.totalPaid < price) {
                         revert TransferInvalidSale(from, to, tokenId, sale.totalPaid);
                     }
-                    _profileLimit[to] += 1;
                 } else {
                     revert TransferInvalidSale(from, to, tokenId, 0);
                 }
