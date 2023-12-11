@@ -266,18 +266,19 @@ contract LSP8DropsDigitalAssetTest is Test {
         vm.prank(owner);
         drop.setDefaultTokenUri(bytes.concat(bytes4(0), "http://test/default"));
 
-        bytes32 tokenUriKey =
-            bytes32(bytes.concat(bytes10(keccak256(bytes("LSP8MetadataTokenURI"))), bytes2(0), bytes20(uint160(1))));
-        assertEq(bytes.concat(bytes4(0), "http://test/default"), drop.getData(tokenUriKey));
+        bytes32 tokenId = bytes32(uint256(1));
+        bytes32 tokenUriKey = keccak256(bytes("LSP4Metadata"));
+
+        assertEq(bytes.concat(bytes4(0), "http://test/default"), drop.getDataForTokenId(tokenId, tokenUriKey));
     }
 
     function test_DefaultTokenUriOverridenByBaseUri() public {
         vm.prank(owner);
         drop.setDefaultTokenUri(bytes.concat(bytes4(0), "http://test/default"));
 
-        bytes32 tokenUriKey =
-            bytes32(bytes.concat(bytes10(keccak256(bytes("LSP8MetadataTokenURI"))), bytes2(0), bytes20(uint160(1))));
-        assertEq(bytes.concat(bytes4(0), "http://test/default"), drop.getData(tokenUriKey));
+        bytes32 tokenId = bytes32(uint256(1));
+        bytes32 tokenUriKey = keccak256(bytes("LSP4Metadata"));
+        assertEq(bytes.concat(bytes4(0), "http://test/default"), drop.getDataForTokenId(tokenId, tokenUriKey));
 
         vm.prank(owner);
         drop.setData(keccak256(bytes("LSP8TokenMetadataBaseURI")), bytes.concat(bytes4(0), "http://test/base/"));
@@ -285,6 +286,6 @@ contract LSP8DropsDigitalAssetTest is Test {
         assertEq(
             bytes.concat(bytes4(0), "http://test/base/"), drop.getData(keccak256(bytes("LSP8TokenMetadataBaseURI")))
         );
-        assertEq(new bytes(0), drop.getData(tokenUriKey));
+        assertEq(new bytes(0), drop.getDataForTokenId(tokenId, tokenUriKey));
     }
 }
