@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.17;
+pragma solidity =0.8.22;
 
 interface IParticipant {
     /// Calculates a discount points for a fee on a marketplace.

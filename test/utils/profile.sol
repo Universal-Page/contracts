@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.17;
+pragma solidity =0.8.22;
 
 import {Vm} from "forge-std/Vm.sol";
 import {_LSP1_UNIVERSAL_RECEIVER_DELEGATE_KEY} from

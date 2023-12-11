@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.17;
+pragma solidity =0.8.22;
 
 import {IERC725Y} from "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
 import {Points} from "./Points.sol";
@@ -52,13 +52,10 @@ library Royalties {
 
     function _indexOfRoyaltiesEntry(RoyaltiesInfo[] memory entries, address recipient) private pure returns (int256) {
         uint256 entriesCount = entries.length;
-        for (uint256 i = 0; i < entriesCount;) {
+        for (uint256 i = 0; i < entriesCount; i++) {
             RoyaltiesInfo memory entry = entries[i];
             if (entry.recipient == recipient) {
                 return int256(i);
-            }
-            unchecked {
-                i++;
             }
         }
         return -1;
@@ -140,11 +137,8 @@ library Royalties {
     function _encodeRoyalties(RoyaltiesInfo[] memory entries) private pure returns (bytes memory) {
         bytes memory result = new bytes(0);
         uint256 count = entries.length;
-        for (uint256 i = 0; i < count;) {
+        for (uint256 i = 0; i < count; i++) {
             result = bytes.concat(result, _encodeRoyaltiesEntry(entries[i]));
-            unchecked {
-                i++;
-            }
         }
         return result;
     }

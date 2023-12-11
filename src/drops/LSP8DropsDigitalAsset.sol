@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.17;
+pragma solidity =0.8.22;
 
 import {
     LSP8IdentifiableDigitalAsset,
@@ -63,19 +63,13 @@ contract LSP8DropsDigitalAsset is LSP8CappedSupply, LSP8Enumerable, DropsDigital
         bytes32[] memory tokenIds = new bytes32[](amount);
         uint256 firstTokenId = _totalMintedTokens + 1;
         _totalMintedTokens += amount;
-        for (uint256 i = 0; i < amount;) {
+        for (uint256 i = 0; i < amount; i++) {
             tokenIds[i] = bytes32(firstTokenId + i);
-            unchecked {
-                i++;
-            }
         }
         emit Minted(recipient, tokenIds, totalPrice);
         // mint tokens
-        for (uint256 i = 0; i < amount;) {
+        for (uint256 i = 0; i < amount; i++) {
             _mint(recipient, tokenIds[i], false, "");
-            unchecked {
-                i++;
-            }
         }
     }
 

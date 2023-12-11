@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity =0.8.22;
 
 import {OwnableUnset} from "@erc725/smart-contracts/contracts/custom/OwnableUnset.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -63,7 +63,7 @@ contract Participant is IParticipant, OwnableUnset, PausableUpgradeable {
         }
         if (address(collectorAsset) != address(0)) {
             bytes32[] memory tokenIds = collectorAsset.tokenIdsOf(profile);
-            for (uint256 i = 0; i < tokenIds.length;) {
+            for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint8 tier = collectorAsset.tokenTierOf(tokenIds[i]);
                 uint32 discount = 0;
                 if (tier == 0) {
@@ -77,9 +77,6 @@ contract Participant is IParticipant, OwnableUnset, PausableUpgradeable {
                 }
                 if (maxDiscount < discount) {
                     maxDiscount = discount;
-                }
-                unchecked {
-                    i++;
                 }
             }
         }

@@ -9,7 +9,7 @@ fs_permissions = [
 ]
 
 # solidity compiler
-solc = "0.8.17"
+solc = "0.8.22"
 
 # Increase optimizer_runs
 optimizer = true

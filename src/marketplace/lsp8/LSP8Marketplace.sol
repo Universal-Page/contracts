@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.17;
+pragma solidity =0.8.22;
 
 import {ILSP8IdentifiableDigitalAsset} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/ILSP8IdentifiableDigitalAsset.sol";
@@ -130,16 +130,13 @@ contract LSP8Marketplace is IPageNameMarketplace, Base {
             }
         } else {
             uint256 royaltiesRecipientsCount = royaltiesRecipients.length;
-            for (uint256 i = 0; i < royaltiesRecipientsCount;) {
+            for (uint256 i = 0; i < royaltiesRecipientsCount; i++) {
                 if (royaltiesAmounts[i] > 0) {
                     (bool royaltiesPaid,) = royaltiesRecipients[i].call{value: royaltiesAmounts[i]}("");
                     if (!royaltiesPaid) {
                         revert Unpaid(listingId, royaltiesRecipients[i], royaltiesAmounts[i]);
                     }
                     emit RoyaltiesPaid(listingId, asset, tokenId, royaltiesRecipients[i], royaltiesAmounts[i]);
-                }
-                unchecked {
-                    i++;
                 }
             }
             uint256 sellerAmount = totalPaid - feeAmount - royaltiesTotalAmount;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.17;
+pragma solidity =0.8.22;
 
 import {OwnableUnset} from "@erc725/smart-contracts/contracts/custom/OwnableUnset.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -81,15 +81,12 @@ abstract contract Base is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgr
         recipients = new address[](royalties.length);
         amounts = new uint256[](royalties.length);
         uint256 count = royalties.length;
-        for (uint256 i = 0; i < count;) {
+        for (uint256 i = 0; i < count; i++) {
             assert(Points.isValid(royalties[i].points));
             uint256 amount = Points.realize(totalPrice, royalties[i].points);
             recipients[i] = royalties[i].recipient;
             amounts[i] = amount;
             totalAmount += amount;
-            unchecked {
-                i++;
-            }
         }
         if ((royaltiesThresholdPoints != 0) && (totalAmount > Points.realize(totalPrice, royaltiesThresholdPoints))) {
             revert RoyaltiesExceedThreshold(royaltiesThresholdPoints, totalPrice, totalAmount);

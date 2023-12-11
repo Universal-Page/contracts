@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.17;
+pragma solidity =0.8.22;
 
 import {Test} from "forge-std/Test.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";

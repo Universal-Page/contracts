@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.17;
+pragma solidity =0.8.22;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -116,11 +116,8 @@ contract CollectorIdentifiableDigitalAsset is
         if (supply + amount > tokenSupplyLimit) {
             revert TokenSupplyLimitExceeded(supply, tokenSupplyLimit, amount);
         }
-        for (uint256 i = 0; i < amount;) {
+        for (uint256 i = 0; i < amount; i++) {
             _mint(recipient, tokenIds[i], true, "");
-            unchecked {
-                i++;
-            }
         }
         emit TokensReserved(recipient, tokenIds);
     }
@@ -144,11 +141,8 @@ contract CollectorIdentifiableDigitalAsset is
         if (msg.value != amount * price) {
             revert InvalidPurchaseAmount(amount * price, msg.value);
         }
-        for (uint256 i = 0; i < amount;) {
+        for (uint256 i = 0; i < amount; i++) {
             _mint(recipient, tokenIds[i], false, "");
-            unchecked {
-                i++;
-            }
         }
         emit TokensPurchased(recipient, tokenIds, msg.value);
     }

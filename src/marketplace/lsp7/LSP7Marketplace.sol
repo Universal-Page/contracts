@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.17;
+pragma solidity =0.8.22;
 
 import {ILSP7DigitalAsset} from "@lukso/lsp-smart-contracts/contracts/LSP7DigitalAsset/ILSP7DigitalAsset.sol";
 import {Base} from "../common/Base.sol";
@@ -82,16 +82,13 @@ contract LSP7Marketplace is Base {
             revert FeesExceedTotalPaid(totalPaid, feeAmount, royaltiesTotalAmount);
         }
         uint256 royaltiesRecipientsCount = royaltiesRecipients.length;
-        for (uint256 i = 0; i < royaltiesRecipientsCount;) {
+        for (uint256 i = 0; i < royaltiesRecipientsCount; i++) {
             if (royaltiesAmounts[i] > 0) {
                 (bool royaltiesPaid,) = royaltiesRecipients[i].call{value: royaltiesAmounts[i]}("");
                 if (!royaltiesPaid) {
                     revert Unpaid(listingId, royaltiesRecipients[i], royaltiesAmounts[i]);
                 }
                 emit RoyaltiesPaid(listingId, asset, itemCount, royaltiesRecipients[i], royaltiesAmounts[i]);
-            }
-            unchecked {
-                i++;
             }
         }
         uint256 sellerAmount = totalPaid - feeAmount - royaltiesTotalAmount;
