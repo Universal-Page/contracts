@@ -66,6 +66,7 @@ contract Configure is Script {
 
     function run() external {
         address controller = vm.envAddress("PROFILE_CONTROLLER_ADDRESS");
+        address treasury = vm.envAddress("TREASURY_ADDRESS");
         UniversalProfile profile = UniversalProfile(payable(vm.envAddress("PROFILE_ADDRESS")));
         LSP6KeyManager keyManager = LSP6KeyManager(profile.owner());
         PageName pageName = PageName(payable(vm.envAddress("CONTRACT_PAGE_NAME_ADDRESS")));
@@ -82,6 +83,19 @@ contract Configure is Script {
                     address(pageName),
                     0,
                     abi.encodeWithSelector(pageName.setData.selector, _LSP8_TOKEN_METADATA_BASE_URI_KEY, encodedBaseUri)
+                )
+            );
+        }
+
+        if (pageName.beneficiary() != treasury) {
+            vm.broadcast(controller);
+            keyManager.execute(
+                abi.encodeWithSelector(
+                    profile.execute.selector,
+                    OPERATION_0_CALL,
+                    address(pageName),
+                    0,
+                    abi.encodeWithSelector(pageName.setBeneficiary.selector, treasury)
                 )
             );
         }
