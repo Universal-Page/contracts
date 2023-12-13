@@ -15,10 +15,8 @@ import {
 } from "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8Constants.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
 import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
-import {IPageNameMarketplace, PendingSale} from "../../src/page/IPageNameMarketplace.sol";
 import {PageName} from "../../src/page/PageName.sol";
 import {deployProfile} from "../utils/profile.sol";
-import {PageNameMarketplaceMock} from "./PageNameMarketplaceMock.sol";
 
 contract PageNameTest is Test {
     event ValueReceived(address indexed sender, uint256 indexed value);
@@ -33,7 +31,6 @@ contract PageNameTest is Test {
     address beneficiary;
     address controller;
     uint256 controllerKey;
-    PageNameMarketplaceMock marketplace;
 
     function setUp() public {
         admin = vm.addr(1);
@@ -43,7 +40,6 @@ contract PageNameTest is Test {
         controllerKey = 4;
         controller = vm.addr(controllerKey);
 
-        marketplace = new PageNameMarketplaceMock();
         name = PageName(
             payable(
                 address(
@@ -57,10 +53,7 @@ contract PageNameTest is Test {
                             owner,
                             beneficiary,
                             controller,
-                            1 ether,
-                            3,
-                            2,
-                            marketplace
+                            3
                         )
                     )
                 )
@@ -77,17 +70,12 @@ contract PageNameTest is Test {
         assertEq(owner, name.owner());
         assertEq(beneficiary, name.beneficiary());
         assertEq(controller, name.controller());
-        assertEq(1 ether, name.price());
         assertEq(3, name.minimumLength());
-        assertEq(2, name.profileLimit());
-        assertEq(address(marketplace), address(name.marketplace()));
     }
 
     function test_ConfigureIfOwner() public {
         vm.startPrank(owner);
-        name.setProfileLimit(10);
         name.setMinimumLength(4);
-        name.setPrice(0 ether);
         name.setController(address(10));
         name.pause();
         name.unpause();
@@ -97,15 +85,7 @@ contract PageNameTest is Test {
     function test_Revert_IfConfigureNotOwner() public {
         vm.prank(address(1));
         vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
-        name.setProfileLimit(10);
-
-        vm.prank(address(1));
-        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         name.setMinimumLength(4);
-
-        vm.prank(address(1));
-        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
-        name.setPrice(0 ether);
 
         vm.prank(address(1));
         vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
@@ -128,7 +108,7 @@ contract PageNameTest is Test {
         vm.prank(owner);
         name.pause();
         vm.expectRevert("Pausable: paused");
-        name.reserve(address(100), "test", 0, 0, 0);
+        name.reserve(address(100), "test", false, abi.encode(uint256(0)), 0, 0, 0);
         vm.expectRevert("Pausable: paused");
         name.release(bytes32(uint256(1)));
     }
@@ -182,26 +162,34 @@ contract PageNameTest is Test {
         string memory reservationName = string(buffer);
 
         (UniversalProfile profile,) = deployProfile();
+        bytes memory salt = abi.encode(uint256(0));
+
         bytes32 hash = keccak256(
-            abi.encodePacked(address(name), block.chainid, address(profile), reservationName, uint256(0 ether))
+            abi.encodePacked(
+                address(name), block.chainid, address(profile), reservationName, false, salt, uint256(0 ether)
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
         vm.prank(address(profile));
         vm.expectEmit(address(name));
         emit ReservedName(address(profile), bytes32(bytes(reservationName)), 0 ether);
-        name.reserve(address(profile), reservationName, v, r, s);
+        name.reserve(address(profile), reservationName, false, salt, v, r, s);
         assertEq(1, name.balanceOf(address(profile)));
     }
 
     function test_Revert_ReserveIfUnathorized() public {
         (UniversalProfile profile,) = deployProfile();
-        bytes32 hash = keccak256(abi.encodePacked(address(name), address(profile), "test", uint256(0 ether)));
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                address(name), block.chainid, address(profile), "test", false, abi.encode(uint256(0)), uint256(0 ether)
+            )
+        );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(100, hash);
         vm.prank(address(profile));
         vm.expectRevert(
             abi.encodeWithSelector(PageName.UnauthorizedReservation.selector, address(profile), "test", 0 ether)
         );
-        name.reserve(address(profile), "test", v, r, s);
+        name.reserve(address(profile), "test", false, abi.encode(uint256(0)), v, r, s);
     }
 
     function testFuzz_Revert_ReserveIfShortName(uint8 minimumLength, string calldata reservationName) public {
@@ -212,14 +200,22 @@ contract PageNameTest is Test {
 
         (UniversalProfile profile,) = deployProfile();
         bytes32 hash = keccak256(
-            abi.encodePacked(address(name), block.chainid, address(profile), reservationName, uint256(0 ether))
+            abi.encodePacked(
+                address(name),
+                block.chainid,
+                address(profile),
+                reservationName,
+                false,
+                abi.encode(uint256(0)),
+                uint256(0 ether)
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
         vm.prank(address(profile));
         vm.expectRevert(
             abi.encodeWithSelector(PageName.IncorrectReservationName.selector, address(profile), reservationName)
         );
-        name.reserve(address(profile), reservationName, v, r, s);
+        name.reserve(address(profile), reservationName, false, abi.encode(uint256(0)), v, r, s);
     }
 
     function testFuzz_Revert_ReserveIfLongName(uint8 minimumLength, string calldata reservationName) public {
@@ -230,14 +226,22 @@ contract PageNameTest is Test {
 
         (UniversalProfile profile,) = deployProfile();
         bytes32 hash = keccak256(
-            abi.encodePacked(address(name), block.chainid, address(profile), reservationName, uint256(0 ether))
+            abi.encodePacked(
+                address(name),
+                block.chainid,
+                address(profile),
+                reservationName,
+                false,
+                abi.encode(uint256(0)),
+                uint256(0 ether)
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
         vm.prank(address(profile));
         vm.expectRevert(
             abi.encodeWithSelector(PageName.IncorrectReservationName.selector, address(profile), reservationName)
         );
-        name.reserve(address(profile), reservationName, v, r, s);
+        name.reserve(address(profile), reservationName, false, abi.encode(uint256(0)), v, r, s);
     }
 
     function testFuzz_Revert_ReserveIfContainsInvalidCharacters(bytes1 char) public {
@@ -249,74 +253,77 @@ contract PageNameTest is Test {
 
         (UniversalProfile profile,) = deployProfile();
         bytes32 hash = keccak256(
-            abi.encodePacked(address(name), block.chainid, address(profile), reservationName, uint256(0 ether))
+            abi.encodePacked(
+                address(name),
+                block.chainid,
+                address(profile),
+                reservationName,
+                false,
+                abi.encode(uint256(0)),
+                uint256(0 ether)
+            )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
         vm.prank(address(profile));
         vm.expectRevert(
             abi.encodeWithSelector(PageName.IncorrectReservationName.selector, address(profile), reservationName)
         );
-        name.reserve(address(profile), reservationName, v, r, s);
+        name.reserve(address(profile), reservationName, false, abi.encode(uint256(0)), v, r, s);
     }
 
-    function test_Revert_ReserveWhenExceedProfileLimit() public {
+    function test_Revert_ReserveMultiple() public {
         (UniversalProfile profile,) = deployProfile();
-        vm.prank(owner);
-        name.setProfileLimit(2);
         {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(profile), "test1", uint256(0 ether)));
+            bytes32 hash = keccak256(
+                abi.encodePacked(
+                    address(name),
+                    block.chainid,
+                    address(profile),
+                    "test1",
+                    false,
+                    abi.encode(uint256(0)),
+                    uint256(0 ether)
+                )
+            );
             (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(profile));
-            name.reserve(address(profile), "test1", v, r, s);
-            assertEq(1, name.balanceOf(address(profile)));
-        }
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(profile), "test2", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(profile));
-            name.reserve(address(profile), "test2", v, r, s);
-            assertEq(2, name.balanceOf(address(profile)));
-        }
-    }
-
-    function test_ReserveWhenExceedProfileLimit() public {
-        (UniversalProfile profile,) = deployProfile();
-        vm.prank(owner);
-        name.setProfileLimit(1);
-        vm.prank(owner);
-        name.setPrice(1.5 ether);
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(profile), "test1", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(profile));
-            name.reserve(address(profile), "test1", v, r, s);
-            assertEq(1, name.balanceOf(address(profile)));
-        }
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(profile), "test2", uint256(1.5 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.deal(address(profile), 2 ether);
             vm.prank(address(profile));
             vm.expectEmit(address(name));
-            emit ReservedName(address(profile), bytes32("test2"), 1.5 ether);
-            name.reserve{value: 1.5 ether}(address(profile), "test2", v, r, s);
-            assertEq(2, name.balanceOf(address(profile)));
-            assertEq(1.5 ether, address(name).balance);
-            assertEq(0.5 ether, address(profile).balance);
+            emit ReservedName(address(profile), bytes32(bytes("test1")), 0 ether);
+            name.reserve(address(profile), "test1", false, abi.encode(uint256(0)), v, r, s);
+            assertEq(1, name.balanceOf(address(profile)));
+        }
+        {
+            bytes32 hash = keccak256(
+                abi.encodePacked(
+                    address(name),
+                    block.chainid,
+                    address(profile),
+                    "test2",
+                    false,
+                    abi.encode(uint256(1)),
+                    uint256(0 ether)
+                )
+            );
+            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
+            vm.prank(address(profile));
+            vm.expectRevert(
+                abi.encodeWithSelector(PageName.UnauthorizedReservation.selector, address(profile), "test2", 0 ether)
+            );
+            name.reserve(address(profile), "test2", false, abi.encode(uint256(1)), v, r, s);
+            assertEq(1, name.balanceOf(address(profile)));
         }
     }
 
     function test_Release() public {
         (UniversalProfile profile,) = deployProfile();
-        bytes32 hash =
-            keccak256(abi.encodePacked(address(name), block.chainid, address(profile), "test", uint256(0 ether)));
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                address(name), block.chainid, address(profile), "test", false, abi.encode(uint256(0)), uint256(0 ether)
+            )
+        );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
         vm.prank(address(profile));
-        name.reserve(address(profile), "test", v, r, s);
+        name.reserve(address(profile), "test", false, abi.encode(uint256(0)), v, r, s);
         assertEq(1, name.totalSupply());
         assertEq(1, name.balanceOf(address(profile)));
 
@@ -330,11 +337,14 @@ contract PageNameTest is Test {
 
     function test_Revert_ReleaseIfUnathorized() public {
         (UniversalProfile alice,) = deployProfile();
-        bytes32 hash =
-            keccak256(abi.encodePacked(address(name), block.chainid, address(alice), "test", uint256(0 ether)));
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                address(name), block.chainid, address(alice), "test", false, abi.encode(uint256(0)), uint256(0 ether)
+            )
+        );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
         vm.prank(address(alice));
-        name.reserve(address(alice), "test", v, r, s);
+        name.reserve(address(alice), "test", false, abi.encode(uint256(0)), v, r, s);
         (UniversalProfile bob,) = deployProfile();
 
         vm.prank(address(bob));
@@ -342,249 +352,28 @@ contract PageNameTest is Test {
         name.release(bytes32("test"));
     }
 
-    function test_ReserveFreeIfPaidRelease() public {
+    function test_Revert_ReserveWhenReleasedAndUseSameSignature() public {
         (UniversalProfile profile,) = deployProfile();
-        vm.prank(owner);
-        name.setProfileLimit(1);
-        vm.prank(owner);
-        name.setPrice(1 ether);
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                address(name), block.chainid, address(profile), "test", false, abi.encode(uint256(0)), uint256(0 ether)
+            )
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
         {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(profile), "test1", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
             vm.prank(address(profile));
-            name.reserve(address(profile), "test1", v, r, s);
-        }
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(profile), "test2", uint256(1 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(profile));
-            vm.deal(address(profile), 1 ether);
-            name.reserve{value: 1 ether}(address(profile), "test2", v, r, s);
+            name.reserve(address(profile), "test", false, abi.encode(uint256(0)), v, r, s);
         }
         {
             vm.prank(address(profile));
-            name.release("test2");
+            name.release(bytes32("test"));
         }
         {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(profile), "test3", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
             vm.prank(address(profile));
-            name.reserve(address(profile), "test3", v, r, s);
-        }
-    }
-
-    function test_ReserveFreeWhenTransferred() public {
-        (UniversalProfile alice,) = deployProfile();
-        (UniversalProfile bob,) = deployProfile();
-        vm.prank(owner);
-        name.setProfileLimit(1);
-        vm.prank(owner);
-        name.setPrice(1 ether);
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(alice), "test1", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(alice));
-            name.reserve(address(alice), "test1", v, r, s);
-            assertEq(1, name.balanceOf(address(alice)));
-            assertEq(0, name.balanceOf(address(bob)));
-        }
-        {
-            vm.prank(address(alice));
-            name.transfer(address(alice), address(bob), bytes32("test1"), false, "");
-            assertEq(0, name.balanceOf(address(alice)));
-            assertEq(1, name.balanceOf(address(bob)));
-        }
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(alice), "test2", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(alice));
-            name.reserve(address(alice), "test2", v, r, s);
-            assertEq(1, name.balanceOf(address(alice)));
-            assertEq(1, name.balanceOf(address(bob)));
-        }
-    }
-
-    function test_TransferWhenSold() public {
-        (UniversalProfile alice,) = deployProfile();
-        (UniversalProfile bob,) = deployProfile();
-        vm.prank(owner);
-        name.setProfileLimit(1);
-        vm.prank(owner);
-        name.setPrice(1.5 ether);
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(alice), "test1", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(alice));
-            name.reserve(address(alice), "test1", v, r, s);
-        }
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(bob), "test2", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(bob));
-            name.reserve(address(bob), "test2", v, r, s);
-        }
-        {
-            vm.prank(address(alice));
-            name.authorizeOperator(address(marketplace), bytes32("test1"), "");
-        }
-        {
-            marketplace.setPendingSale(
-                PendingSale({
-                    asset: address(name),
-                    tokenId: bytes32("test1"),
-                    seller: address(alice),
-                    buyer: address(bob),
-                    totalPaid: 1.5 ether
-                })
-            );
-            vm.prank(address(marketplace));
-            name.transfer(address(alice), address(bob), bytes32("test1"), false, "");
-            assertEq(0, name.balanceOf(address(alice)));
-            assertEq(2, name.balanceOf(address(bob)));
-        }
-    }
-
-    function test_Revert_TransferIfSoldLow(uint256 price, uint256 totalPaid) public {
-        vm.assume(price > 0.1 ether);
-        vm.assume(totalPaid < price);
-
-        (UniversalProfile alice,) = deployProfile();
-        (UniversalProfile bob,) = deployProfile();
-        vm.prank(owner);
-        name.setProfileLimit(1);
-        vm.prank(owner);
-        name.setPrice(price);
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(alice), "test1", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(alice));
-            name.reserve(address(alice), "test1", v, r, s);
-        }
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(bob), "test2", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(bob));
-            name.reserve(address(bob), "test2", v, r, s);
-        }
-        {
-            vm.prank(address(alice));
-            name.authorizeOperator(address(marketplace), bytes32("test1"), "");
-        }
-        {
-            marketplace.setPendingSale(
-                PendingSale({
-                    asset: address(name),
-                    tokenId: bytes32("test1"),
-                    seller: address(alice),
-                    buyer: address(bob),
-                    totalPaid: totalPaid
-                })
-            );
-            vm.prank(address(marketplace));
             vm.expectRevert(
-                abi.encodeWithSelector(
-                    PageName.TransferInvalidSale.selector, address(alice), address(bob), bytes32("test1"), totalPaid
-                )
+                abi.encodeWithSelector(PageName.UnauthorizedReservation.selector, address(profile), "test", 0 ether)
             );
-            name.transfer(address(alice), address(bob), bytes32("test1"), false, "");
-        }
-    }
-
-    function test_Revert_TransferWhenExceedProfileLimit() public {
-        (UniversalProfile alice,) = deployProfile();
-        (UniversalProfile bob,) = deployProfile();
-        vm.prank(owner);
-        name.setProfileLimit(1);
-        vm.prank(owner);
-        name.setPrice(1.5 ether);
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(alice), "test1", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(alice));
-            name.reserve(address(alice), "test1", v, r, s);
-        }
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(bob), "test2", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(bob));
-            name.reserve(address(bob), "test2", v, r, s);
-        }
-        {
-            vm.prank(address(alice));
-            vm.expectRevert(
-                abi.encodeWithSelector(
-                    PageName.TransferExceedLimit.selector, address(alice), address(bob), bytes32("test1"), 1
-                )
-            );
-            name.transfer(address(alice), address(bob), bytes32("test1"), false, "");
-        }
-    }
-
-    function test_ReserveFreeAfterReleasedSold() public {
-        (UniversalProfile alice,) = deployProfile();
-        (UniversalProfile bob,) = deployProfile();
-        vm.prank(owner);
-        name.setProfileLimit(1);
-        vm.prank(owner);
-        name.setPrice(1.5 ether);
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(alice), "test1", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(alice));
-            name.reserve(address(alice), "test1", v, r, s);
-        }
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(bob), "test2", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(bob));
-            name.reserve(address(bob), "test2", v, r, s);
-        }
-        {
-            vm.prank(address(alice));
-            name.authorizeOperator(address(marketplace), bytes32("test1"), "");
-        }
-        {
-            marketplace.setPendingSale(
-                PendingSale({
-                    asset: address(name),
-                    tokenId: bytes32("test1"),
-                    seller: address(alice),
-                    buyer: address(bob),
-                    totalPaid: 1.5 ether
-                })
-            );
-            vm.prank(address(marketplace));
-            name.transfer(address(alice), address(bob), bytes32("test1"), false, "");
-            assertEq(0, name.balanceOf(address(alice)));
-            assertEq(2, name.balanceOf(address(bob)));
-        }
-        {
-            vm.prank(address(bob));
-            vm.expectEmit(address(name));
-            emit ReleasedName(address(bob), bytes32("test1"));
-            name.release(bytes32("test1"));
-            assertEq(1, name.balanceOf(address(bob)));
-        }
-        {
-            bytes32 hash =
-                keccak256(abi.encodePacked(address(name), block.chainid, address(bob), "test3", uint256(0 ether)));
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
-            vm.prank(address(bob));
-            name.reserve(address(bob), "test3", v, r, s);
-            assertEq(2, name.balanceOf(address(bob)));
+            name.reserve(address(profile), "test", false, abi.encode(uint256(0)), v, r, s);
         }
     }
 }

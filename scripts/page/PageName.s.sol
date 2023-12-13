@@ -9,13 +9,10 @@ import {
     ITransparentUpgradeableProxy
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
-import {LSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6KeyManager.sol";
 import {OPERATION_0_CALL} from "@erc725/smart-contracts/contracts/constants.sol";
 import {PageName} from "../../src/page/PageName.sol";
 
-uint16 constant PROFILE_LIMIT = 1;
 uint8 constant MINIMUM_LENGTH = 3;
-uint256 constant PRICE = 1 ether;
 
 contract Deploy is Script {
     function run() external {
@@ -23,7 +20,6 @@ contract Deploy is Script {
         address profile = vm.envAddress("PROFILE_ADDRESS");
         address treasury = vm.envAddress("TREASURY_ADDRESS");
         address controller = vm.envAddress("PAGE_NAME_CONTROLLER_ADDRESS");
-        address marketplace = vm.envAddress("CONTRACT_LSP8_MARKETPLACE_ADDRESS");
 
         address proxy = vm.envOr("CONTRACT_PAGE_NAME_ADDRESS", address(0));
 
@@ -43,10 +39,7 @@ contract Deploy is Script {
                       profile,
                       treasury,
                       controller,
-                      PRICE,
-                      MINIMUM_LENGTH,
-                      PROFILE_LIMIT,
-                      marketplace)
+                      MINIMUM_LENGTH)
                 )
             );
             console.log(string.concat("PageName: deploy ", Strings.toHexString(address(proxy))));
@@ -68,7 +61,6 @@ contract Configure is Script {
         address controller = vm.envAddress("PROFILE_CONTROLLER_ADDRESS");
         address treasury = vm.envAddress("TREASURY_ADDRESS");
         UniversalProfile profile = UniversalProfile(payable(vm.envAddress("PROFILE_ADDRESS")));
-        LSP6KeyManager keyManager = LSP6KeyManager(profile.owner());
         PageName pageName = PageName(payable(vm.envAddress("CONTRACT_PAGE_NAME_ADDRESS")));
 
         bytes memory currentBaseUri = pageName.getData(_LSP8_TOKEN_METADATA_BASE_URI_KEY);
@@ -76,66 +68,31 @@ contract Configure is Script {
         bytes memory encodedBaseUri = bytes.concat(_baseUriHash, bytes(baseUri));
         if (keccak256(encodedBaseUri) != keccak256(currentBaseUri)) {
             vm.broadcast(controller);
-            keyManager.execute(
-                abi.encodeWithSelector(
-                    profile.execute.selector,
-                    OPERATION_0_CALL,
-                    address(pageName),
-                    0,
-                    abi.encodeWithSelector(pageName.setData.selector, _LSP8_TOKEN_METADATA_BASE_URI_KEY, encodedBaseUri)
-                )
+            profile.execute(
+                OPERATION_0_CALL,
+                address(pageName),
+                0,
+                abi.encodeWithSelector(pageName.setData.selector, _LSP8_TOKEN_METADATA_BASE_URI_KEY, encodedBaseUri)
             );
         }
 
         if (pageName.beneficiary() != treasury) {
             vm.broadcast(controller);
-            keyManager.execute(
-                abi.encodeWithSelector(
-                    profile.execute.selector,
-                    OPERATION_0_CALL,
-                    address(pageName),
-                    0,
-                    abi.encodeWithSelector(pageName.setBeneficiary.selector, treasury)
-                )
-            );
-        }
-
-        if (pageName.price() != PRICE) {
-            vm.broadcast(controller);
-            keyManager.execute(
-                abi.encodeWithSelector(
-                    profile.execute.selector,
-                    OPERATION_0_CALL,
-                    address(pageName),
-                    0,
-                    abi.encodeWithSelector(pageName.setPrice.selector, PRICE)
-                )
-            );
-        }
-
-        if (pageName.profileLimit() != PROFILE_LIMIT) {
-            vm.broadcast(controller);
-            keyManager.execute(
-                abi.encodeWithSelector(
-                    profile.execute.selector,
-                    OPERATION_0_CALL,
-                    address(pageName),
-                    0,
-                    abi.encodeWithSelector(pageName.setProfileLimit.selector, PROFILE_LIMIT)
-                )
+            profile.execute(
+                OPERATION_0_CALL,
+                address(pageName),
+                0,
+                abi.encodeWithSelector(pageName.setBeneficiary.selector, treasury)
             );
         }
 
         if (pageName.minimumLength() != MINIMUM_LENGTH) {
             vm.broadcast(controller);
-            keyManager.execute(
-                abi.encodeWithSelector(
-                    profile.execute.selector,
-                    OPERATION_0_CALL,
-                    address(pageName),
-                    0,
-                    abi.encodeWithSelector(pageName.setMinimumLength.selector, MINIMUM_LENGTH)
-                )
+            profile.execute(
+                OPERATION_0_CALL,
+                address(pageName),
+                0,
+                abi.encodeWithSelector(pageName.setMinimumLength.selector, MINIMUM_LENGTH)
             );
         }
     }

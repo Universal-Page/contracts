@@ -12,9 +12,10 @@ import {LSP8EnumerableInitAbstract} from
 import {LSP8IdentifiableDigitalAssetInitAbstract} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8IdentifiableDigitalAssetInitAbstract.sol";
 import {Withdrawable} from "../common/Withdrawable.sol";
-import {IPageNameMarketplace, PendingSale} from "./IPageNameMarketplace.sol";
 
 contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, PausableUpgradeable, Withdrawable {
+    uint256 private constant _PROFILE_CLAIMS_CLAIMED = 1 << 255;
+
     error InvalidController();
 
     error UnauthorizedRelease(address account, bytes32 tokenId);
@@ -22,20 +23,19 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
     error IncorrectReservationName(address recipient, string name);
     error UnauthorizedReservation(address recipient, string name, uint256 price);
 
-    error TransferExceedLimit(address from, address to, bytes32 tokenId, uint256 limit);
-    error TransferInvalidSale(address from, address to, bytes32 tokenId, uint256 totalPaid);
-
     event ControllerChanged(address indexed oldController, address indexed newController);
 
     event ReservedName(address indexed account, bytes32 indexed tokenId, uint256 price);
     event ReleasedName(address indexed account, bytes32 indexed tokenId);
 
-    mapping(address => uint256) private _profileLimit;
-    uint256 public price;
+    mapping(address => uint256) private _profileClaims;
+    uint256 public _unused_storage_slot_1;
     uint8 public minimumLength;
-    uint16 public profileLimit;
+    uint16 public _unused_storage_slot_2;
     address public controller;
-    IPageNameMarketplace public marketplace;
+    uint160 private _unused_storage_slot_3;
+    // hash => used
+    mapping(bytes32 => bool) private _usedReservations;
 
     constructor() {
         _disableInitializers();
@@ -47,36 +47,37 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
         address newOwner_,
         address beneficiary_,
         address controller_,
-        uint256 price_,
-        uint8 minimumLength_,
-        uint16 profileLimit_,
-        IPageNameMarketplace marketplace_
+        uint8 minimumLength_
     ) external initializer {
         super._initialize(name_, symbol_, newOwner_, _LSP4_TOKEN_TYPE_NFT, _LSP8_TOKENID_FORMAT_STRING);
         __ReentrancyGuard_init();
         __Pausable_init();
         _setBeneficiary(beneficiary_);
         _setController(controller_);
-        price = price_;
-        profileLimit = profileLimit_;
         minimumLength = minimumLength_;
-        marketplace = marketplace_;
     }
 
     receive() external payable override(LSP8IdentifiableDigitalAssetInitAbstract, Withdrawable) {
         _doReceive();
     }
 
-    function setProfileLimit(uint16 newLimit) external onlyOwner {
-        profileLimit = newLimit;
-    }
-
     function setMinimumLength(uint8 newLength) external onlyOwner {
         minimumLength = newLength;
     }
 
-    function setPrice(uint256 newPrice) external onlyOwner {
-        price = newPrice;
+    function claimsOf(address account) public view returns (bool claimed) {
+        uint256 claims = _profileClaims[account];
+        claimed = (claims & _PROFILE_CLAIMS_CLAIMED) == _PROFILE_CLAIMS_CLAIMED;
+    }
+
+    function setClaimed(address account, bool claimed) private {
+        uint256 claims = _profileClaims[account];
+        if (claimed) {
+            claims |= _PROFILE_CLAIMS_CLAIMED;
+        } else {
+            claims &= ~_PROFILE_CLAIMS_CLAIMED;
+        }
+        _profileClaims[account] = claims;
     }
 
     function setController(address newController) external onlyOwner {
@@ -103,23 +104,31 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
         _unpause();
     }
 
-    function profileLimitOf(address tokenOwner) public view returns (uint256) {
-        return profileLimit + _profileLimit[tokenOwner];
-    }
-
-    function reserve(address recipient, string calldata name, uint8 v, bytes32 r, bytes32 s)
-        external
-        payable
-        nonReentrant
-        whenNotPaused
-    {
-        bytes32 hash = keccak256(abi.encodePacked(address(this), block.chainid, recipient, name, msg.value));
-        if (ECDSA.recover(hash, v, r, s) != controller) {
-            revert UnauthorizedReservation(recipient, name, msg.value);
-        }
+    function reserve(
+        address recipient,
+        string calldata name,
+        bool force,
+        bytes calldata salt,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external payable nonReentrant whenNotPaused {
         if (!_isValidName(name)) {
             revert IncorrectReservationName(recipient, name);
         }
+        bytes32 hash =
+            keccak256(abi.encodePacked(address(this), block.chainid, recipient, name, force, salt, msg.value));
+        if (_usedReservations[hash] || (ECDSA.recover(hash, v, r, s) != controller)) {
+            revert UnauthorizedReservation(recipient, name, msg.value);
+        }
+        if (!force && (msg.value == 0)) {
+            (bool claimed) = claimsOf(recipient);
+            if (claimed) {
+                revert UnauthorizedReservation(recipient, name, msg.value);
+            }
+            setClaimed(recipient, true);
+        }
+        _usedReservations[hash] = true;
         bytes32 tokenId = bytes32(bytes(name));
         _mint(recipient, tokenId, false, "");
         emit ReservedName(recipient, tokenId, msg.value);
@@ -147,28 +156,5 @@ contract PageName is LSP8EnumerableInitAbstract, ReentrancyGuardUpgradeable, Pau
             }
         }
         return true;
-    }
-
-    function _beforeTokenTransfer(address from, address to, bytes32 tokenId, bytes memory data)
-        internal
-        virtual
-        override(LSP8EnumerableInitAbstract)
-        whenNotPaused
-    {
-        super._beforeTokenTransfer(from, to, tokenId, data);
-        if (from != address(0) && to != address(0) && balanceOf(to) >= profileLimitOf(to)) {
-            if (msg.sender == address(marketplace)) {
-                PendingSale memory sale = marketplace.pendingSale();
-                if (sale.asset == address(this) && sale.tokenId == tokenId && sale.seller == from && sale.buyer == to) {
-                    if (sale.totalPaid < price) {
-                        revert TransferInvalidSale(from, to, tokenId, sale.totalPaid);
-                    }
-                } else {
-                    revert TransferInvalidSale(from, to, tokenId, 0);
-                }
-            } else {
-                revert TransferExceedLimit(from, to, tokenId, profileLimitOf(to));
-            }
-        }
     }
 }

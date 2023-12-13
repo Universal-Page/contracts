@@ -6,3 +6,4 @@ docs/
 
 tools/playground.sh
 scripts/Playground.s.sol
+scripts/data.json

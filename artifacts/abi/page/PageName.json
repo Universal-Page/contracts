@@ -299,58 +299,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "limit",
-        "type": "uint256"
-      }
-    ],
-    "name": "TransferExceedLimit",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "totalPaid",
-        "type": "uint256"
-      }
-    ],
-    "name": "TransferInvalidSale",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "account",
         "type": "address"
       },
@@ -722,6 +670,32 @@
     "type": "fallback"
   },
   {
+    "inputs": [],
+    "name": "_unused_storage_slot_1",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_unused_storage_slot_2",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -790,6 +764,25 @@
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "claimsOf",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "claimed",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -941,24 +934,9 @@
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "price_",
-        "type": "uint256"
-      },
-      {
         "internalType": "uint8",
         "name": "minimumLength_",
         "type": "uint8"
-      },
-      {
-        "internalType": "uint16",
-        "name": "profileLimit_",
-        "type": "uint16"
-      },
-      {
-        "internalType": "contract IPageNameMarketplace",
-        "name": "marketplace_",
-        "type": "address"
       }
     ],
     "name": "initialize",
@@ -985,19 +963,6 @@
         "internalType": "bool",
         "name": "",
         "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "marketplace",
-    "outputs": [
-      {
-        "internalType": "contract IPageNameMarketplace",
-        "name": "",
-        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -1050,51 +1015,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "price",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "profileLimit",
-    "outputs": [
-      {
-        "internalType": "uint16",
-        "name": "",
-        "type": "uint16"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "tokenOwner",
-        "type": "address"
-      }
-    ],
-    "name": "profileLimitOf",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -1125,6 +1045,16 @@
         "internalType": "string",
         "name": "name",
         "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "force",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes",
+        "name": "salt",
+        "type": "bytes"
       },
       {
         "internalType": "uint8",
@@ -1292,32 +1222,6 @@
       }
     ],
     "name": "setMinimumLength",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "newPrice",
-        "type": "uint256"
-      }
-    ],
-    "name": "setPrice",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint16",
-        "name": "newLimit",
-        "type": "uint16"
-      }
-    ],
-    "name": "setProfileLimit",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
