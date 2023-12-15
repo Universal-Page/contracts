@@ -45,14 +45,7 @@ interface ILSP8Auctions {
         uint256 totalPaid
     );
     /// a buyer retracted their bid
-    event Retracted(
-        uint256 indexed listingId,
-        address seller,
-        address indexed owner,
-        bytes32 tokenId,
-        address indexed buyer,
-        uint256 totalPaid
-    );
+    event Retracted(uint256 indexed listingId, address indexed buyer, uint256 totalPaid);
 
     /// confirms an auction is issued
     /// @param listingId listing id

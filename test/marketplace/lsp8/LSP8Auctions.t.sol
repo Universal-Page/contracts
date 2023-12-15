@@ -41,14 +41,7 @@ contract LSP8AuctionsTest is Test {
         address indexed buyer,
         uint256 totalPaid
     );
-    event Retracted(
-        uint256 indexed listingId,
-        address seller,
-        address indexed owner,
-        bytes32 tokenId,
-        address indexed buyer,
-        uint256 totalPaid
-    );
+    event Retracted(uint256 indexed listingId, address indexed buyer, uint256 totalPaid);
 
     LSP8Listings listings;
     LSP8Auctions auctions;
@@ -343,7 +336,7 @@ contract LSP8AuctionsTest is Test {
         assertEq(0 ether, address(bob).balance);
         vm.prank(address(bob));
         vm.expectEmit(address(auctions));
-        emit Retracted(1, address(alice), address(alice), tokenId, address(bob), 1 ether);
+        emit Retracted(1, address(bob), 1 ether);
         auctions.retract(1);
         assertEq(1 ether, address(bob).balance);
     }
@@ -383,7 +376,7 @@ contract LSP8AuctionsTest is Test {
 
         vm.prank(address(bob));
         vm.expectEmit(address(auctions));
-        emit Retracted(1, address(alice), address(alice), tokenId, address(bob), 1 ether);
+        emit Retracted(1, address(bob), 1 ether);
         auctions.retract(1);
         assertEq(1 ether, address(bob).balance);
     }
@@ -579,5 +572,36 @@ contract LSP8AuctionsTest is Test {
         assertFalse(auctions.isActiveAuction(1));
         assertEq(1 ether, address(bob).balance);
         assertEq(0, address(marketplace).balance);
+    }
+
+    function test_RetractAfterAuctionCanceled() public {
+        address marketplace = vm.addr(100);
+        assertFalse(auctions.hasRole(marketplace, MARKETPLACE_ROLE));
+
+        vm.prank(owner);
+        auctions.grantRole(marketplace, MARKETPLACE_ROLE);
+        assertTrue(auctions.hasRole(marketplace, MARKETPLACE_ROLE));
+
+        bytes32 tokenId = bytes32(0);
+        (UniversalProfile alice,) = deployProfile();
+        (UniversalProfile bob,) = deployProfile();
+        asset.mint(address(alice), tokenId, false, "");
+
+        vm.prank(address(alice));
+        auctions.issue(address(asset), tokenId, 1 ether, block.timestamp, 7 days);
+
+        vm.deal(address(bob), 1 ether);
+        vm.prank(address(bob));
+        auctions.offer{value: 1 ether}(1);
+        assertEq(0 ether, address(bob).balance);
+
+        vm.prank(address(alice));
+        auctions.cancel(1);
+
+        vm.prank(address(bob));
+        // vm.expectEmit(address(auctions));
+        emit Retracted(1, address(bob), 1 ether);
+        auctions.retract(1);
+        assertEq(1 ether, address(bob).balance);
     }
 }

@@ -162,21 +162,22 @@ contract LSP8Auctions is ILSP8Auctions, Module {
 
     function retract(uint256 listingId) external override whenNotPaused nonReentrant {
         address buyer = msg.sender;
-        LSP8Listing memory listing = listings.getListing(listingId);
-        LSP8Auction memory auction = getAuction(listingId);
-        LSP8Bid memory bid = getBid(listingId, buyer);
-        // highest bidder needs to wait before retracting the offer
-        if (_highestBidder[listingId] == buyer) {
-            if (block.timestamp < auction.endTime + 24 hours) {
-                revert HighestOfferPending(listingId, buyer);
+        if (isIssued(listingId)) {
+            LSP8Auction memory auction = getAuction(listingId);
+            // highest bidder needs to wait before retracting the offer
+            if (_highestBidder[listingId] == buyer) {
+                if (block.timestamp < auction.endTime + 24 hours) {
+                    revert HighestOfferPending(listingId, buyer);
+                }
+                delete _highestBidder[listingId];
             }
-            delete _highestBidder[listingId];
         }
+        LSP8Bid memory bid = getBid(listingId, buyer);
         delete _bids[listingId][buyer];
         (bool success,) = buyer.call{value: bid.totalPaid}("");
         if (!success) {
             revert Unpaid(listingId, buyer, bid.totalPaid);
         }
-        emit Retracted(listingId, auction.seller, listing.owner, listing.tokenId, buyer, bid.totalPaid);
+        emit Retracted(listingId, buyer, bid.totalPaid);
     }
 }
