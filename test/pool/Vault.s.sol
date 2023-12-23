@@ -76,6 +76,8 @@ contract VaultTest is Test {
         vault.enableOracle(oracle, false);
         vault.setFee(1);
         vault.setFeeRecipient(feeRecipient);
+        vault.setRestricted(true);
+        vault.allowlist(address(0), true);
         vm.stopPrank();
     }
 
@@ -103,6 +105,14 @@ contract VaultTest is Test {
         vm.prank(address(1));
         vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         vault.setFeeRecipient(feeRecipient);
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
+        vault.setRestricted(true);
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
+        vault.allowlist(address(0), true);
     }
 
     function test_Revert_DepositZero() public {
