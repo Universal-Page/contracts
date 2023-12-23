@@ -37,10 +37,12 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     uint32 public fee;
     address public feeRecipient;
     uint256 public claimableFeeAmount;
+    bool public restricted;
+    IDepositContract private _depositContract;
     mapping(address => uint256) private _shares;
     mapping(address => bool) private _oracles;
     mapping(address => uint256) private _pendingWithdrawals;
-    IDepositContract private _depositContract;
+    mapping(address => bool) private _allowlisted;
 
     modifier onlyOracle() {
         _checkOracle();
@@ -99,6 +101,18 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         return _oracles[oracle];
     }
 
+    function allowlist(address account, bool enabled) external onlyOwner {
+        _allowlisted[account] = enabled;
+    }
+
+    function isAllowlisted(address account) public view returns (bool) {
+        return _allowlisted[account];
+    }
+
+    function setRestricted(bool enabled) external onlyOwner {
+        restricted = enabled;
+    }
+
     function _checkOracle() private view {
         address oracle = msg.sender;
         if (!isOracle(oracle)) {
@@ -145,6 +159,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
 
     function deposit(address beneficiary) public payable whenNotPaused {
         address account = msg.sender;
+        if (restricted && !isAllowlisted(account)) {
+            revert InvalidAddress(account);
+        }
         uint256 amount = msg.value;
         if (amount == 0) {
             revert InvalidAmount(amount);
