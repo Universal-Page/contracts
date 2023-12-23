@@ -110,3 +110,5 @@ exportAbi "marketplace/lsp8/LSP8Auctions"
 exportAbi "marketplace/lsp8/LSP8Marketplace"
 
 exportAbi "page/PageName"
+
+exportAbi "pool/Vault"
