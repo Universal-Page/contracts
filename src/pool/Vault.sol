@@ -5,7 +5,7 @@ import {OwnableUnset} from "@erc725/smart-contracts/contracts/custom/OwnableUnse
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {DepositContract, DEPOSIT_AMOUNT} from "./Deposit.sol";
+import {IDepositContract, DEPOSIT_AMOUNT} from "./Deposit.sol";
 
 contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable {
     error InvalidAmount(uint256 amount);
@@ -14,12 +14,19 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     error DepositLimitExceeded(uint256 totalValue, uint256 depositLimit);
     error CallerNotOracle(address account);
     error InsufficientBalance(uint256 availableAmount, uint256 requestedAmount);
+    error CallerNotFeeRecipient(address account);
+    error FeeClaimFailed(address account, address beneficiary, uint256 amount);
+    error InvalidAddress(address account);
 
     event Deposited(address indexed account, address indexed beneficiary, uint256 amount);
     event Withdrawn(address indexed account, address indexed beneficiary, uint256 amount);
     event WithdrawalRequested(address indexed account, address indexed beneficiary, uint256 amount);
     event Claimed(address indexed account, address indexed beneficiary, uint256 amount);
     event DepositLimitChanged(uint256 previousLimit, uint256 newLimit);
+    event FeeChanged(uint32 previousFee, uint32 newFee);
+    event FeeRecipientChanged(address previousFeeRecipient, address newFeeRecipient);
+    event FeeClaimed(address indexed account, address indexed beneficiary, uint256 amount);
+    event FeeReceived(uint256 amount);
 
     uint256 public depositLimit;
     uint256 public totalShares;
@@ -27,9 +34,13 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     uint256 public availableAmount;
     uint256 public pendingWithdrawalAmount;
     uint256 public validators;
+    uint32 public fee;
+    address public feeRecipient;
+    uint256 public claimableFeeAmount;
     mapping(address => uint256) private _shares;
     mapping(address => bool) private _oracles;
     mapping(address => uint256) private _pendingWithdrawals;
+    IDepositContract private _depositContract;
 
     modifier onlyOracle() {
         _checkOracle();
@@ -40,10 +51,14 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         _disableInitializers();
     }
 
-    function initialize(address newOwner_) external initializer {
+    function initialize(address newOwner_, IDepositContract depositContract_) external initializer {
+        if (address(depositContract_) == address(0)) {
+            revert InvalidAddress(address(depositContract_));
+        }
         __ReentrancyGuard_init();
         __Pausable_init();
         _setOwner(newOwner_);
+        _depositContract = depositContract_;
     }
 
     receive() external payable {
@@ -56,6 +71,18 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
 
     function unpause() external onlyOwner {
         _unpause();
+    }
+
+    function setFee(uint32 newFee) external onlyOwner {
+        uint32 previousFee = fee;
+        fee = newFee;
+        emit FeeChanged(previousFee, newFee);
+    }
+
+    function setFeeRecipient(address newFeeRecipient) external onlyOwner {
+        address previousFeeRecipient = feeRecipient;
+        feeRecipient = newFeeRecipient;
+        emit FeeRecipientChanged(previousFeeRecipient, newFeeRecipient);
     }
 
     function setDepositLimit(uint256 newDepositLimit) external onlyOwner {
@@ -93,6 +120,12 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         return _pendingWithdrawals[account];
     }
 
+    function claimableBalanceOf(address account) external view returns (uint256) {
+        uint256 pendingWithdrawal = _pendingWithdrawals[account];
+        uint256 currentBalance = address(this).balance - claimableFeeAmount;
+        return pendingWithdrawal > currentBalance ? currentBalance : pendingWithdrawal;
+    }
+
     function claim(uint256 amount, address beneficiary) external nonReentrant whenNotPaused {
         address account = msg.sender;
         if (amount == 0) {
@@ -123,6 +156,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         _shares[beneficiary] += shares;
         totalShares += shares;
         totalAmount += amount;
+        availableAmount += amount;
         emit Deposited(account, beneficiary, amount);
     }
 
@@ -159,13 +193,43 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         }
     }
 
-    function rebalance() external onlyOracle whenNotPaused {
-        _rebalance();
+    function claimFees(uint256 amount, address beneficiary) external nonReentrant whenNotPaused {
+        address account = msg.sender;
+        if (account != feeRecipient) {
+            revert CallerNotFeeRecipient(account);
+        }
+        if (amount == 0) {
+            revert InvalidAmount(amount);
+        }
+        if (amount > claimableFeeAmount) {
+            revert InsufficientBalance(claimableFeeAmount, amount);
+        }
+        claimableFeeAmount -= amount;
+        (bool success,) = beneficiary.call{value: amount}("");
+        if (!success) {
+            revert FeeClaimFailed(account, beneficiary, amount);
+        }
+        emit FeeClaimed(account, beneficiary, amount);
     }
 
-    function _rebalance() private {
-        uint256 currentBalance = address(this).balance;
-        availableAmount = currentBalance > pendingWithdrawalAmount ? currentBalance - pendingWithdrawalAmount : 0;
+    function rebalance() external onlyOracle whenNotPaused {
+        uint256 currentBalance = address(this).balance - claimableFeeAmount;
+
+        uint256 newAvailableAmount = currentBalance;
+        if (currentBalance > pendingWithdrawalAmount) {
+            newAvailableAmount -= pendingWithdrawalAmount;
+        }
+
+        if (newAvailableAmount > availableAmount) {
+            uint256 feeAmount = Math.mulDiv(newAvailableAmount - availableAmount, fee, 100_000);
+            if (feeAmount > 0) {
+                claimableFeeAmount += feeAmount;
+                newAvailableAmount -= feeAmount;
+                emit FeeReceived(feeAmount);
+            }
+        }
+
+        availableAmount = newAvailableAmount;
         totalAmount = validators * DEPOSIT_AMOUNT + availableAmount;
     }
 
@@ -175,15 +239,12 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         nonReentrant
         whenNotPaused
     {
-        // rebalance before depositing
-        _rebalance();
         if (availableAmount < DEPOSIT_AMOUNT) {
             revert InsufficientBalance(availableAmount, DEPOSIT_AMOUNT);
         }
         validators += 1;
+        availableAmount -= DEPOSIT_AMOUNT;
         bytes memory withdrawalCredentials = abi.encodePacked(hex"010000000000000000000000", address(this));
-        DepositContract.deposit{value: DEPOSIT_AMOUNT}(pubkey, withdrawalCredentials, signature, depositDataRoot);
-        // after depositing and registering new validator we need to rebalance again
-        _rebalance();
+        _depositContract.deposit{value: DEPOSIT_AMOUNT}(pubkey, withdrawalCredentials, signature, depositDataRoot);
     }
 }
