@@ -98,3 +98,5 @@ submit "marketplace/lsp8/LSP8Auctions"
 submit "marketplace/lsp8/LSP8Marketplace"
 
 submit "page/PageName"
+
+submit "pool/Vault"

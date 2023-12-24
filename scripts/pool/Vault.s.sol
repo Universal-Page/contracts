@@ -18,7 +18,6 @@ contract Deploy is Script {
     function run() external {
         address admin = vm.envAddress("ADMIN_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
-        address treasury = vm.envAddress("TREASURY_ADDRESS");
 
         address proxy = vm.envOr("CONTRACT_POOL_VAULT", address(0));
 
