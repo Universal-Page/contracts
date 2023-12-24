@@ -42,20 +42,6 @@ contract Deploy is Script {
     }
 }
 
-contract Claim is Script {
-    function run() external {
-        address owner = vm.envAddress("OWNER_ADDRESS");
-        address treasury = vm.envAddress("TREASURY_ADDRESS");
-
-        Vault vault = Vault(payable(vm.envAddress("CONTRACT_POOL_VAULT")));
-
-        if (vault.claimableFeeAmount() > 0) {
-            vm.broadcast(owner);
-            vault.claimFees(vault.claimableFeeAmount(), treasury);
-        }
-    }
-}
-
 contract Configure is Script {
     function run() external {
         address owner = vm.envAddress("OWNER_ADDRESS");
@@ -64,9 +50,9 @@ contract Configure is Script {
 
         Vault vault = Vault(payable(vm.envAddress("CONTRACT_POOL_VAULT")));
 
-        if (vault.feeRecipient() != owner) {
+        if (vault.feeRecipient() != profile) {
             vm.broadcast(owner);
-            vault.setFeeRecipient(owner);
+            vault.setFeeRecipient(profile);
         }
 
         if (vault.fee() != SERVICE_FEE) {
