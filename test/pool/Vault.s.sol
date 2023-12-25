@@ -6,7 +6,7 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Vault} from "../../src/pool/Vault.sol";
-import {IDepositContract} from "../../src/pool/Deposit.sol";
+import {IDepositContract} from "../../src/pool/IDepositContract.sol";
 
 contract VaultTest is Test {
     event Deposited(address indexed account, address indexed beneficiary, uint256 amount);

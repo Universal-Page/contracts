@@ -5,7 +5,7 @@ import {OwnableUnset} from "@erc725/smart-contracts/contracts/custom/OwnableUnse
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {IDepositContract, DEPOSIT_AMOUNT} from "./Deposit.sol";
+import {IDepositContract, DEPOSIT_AMOUNT} from "./IDepositContract.sol";
 
 contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable {
     error InvalidAmount(uint256 amount);

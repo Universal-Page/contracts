@@ -112,3 +112,4 @@ exportAbi "marketplace/lsp8/LSP8Marketplace"
 exportAbi "page/PageName"
 
 exportAbi "pool/Vault"
+exportAbi "pool/IDepositContract"
