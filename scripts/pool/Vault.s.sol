@@ -9,7 +9,7 @@ import {
     ITransparentUpgradeableProxy
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {Vault} from "../../src/pool/Vault.sol";
-import {DepositContract} from "../../src/pool/Deposit.sol";
+import {DepositContract} from "../../src/pool/IDepositContract.sol";
 
 uint32 constant SERVICE_FEE = 8_000; // 8%
 uint256 constant DEPOSIT_LIMIT = 1000 * 32 ether;

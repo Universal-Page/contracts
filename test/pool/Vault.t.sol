@@ -215,6 +215,29 @@ contract VaultTest is Test {
         assertEq(1, depositContract.depositCount());
     }
 
+    function test_Revert_RegisterSameValidator() public {
+        uint256 amount = 64 ether;
+
+        vm.prank(owner);
+        vault.setDepositLimit(amount);
+
+        vm.prank(owner);
+        vault.enableOracle(oracle, true);
+
+        address alice = vm.addr(100);
+        vm.deal(alice, amount);
+
+        vm.prank(alice);
+        vault.deposit{value: amount}(beneficiary);
+
+        vm.prank(oracle);
+        vault.registerValidator(hex"1234", hex"5678", bytes32(0));
+
+        vm.prank(oracle);
+        vm.expectRevert(abi.encodeWithSelector(Vault.ValidatorAlreadyRegistered.selector, hex"1234"));
+        vault.registerValidator(hex"1234", hex"5678", bytes32(0));
+    }
+
     function test_DepositMultipleTimesAndRegisterSingleValidator() public {
         vm.prank(owner);
         vault.setDepositLimit(100 ether);
@@ -454,7 +477,7 @@ contract VaultTest is Test {
         vault.registerValidator(hex"1234", hex"5678", bytes32(0));
 
         vm.prank(oracle);
-        vault.registerValidator(hex"1234", hex"5678", bytes32(0));
+        vault.registerValidator(hex"4321", hex"8765", bytes32(0));
 
         assertEq(79 ether, vault.totalAmount());
         assertEq(15 ether, vault.availableAmount());

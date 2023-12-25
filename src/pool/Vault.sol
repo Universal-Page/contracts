@@ -17,6 +17,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     error CallerNotFeeRecipient(address account);
     error FeeClaimFailed(address account, address beneficiary, uint256 amount);
     error InvalidAddress(address account);
+    error ValidatorAlreadyRegistered(bytes pubkey);
 
     event Deposited(address indexed account, address indexed beneficiary, uint256 amount);
     event Withdrawn(address indexed account, address indexed beneficiary, uint256 amount);
@@ -43,6 +44,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     mapping(address => bool) private _oracles;
     mapping(address => uint256) private _pendingWithdrawals;
     mapping(address => bool) private _allowlisted;
+    mapping(bytes => bool) private _registeredKeys;
 
     modifier onlyOracle() {
         _checkOracle();
@@ -259,6 +261,10 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         if (availableAmount < DEPOSIT_AMOUNT) {
             revert InsufficientBalance(availableAmount, DEPOSIT_AMOUNT);
         }
+        if (_registeredKeys[pubkey]) {
+            revert ValidatorAlreadyRegistered(pubkey);
+        }
+        _registeredKeys[pubkey] = true;
         validators += 1;
         availableAmount -= DEPOSIT_AMOUNT;
         bytes memory withdrawalCredentials = abi.encodePacked(hex"010000000000000000000000", address(this));
