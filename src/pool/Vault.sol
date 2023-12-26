@@ -28,6 +28,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     event FeeRecipientChanged(address previousFeeRecipient, address newFeeRecipient);
     event FeeClaimed(address indexed account, address indexed beneficiary, uint256 amount);
     event FeeReceived(uint256 amount);
+    event OracleEnabled(address indexed oracle, bool enabled);
 
     uint256 public depositLimit;
     uint256 public totalShares;
@@ -97,6 +98,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
 
     function enableOracle(address oracle, bool enabled) external onlyOwner {
         _oracles[oracle] = enabled;
+        emit OracleEnabled(oracle, enabled);
     }
 
     function isOracle(address oracle) public view returns (bool) {

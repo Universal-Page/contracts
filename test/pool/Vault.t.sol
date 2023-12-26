@@ -115,6 +115,16 @@ contract VaultTest is Test {
         vault.allowlist(address(0), true);
     }
 
+    function test_Revert_IfCallerNotOracle() public {
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(Vault.CallerNotOracle.selector, address(1)));
+        vault.rebalance();
+
+        vm.prank(address(1));
+        vm.expectRevert(abi.encodeWithSelector(Vault.CallerNotOracle.selector, address(1)));
+        vault.registerValidator(hex"1234", hex"5678", bytes32(0));
+    }
+
     function test_Revert_DepositZero() public {
         vm.prank(vm.addr(100));
         vm.expectRevert(abi.encodeWithSelector(Vault.InvalidAmount.selector, 0));
