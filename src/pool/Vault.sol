@@ -46,6 +46,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     mapping(address => uint256) private _pendingWithdrawals;
     mapping(address => bool) private _allowlisted;
     mapping(bytes => bool) private _registeredKeys;
+    uint256 private _totalUsedValidators;
 
     modifier onlyOracle() {
         _checkOracle();
@@ -170,8 +171,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         if (amount == 0) {
             revert InvalidAmount(amount);
         }
-        if (totalAmount + amount > depositLimit) {
-            revert DepositLimitExceeded(totalAmount + amount, depositLimit);
+        uint256 newTotalDeposits = Math.max(_totalUsedValidators * DEPOSIT_AMOUNT, totalAmount) + amount;
+        if (newTotalDeposits > depositLimit) {
+            revert DepositLimitExceeded(newTotalDeposits, depositLimit);
         }
         uint256 shares = totalAmount == 0 ? amount : Math.mulDiv(amount, totalShares, totalAmount);
         _shares[beneficiary] += shares;
@@ -267,6 +269,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
             revert ValidatorAlreadyRegistered(pubkey);
         }
         _registeredKeys[pubkey] = true;
+        _totalUsedValidators += 1;
         validators += 1;
         availableAmount -= DEPOSIT_AMOUNT;
         bytes memory withdrawalCredentials = abi.encodePacked(hex"010000000000000000000000", address(this));
