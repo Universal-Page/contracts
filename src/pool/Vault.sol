@@ -239,7 +239,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         uint256 currentBalance = address(this).balance - claimableFeeAmount;
 
         uint256 newAvailableAmount = currentBalance;
-        if (currentBalance > pendingWithdrawalAmount) {
+        if (newAvailableAmount < pendingWithdrawalAmount) {
+            newAvailableAmount = 0;
+        } else {
             newAvailableAmount -= pendingWithdrawalAmount;
         }
 
