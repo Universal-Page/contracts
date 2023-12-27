@@ -183,16 +183,15 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         emit Deposited(account, beneficiary, amount);
     }
 
-    function withdraw(uint256 shares, address beneficiary) external nonReentrant whenNotPaused {
+    function withdraw(uint256 amount, address beneficiary) external nonReentrant whenNotPaused {
         address account = msg.sender;
-        if (shares == 0) {
-            revert InvalidAmount(shares);
+        if (amount == 0) {
+            revert InvalidAmount(amount);
         }
+        uint256 shares = totalAmount == 0 ? amount : Math.mulDiv(amount, totalShares, totalAmount);
         if (shares > _shares[account]) {
             revert InsufficientBalance(_shares[account], shares);
         }
-
-        uint256 amount = Math.mulDiv(shares, totalAmount, totalShares);
         _shares[account] -= shares;
         totalShares -= shares;
         totalAmount -= amount;

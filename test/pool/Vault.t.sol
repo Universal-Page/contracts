@@ -629,7 +629,7 @@ contract VaultTest is Test {
         assertEq(0 ether, bob.balance);
 
         vm.prank(bob);
-        vault.withdraw(6 ether, bob);
+        vault.withdraw(9 ether, bob);
 
         assertEq(45 ether, vault.totalAmount());
         assertEq(45 ether, vault.availableAmount());
