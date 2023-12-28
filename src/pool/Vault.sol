@@ -32,13 +32,13 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
 
     uint256 public depositLimit;
     uint256 public totalShares;
-    uint256 public totalAmount;
-    uint256 public availableAmount;
-    uint256 public pendingWithdrawalAmount;
+    uint256 public totalStaked;
+    uint256 public totalUnstaked;
+    uint256 public totalPendingWithdrawal;
     uint256 public validators;
     uint32 public fee;
     address public feeRecipient;
-    uint256 public claimableFeeAmount;
+    uint256 public totalFees;
     bool public restricted;
     IDepositContract private _depositContract;
     mapping(address => uint256) private _shares;
@@ -46,7 +46,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     mapping(address => uint256) private _pendingWithdrawals;
     mapping(address => bool) private _allowlisted;
     mapping(bytes => bool) private _registeredKeys;
-    uint256 private _totalUsedValidators;
+    uint256 private _unusedSlot0;
 
     modifier onlyOracle() {
         _checkOracle();
@@ -130,9 +130,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     }
 
     function balanceOf(address account) external view returns (uint256) {
-        uint256 shares = _shares[account];
-        uint256 amount = shares > 0 ? Math.mulDiv(shares, totalAmount, totalShares) : 0;
-        return amount;
+        return _toBalance(_shares[account]);
     }
 
     function pendingBalanceOf(address account) external view returns (uint256) {
@@ -141,7 +139,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
 
     function claimableBalanceOf(address account) external view returns (uint256) {
         uint256 pendingWithdrawal = _pendingWithdrawals[account];
-        uint256 currentBalance = address(this).balance - claimableFeeAmount;
+        uint256 currentBalance = address(this).balance - totalFees;
         return pendingWithdrawal > currentBalance ? currentBalance : pendingWithdrawal;
     }
 
@@ -154,12 +152,26 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
             revert InsufficientBalance(_pendingWithdrawals[account], amount);
         }
         _pendingWithdrawals[account] -= amount;
-        pendingWithdrawalAmount -= amount;
+        totalPendingWithdrawal -= amount;
         (bool success,) = beneficiary.call{value: amount}("");
         if (!success) {
             revert ClaimFailed(account, beneficiary, amount);
         }
         emit Claimed(account, beneficiary, amount);
+    }
+
+    function _toBalance(uint256 shares) private view returns (uint256) {
+        if (totalShares == 0) {
+            return 0;
+        }
+        return Math.mulDiv(shares, totalStaked + totalUnstaked, totalShares);
+    }
+
+    function _toShares(uint256 amount) private view returns (uint256) {
+        if (totalShares == 0) {
+            return amount;
+        }
+        return Math.mulDiv(amount, totalShares, totalStaked + totalUnstaked);
     }
 
     function deposit(address beneficiary) public payable whenNotPaused {
@@ -171,15 +183,14 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         if (amount == 0) {
             revert InvalidAmount(amount);
         }
-        uint256 newTotalDeposits = Math.max(_totalUsedValidators * DEPOSIT_AMOUNT, totalAmount) + amount;
+        uint256 newTotalDeposits = Math.max(validators * DEPOSIT_AMOUNT, totalStaked + totalUnstaked) + amount;
         if (newTotalDeposits > depositLimit) {
             revert DepositLimitExceeded(newTotalDeposits, depositLimit);
         }
-        uint256 shares = totalAmount == 0 ? amount : Math.mulDiv(amount, totalShares, totalAmount);
+        uint256 shares = _toShares(amount);
         _shares[beneficiary] += shares;
         totalShares += shares;
-        totalAmount += amount;
-        availableAmount += amount;
+        totalUnstaked += amount;
         emit Deposited(account, beneficiary, amount);
     }
 
@@ -188,19 +199,18 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         if (amount == 0) {
             revert InvalidAmount(amount);
         }
-        uint256 shares = totalAmount == 0 ? amount : Math.mulDiv(amount, totalShares, totalAmount);
+        uint256 shares = _toShares(amount);
         if (shares > _shares[account]) {
             revert InsufficientBalance(_shares[account], shares);
         }
         _shares[account] -= shares;
         totalShares -= shares;
-        totalAmount -= amount;
 
-        uint256 immediateAmount = amount > availableAmount ? availableAmount : amount;
+        uint256 immediateAmount = amount > totalUnstaked ? totalUnstaked : amount;
         uint256 delayedAmount = amount - immediateAmount;
 
         if (immediateAmount > 0) {
-            availableAmount -= immediateAmount;
+            totalUnstaked -= immediateAmount;
             (bool success,) = beneficiary.call{value: immediateAmount}("");
             if (!success) {
                 revert WithdrawalFailed(account, beneficiary, immediateAmount);
@@ -209,7 +219,8 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         }
 
         if (delayedAmount > 0) {
-            pendingWithdrawalAmount += delayedAmount;
+            totalStaked -= delayedAmount;
+            totalPendingWithdrawal += delayedAmount;
             _pendingWithdrawals[beneficiary] += delayedAmount;
             emit WithdrawalRequested(account, beneficiary, delayedAmount);
         }
@@ -223,10 +234,10 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         if (amount == 0) {
             revert InvalidAmount(amount);
         }
-        if (amount > claimableFeeAmount) {
-            revert InsufficientBalance(claimableFeeAmount, amount);
+        if (amount > totalFees) {
+            revert InsufficientBalance(totalFees, amount);
         }
-        claimableFeeAmount -= amount;
+        totalFees -= amount;
         (bool success,) = beneficiary.call{value: amount}("");
         if (!success) {
             revert FeeClaimFailed(account, beneficiary, amount);
@@ -235,26 +246,21 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     }
 
     function rebalance() external onlyOracle whenNotPaused {
-        uint256 currentBalance = address(this).balance - claimableFeeAmount;
-
-        uint256 newAvailableAmount = currentBalance;
-        if (newAvailableAmount < pendingWithdrawalAmount) {
-            newAvailableAmount = 0;
+        uint256 newTotalUnstaked = address(this).balance - totalFees;
+        if (newTotalUnstaked < totalPendingWithdrawal) {
+            newTotalUnstaked = 0;
         } else {
-            newAvailableAmount -= pendingWithdrawalAmount;
+            newTotalUnstaked -= totalPendingWithdrawal;
         }
-
-        if (newAvailableAmount > availableAmount) {
-            uint256 feeAmount = Math.mulDiv(newAvailableAmount - availableAmount, fee, 100_000);
+        if (newTotalUnstaked > totalUnstaked) {
+            uint256 feeAmount = Math.mulDiv(newTotalUnstaked - totalUnstaked, fee, 100_000);
             if (feeAmount > 0) {
-                claimableFeeAmount += feeAmount;
-                newAvailableAmount -= feeAmount;
+                totalFees += feeAmount;
+                newTotalUnstaked -= feeAmount;
                 emit FeeReceived(feeAmount);
             }
         }
-
-        availableAmount = newAvailableAmount;
-        totalAmount = validators * DEPOSIT_AMOUNT + availableAmount;
+        totalUnstaked = newTotalUnstaked;
     }
 
     function registerValidator(bytes calldata pubkey, bytes calldata signature, bytes32 depositDataRoot)
@@ -263,16 +269,16 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         nonReentrant
         whenNotPaused
     {
-        if (availableAmount < DEPOSIT_AMOUNT) {
-            revert InsufficientBalance(availableAmount, DEPOSIT_AMOUNT);
+        if (totalUnstaked < DEPOSIT_AMOUNT) {
+            revert InsufficientBalance(totalUnstaked, DEPOSIT_AMOUNT);
         }
         if (_registeredKeys[pubkey]) {
             revert ValidatorAlreadyRegistered(pubkey);
         }
         _registeredKeys[pubkey] = true;
-        _totalUsedValidators += 1;
         validators += 1;
-        availableAmount -= DEPOSIT_AMOUNT;
+        totalStaked += DEPOSIT_AMOUNT;
+        totalUnstaked -= DEPOSIT_AMOUNT;
         bytes memory withdrawalCredentials = abi.encodePacked(hex"010000000000000000000000", address(this));
         _depositContract.deposit{value: DEPOSIT_AMOUNT}(pubkey, withdrawalCredentials, signature, depositDataRoot);
     }

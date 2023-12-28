@@ -461,19 +461,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "availableAmount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
@@ -537,19 +524,6 @@
       }
     ],
     "name": "claimableBalanceOf",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "claimableFeeAmount",
     "outputs": [
       {
         "internalType": "uint256",
@@ -740,19 +714,6 @@
   },
   {
     "inputs": [],
-    "name": "pendingWithdrawalAmount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "rebalance",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -874,7 +835,20 @@
   },
   {
     "inputs": [],
-    "name": "totalAmount",
+    "name": "totalFees",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalPendingWithdrawal",
     "outputs": [
       {
         "internalType": "uint256",
@@ -888,6 +862,32 @@
   {
     "inputs": [],
     "name": "totalShares",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalStaked",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalUnstaked",
     "outputs": [
       {
         "internalType": "uint256",
