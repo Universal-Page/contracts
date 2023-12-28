@@ -263,6 +263,10 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         totalUnstaked = newTotalUnstaked;
     }
 
+    function isValidatorRegistered(bytes calldata pubkey) external view returns (bool) {
+        return _registeredKeys[pubkey];
+    }
+
     function registerValidator(bytes calldata pubkey, bytes calldata signature, bytes32 depositDataRoot)
         external
         onlyOracle
