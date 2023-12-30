@@ -246,12 +246,26 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     }
 
     function rebalance() external onlyOracle whenNotPaused {
-        uint256 newTotalUnstaked = address(this).balance - totalFees;
-        if (newTotalUnstaked < totalPendingWithdrawal) {
-            newTotalUnstaked = 0;
-        } else {
-            newTotalUnstaked -= totalPendingWithdrawal;
+        uint256 newTotalUnstaked = address(this).balance;
+
+        // account for staking fees
+        newTotalUnstaked = newTotalUnstaked < totalFees ? 0 : newTotalUnstaked - totalFees;
+
+        // account for pending withdrawals to claim later
+        newTotalUnstaked = newTotalUnstaked < totalPendingWithdrawal ? 0 : newTotalUnstaked - totalPendingWithdrawal;
+
+        // account for partially withdrawn validators
+        uint256 stakedInactive = totalStaked % DEPOSIT_AMOUNT;
+        if (stakedInactive > 0) {
+            if (newTotalUnstaked < stakedInactive) {
+                newTotalUnstaked = 0;
+            } else {
+                // redistribute inactive stake from staked to unstaked balance
+                totalStaked -= stakedInactive;
+            }
         }
+
+        // payout fees on rewards difference
         if (newTotalUnstaked > totalUnstaked) {
             uint256 feeAmount = Math.mulDiv(newTotalUnstaked - totalUnstaked, fee, 100_000);
             if (feeAmount > 0) {
@@ -260,6 +274,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
                 emit FeeReceived(feeAmount);
             }
         }
+
         totalUnstaked = newTotalUnstaked;
     }
 
