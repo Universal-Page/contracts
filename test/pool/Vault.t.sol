@@ -18,6 +18,9 @@ contract VaultTest is Test {
     event FeeRecipientChanged(address previousFeeRecipient, address newFeeRecipient);
     event FeeClaimed(address indexed account, address indexed beneficiary, uint256 amount);
     event FeeReceived(uint256 amount);
+    event Rebalanced(
+        uint256 previousTotalStaked, uint256 previousTotalUnstaked, uint256 totalStaked, uint256 totalUnstaked
+    );
 
     Vault vault;
     address admin;
@@ -504,6 +507,8 @@ contract VaultTest is Test {
         vm.prank(oracle);
         vm.expectEmit();
         emit FeeReceived(1.1 ether);
+        vm.expectEmit();
+        emit Rebalanced(64 ether, 15 ether, 64 ether, 24.9 ether);
         vault.rebalance();
 
         assertEq(64 ether, vault.totalStaked());

@@ -29,6 +29,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     event FeeClaimed(address indexed account, address indexed beneficiary, uint256 amount);
     event FeeReceived(uint256 amount);
     event OracleEnabled(address indexed oracle, bool enabled);
+    event Rebalanced(
+        uint256 previousTotalStaked, uint256 previousTotalUnstaked, uint256 totalStaked, uint256 totalUnstaked
+    );
 
     uint256 public depositLimit;
     uint256 public totalShares;
@@ -246,6 +249,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     }
 
     function rebalance() external onlyOracle whenNotPaused {
+        uint256 previousTotalStaked = totalStaked;
+        uint256 previousTotalUnstaked = totalUnstaked;
+
         uint256 newTotalUnstaked = address(this).balance;
 
         // account for staking fees
@@ -276,6 +282,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         }
 
         totalUnstaked = newTotalUnstaked;
+        emit Rebalanced(previousTotalStaked, previousTotalUnstaked, totalStaked, totalUnstaked);
     }
 
     function isValidatorRegistered(bytes calldata pubkey) external view returns (bool) {
