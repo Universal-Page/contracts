@@ -52,7 +52,7 @@ set +a
 
 SRC_DIR=${PROJECT_DIR}/src
 ABI_DIR=${PROJECT_DIR}/artifacts/abi
-BYTECODE_DIR=${PROJECT_DIR}/artifacts/bytecode
+BYTECODE_DIR=${PROJECT_DIR}/artifacts/bytecode/${CHAIN_ID}
 
 exportAbi() {
   path=$(dirname $1)
