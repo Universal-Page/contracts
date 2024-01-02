@@ -857,6 +857,47 @@ contract VaultTest is Test {
         assertEq(66 ether, vault.claimableBalanceOf(alice));
         assertEq(0 ether, vault.totalFees());
     }
+
+    function test_Revert_RegisterValidatorIfExceedLimitAfterRewards() public {
+        vm.startPrank(owner);
+        vault.setDepositLimit(32 ether);
+        vault.enableOracle(oracle, true);
+        vm.stopPrank();
+
+        address alice = vm.addr(100);
+        vm.deal(alice, 32 ether);
+        vm.prank(alice);
+        vault.deposit{value: 32 ether}(alice);
+
+        assertEq(32 ether, address(vault).balance);
+        assertEq(0 ether, vault.totalStaked());
+        assertEq(32 ether, vault.totalUnstaked());
+
+        vm.prank(oracle);
+        vault.registerValidator(hex"11", hex"11", bytes32(0));
+
+        assertEq(0 ether, address(vault).balance);
+        assertEq(32 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+
+        // simulate enough rewards for 1 validator
+        vm.deal(address(vault), 32 ether);
+
+        vm.prank(oracle);
+        vault.rebalance();
+
+        assertEq(32 ether, address(vault).balance);
+        assertEq(32 ether, vault.totalStaked());
+        assertEq(32 ether, vault.totalUnstaked());
+
+        vm.prank(oracle);
+        vm.expectRevert(abi.encodeWithSelector(Vault.DepositLimitExceeded.selector, 64 ether, 32 ether));
+        vault.registerValidator(hex"22", hex"22", bytes32(0));
+
+        assertEq(32 ether, address(vault).balance);
+        assertEq(32 ether, vault.totalStaked());
+        assertEq(32 ether, vault.totalUnstaked());
+    }
 }
 
 contract MockDepositContract is IDepositContract {

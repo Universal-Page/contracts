@@ -295,6 +295,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         nonReentrant
         whenNotPaused
     {
+        if ((validators + 1) * DEPOSIT_AMOUNT > depositLimit) {
+            revert DepositLimitExceeded((validators + 1) * DEPOSIT_AMOUNT, depositLimit);
+        }
         if (totalUnstaked < DEPOSIT_AMOUNT) {
             revert InsufficientBalance(totalUnstaked, DEPOSIT_AMOUNT);
         }
