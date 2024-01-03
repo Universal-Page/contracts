@@ -27,7 +27,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     event FeeChanged(uint32 previousFee, uint32 newFee);
     event FeeRecipientChanged(address previousFeeRecipient, address newFeeRecipient);
     event FeeClaimed(address indexed account, address indexed beneficiary, uint256 amount);
-    event FeeReceived(uint256 amount);
+    event RewardsDistributed(uint256 balance, uint256 rewards, uint256 fee);
     event OracleEnabled(address indexed oracle, bool enabled);
     event Rebalanced(
         uint256 previousTotalStaked, uint256 previousTotalUnstaked, uint256 totalStaked, uint256 totalUnstaked
@@ -262,23 +262,20 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
 
         // account for partially withdrawn validators
         uint256 stakedInactive = totalStaked % DEPOSIT_AMOUNT;
-        if (stakedInactive > 0) {
-            if (newTotalUnstaked < stakedInactive) {
-                newTotalUnstaked = 0;
-            } else {
-                // redistribute inactive stake from staked to unstaked balance
-                totalStaked -= stakedInactive;
-            }
+        if (newTotalUnstaked < stakedInactive) {
+            newTotalUnstaked = 0;
+        } else {
+            // redistribute inactive stake from staked to unstaked balance
+            totalStaked -= stakedInactive;
         }
 
         // payout fees on rewards difference
-        if (newTotalUnstaked > totalUnstaked) {
-            uint256 feeAmount = Math.mulDiv(newTotalUnstaked - totalUnstaked, fee, 100_000);
-            if (feeAmount > 0) {
-                totalFees += feeAmount;
-                newTotalUnstaked -= feeAmount;
-                emit FeeReceived(feeAmount);
-            }
+        if (newTotalUnstaked > totalUnstaked + stakedInactive) {
+            uint256 rewards = newTotalUnstaked - totalUnstaked - stakedInactive;
+            uint256 feeAmount = Math.mulDiv(rewards, fee, 100_000);
+            totalFees += feeAmount;
+            newTotalUnstaked -= feeAmount;
+            emit RewardsDistributed(previousTotalStaked + previousTotalUnstaked, rewards, feeAmount);
         }
 
         totalUnstaked = newTotalUnstaked;
