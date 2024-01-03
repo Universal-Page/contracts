@@ -515,29 +515,26 @@ contract VaultTest is Test {
         assertEq(24.9 ether, vault.totalUnstaked());
         assertEq(79 ether, vault.totalShares());
         assertEq(33 ether, vault.sharesOf(alice));
-        assertEq(33 ether + Math.mulDiv(33 ether, 88.9 ether - 79 ether, 79 ether), vault.balanceOf(alice));
+        assertEq(37.135443037974683544 ether, vault.balanceOf(alice));
         assertEq(46 ether, vault.sharesOf(bob));
-        assertEq(46 ether + Math.mulDiv(46 ether, 88.9 ether - 79 ether, 79 ether), vault.balanceOf(bob));
+        assertEq(51.764556962025316455 ether, vault.balanceOf(bob));
         assertEq(1.1 ether, vault.totalFees());
         assertEq(2, vault.validators());
         assertEq(26 ether, address(vault).balance);
 
-        vm.prank(feeRecipient);
-        vm.expectEmit();
-        emit FeeClaimed(feeRecipient, feeRecipient, 1 ether);
-        vault.claimFees(1 ether, feeRecipient);
+        vm.prank(alice);
+        vault.withdraw(37.135443037974683544 ether, alice);
 
-        assertEq(0.1 ether, vault.totalFees());
-        assertEq(25 ether, address(vault).balance);
-        assertEq(1 ether, feeRecipient.balance);
+        vm.prank(bob);
+        vault.withdraw(51.764556962025316455 ether, bob);
 
         vm.prank(feeRecipient);
         vm.expectEmit();
-        emit FeeClaimed(feeRecipient, feeRecipient, 0.1 ether);
-        vault.claimFees(0.1 ether, feeRecipient);
+        emit FeeClaimed(feeRecipient, feeRecipient, 1.1 ether);
+        vault.claimFees(1.1 ether, feeRecipient);
 
         assertEq(0, vault.totalFees());
-        assertEq(24.9 ether, address(vault).balance);
+        assertEq(0 ether, address(vault).balance);
         assertEq(1.1 ether, feeRecipient.balance);
     }
 
