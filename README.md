@@ -6,7 +6,7 @@
 | ------- | --------------------- | ------------------------------------------ |
 | mainnet | PageName              | 0x39456bcd4d450e55f851f97c30df828a4e1f6c66 |
 | mainnet | GenesisDigitalAsset   | 0x8da488c29fb873c9561ccf5ff44dda6c1deddc37 |
-| testnet | CollectorDigitalAsset |                                            |
+| mainnet | CollectorDigitalAsset |                                            |
 | mainnet | Participant           | 0xa29aeaabb5da0cc3635576933a66c1b714f058c1 |
 | mainnet | LSP7Listings          | 0xe7f5c709d62bcc3701f4c0cb871eb77e301283b5 |
 | mainnet | LSP7Offers            | 0xb2379f3f3c623cd2ed18e97e407cdda8fe6c6da6 |
