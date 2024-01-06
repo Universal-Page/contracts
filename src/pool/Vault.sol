@@ -49,7 +49,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     mapping(address => uint256) private _pendingWithdrawals;
     mapping(address => bool) private _allowlisted;
     mapping(bytes => bool) private _registeredKeys;
-    uint256 private _unusedSlot0;
+    uint256 public totalClaimable;
 
     modifier onlyOracle() {
         _checkOracle();
@@ -142,8 +142,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
 
     function claimableBalanceOf(address account) external view returns (uint256) {
         uint256 pendingWithdrawal = _pendingWithdrawals[account];
-        uint256 currentBalance = address(this).balance - totalFees;
-        return pendingWithdrawal > currentBalance ? currentBalance : pendingWithdrawal;
+        return pendingWithdrawal > totalClaimable ? totalClaimable : pendingWithdrawal;
     }
 
     function claim(uint256 amount, address beneficiary) external nonReentrant whenNotPaused {
@@ -154,8 +153,12 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         if (amount > _pendingWithdrawals[account]) {
             revert InsufficientBalance(_pendingWithdrawals[account], amount);
         }
+        if (amount > totalClaimable) {
+            revert InsufficientBalance(totalClaimable, amount);
+        }
         _pendingWithdrawals[account] -= amount;
         totalPendingWithdrawal -= amount;
+        totalClaimable -= amount;
         (bool success,) = beneficiary.call{value: amount}("");
         if (!success) {
             revert ClaimFailed(account, beneficiary, amount);
@@ -182,14 +185,17 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         if (restricted && !isAllowlisted(account)) {
             revert InvalidAddress(account);
         }
+
         uint256 amount = msg.value;
         if (amount == 0) {
             revert InvalidAmount(amount);
         }
+
         uint256 newTotalDeposits = Math.max(validators * DEPOSIT_AMOUNT, totalStaked + totalUnstaked) + amount;
         if (newTotalDeposits > depositLimit) {
             revert DepositLimitExceeded(newTotalDeposits, depositLimit);
         }
+
         uint256 shares = _toShares(amount);
         _shares[beneficiary] += shares;
         totalShares += shares;
@@ -252,34 +258,49 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         uint256 previousTotalStaked = totalStaked;
         uint256 previousTotalUnstaked = totalUnstaked;
 
-        uint256 newTotalUnstaked = address(this).balance;
-
-        // account for staking fees
-        newTotalUnstaked = newTotalUnstaked < totalFees ? 0 : newTotalUnstaked - totalFees;
-
-        // account for pending withdrawals to claim later
-        newTotalUnstaked = newTotalUnstaked < totalPendingWithdrawal ? 0 : newTotalUnstaked - totalPendingWithdrawal;
-
-        // account for partially withdrawn validators
-        uint256 stakedInactive = totalStaked % DEPOSIT_AMOUNT;
-        if (newTotalUnstaked < stakedInactive) {
-            newTotalUnstaked = 0;
-        } else {
-            // redistribute inactive stake from staked to unstaked balance
-            totalStaked -= stakedInactive;
-        }
+        (uint256 unstaked, uint256 staked, uint256 inactive, uint256 claimable) = _calculateStake();
 
         // payout fees on rewards difference
-        if (newTotalUnstaked > totalUnstaked + stakedInactive) {
-            uint256 rewards = newTotalUnstaked - totalUnstaked - stakedInactive;
+        if (unstaked > totalUnstaked + inactive) {
+            uint256 rewards = unstaked - totalUnstaked - inactive;
             uint256 feeAmount = Math.mulDiv(rewards, fee, 100_000);
             totalFees += feeAmount;
-            newTotalUnstaked -= feeAmount;
+            unstaked -= feeAmount;
             emit RewardsDistributed(previousTotalStaked + previousTotalUnstaked, rewards, feeAmount);
         }
 
-        totalUnstaked = newTotalUnstaked;
+        totalClaimable = claimable;
+        totalUnstaked = unstaked;
+        totalStaked = staked;
         emit Rebalanced(previousTotalStaked, previousTotalUnstaked, totalStaked, totalUnstaked);
+    }
+
+    function _calculateStake()
+        private
+        view
+        returns (uint256 unstaked, uint256 staked, uint256 inactive, uint256 claimable)
+    {
+        unstaked = address(this).balance;
+        staked = totalStaked;
+
+        // account for staking fees
+        unstaked = unstaked < totalFees ? 0 : unstaked - totalFees;
+
+        // account for pending withdrawals to claim later
+        if (totalPendingWithdrawal > unstaked) {
+            claimable = unstaked;
+            unstaked = 0;
+        } else {
+            claimable = totalPendingWithdrawal;
+            unstaked -= totalPendingWithdrawal;
+        }
+
+        // account for partially withdrawn validators
+        inactive = staked % DEPOSIT_AMOUNT;
+        if (unstaked == totalUnstaked + inactive) {
+            // redistribute inactive stake from staked to unstaked balance
+            staked -= inactive;
+        }
     }
 
     function isValidatorRegistered(bytes calldata pubkey) external view returns (bool) {

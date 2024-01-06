@@ -360,11 +360,10 @@ contract VaultTest is Test {
     }
 
     function test_WithdrawAndExitValidator() public {
-        vm.prank(owner);
+        vm.startBroadcast(owner);
         vault.setDepositLimit(100 ether);
-
-        vm.prank(owner);
         vault.enableOracle(oracle, true);
+        vm.stopBroadcast();
 
         address alice = vm.addr(100);
         vm.deal(alice, 33 ether);
@@ -380,6 +379,7 @@ contract VaultTest is Test {
         assertEq(33 ether, vault.totalShares());
         assertEq(33 ether, vault.sharesOf(alice));
         assertEq(0, vault.totalPendingWithdrawal());
+        assertEq(0, vault.totalClaimable());
         assertEq(0, vault.pendingBalanceOf(alice));
         assertEq(0, vault.claimableBalanceOf(alice));
         assertEq(1, vault.validators());
@@ -400,6 +400,7 @@ contract VaultTest is Test {
         assertEq(30 ether, vault.totalShares());
         assertEq(30 ether, vault.sharesOf(alice));
         assertEq(2 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
         assertEq(2 ether, vault.pendingBalanceOf(alice));
         assertEq(0, vault.claimableBalanceOf(alice));
         assertEq(1, vault.validators());
@@ -409,6 +410,15 @@ contract VaultTest is Test {
         vm.deal(address(vault), 32 ether);
 
         assertEq(2 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
+        assertEq(2 ether, vault.pendingBalanceOf(alice));
+        assertEq(0 ether, vault.claimableBalanceOf(alice));
+
+        vm.prank(oracle);
+        vault.rebalance();
+
+        assertEq(2 ether, vault.totalPendingWithdrawal());
+        assertEq(2 ether, vault.totalClaimable());
         assertEq(2 ether, vault.pendingBalanceOf(alice));
         assertEq(2 ether, vault.claimableBalanceOf(alice));
     }
@@ -433,6 +443,7 @@ contract VaultTest is Test {
         vault.withdraw(3 ether, alice);
 
         assertEq(2 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
         assertEq(2 ether, vault.pendingBalanceOf(alice));
         assertEq(0, vault.claimableBalanceOf(alice));
 
@@ -440,11 +451,19 @@ contract VaultTest is Test {
         vm.deal(address(vault), 32 ether);
 
         vm.prank(alice);
+        vm.expectRevert(abi.encodeWithSelector(Vault.InsufficientBalance.selector, 0 ether, 1.5 ether));
+        vault.claim(1.5 ether, alice);
+
+        vm.prank(oracle);
+        vault.rebalance();
+
+        vm.prank(alice);
         vm.expectEmit();
         emit Claimed(alice, alice, 1.5 ether);
         vault.claim(1.5 ether, alice);
 
         assertEq(0.5 ether, vault.totalPendingWithdrawal());
+        assertEq(0.5 ether, vault.totalClaimable());
         assertEq(0.5 ether, vault.pendingBalanceOf(alice));
         assertEq(0.5 ether, vault.claimableBalanceOf(alice));
 
@@ -454,6 +473,7 @@ contract VaultTest is Test {
         vault.claim(0.5 ether, alice);
 
         assertEq(0, vault.totalPendingWithdrawal());
+        assertEq(0, vault.totalClaimable());
         assertEq(0, vault.pendingBalanceOf(alice));
         assertEq(0, vault.claimableBalanceOf(alice));
     }
@@ -706,7 +726,7 @@ contract VaultTest is Test {
         assertEq(9 ether, bob.balance);
     }
 
-    function test_AccountingAfterPartialWithdrawal() public {
+    function test_AccountAfterPartialWithdrawal() public {
         vm.startPrank(owner);
         vault.setDepositLimit(100 ether);
         vault.enableOracle(oracle, true);
@@ -756,6 +776,78 @@ contract VaultTest is Test {
         assertEq(0 ether, vault.totalFees());
     }
 
+    function test_AccountAfterPartialWithdrawalWithPartialDeposit() public {
+        vm.startPrank(owner);
+        vault.setDepositLimit(124 ether);
+        vault.enableOracle(oracle, true);
+        vault.setFee(10_000);
+        vm.stopPrank();
+
+        address alice = vm.addr(100);
+        vm.deal(alice, 64 ether);
+        vm.prank(alice);
+        vault.deposit{value: 64 ether}(alice);
+
+        address bob = vm.addr(101);
+        vm.deal(bob, 60 ether);
+        vm.prank(bob);
+        vault.deposit{value: 32 ether}(bob);
+
+        vm.prank(oracle);
+        vault.registerValidator(hex"11", hex"11", bytes32(0));
+
+        vm.prank(oracle);
+        vault.registerValidator(hex"22", hex"22", bytes32(0));
+
+        vm.prank(oracle);
+        vault.registerValidator(hex"33", hex"33", bytes32(0));
+
+        assertEq(0 ether, address(vault).balance);
+        assertEq(96 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+        assertEq(0 ether, vault.totalPendingWithdrawal());
+
+        vm.prank(alice);
+        vault.withdraw(6 ether, alice);
+
+        assertEq(0 ether, address(vault).balance);
+        assertEq(90 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+        assertEq(6 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.claimableBalanceOf(alice));
+
+        vm.prank(bob);
+        vault.deposit{value: 28 ether}(bob);
+
+        assertEq(28 ether, address(vault).balance);
+        assertEq(90 ether, vault.totalStaked());
+        assertEq(28 ether, vault.totalUnstaked());
+        assertEq(6 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.claimableBalanceOf(alice));
+
+        // simulate withdrawal
+        // vm.deal(address(vault), 28 ether + 32 ether);
+
+        // assertEq(60 ether, address(vault).balance);
+        // assertEq(90 ether, vault.totalStaked());
+        // assertEq(22 ether, vault.totalUnstaked());
+        // assertEq(6 ether, vault.totalPendingWithdrawal());
+        // assertEq(6 ether, vault.claimableBalanceOf(alice));
+        // assertEq(0 ether, vault.totalFees());
+
+        // vm.prank(oracle);
+        // vm.expectEmit();
+        // emit Rebalanced(90 ether, 22 ether, 64 ether, 48 ether);
+        // vault.rebalance();
+
+        // assertEq(60 ether, address(vault).balance);
+        // assertEq(64 ether, vault.totalStaked());
+        // assertEq(48 ether, vault.totalUnstaked());
+        // assertEq(6 ether, vault.totalPendingWithdrawal());
+        // assertEq(6 ether, vault.claimableBalanceOf(alice));
+        // assertEq(0 ether, vault.totalFees());
+    }
+
     function test_RegisterValidatorAfterPartialWithdrawl() public {
         vm.startPrank(owner);
         vault.setDepositLimit(100 ether);
@@ -774,6 +866,7 @@ contract VaultTest is Test {
         assertEq(32 ether, vault.totalStaked());
         assertEq(0 ether, vault.totalUnstaked());
         assertEq(0 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
         assertEq(32 ether, vault.balanceOf(alice));
         assertEq(0 ether, vault.claimableBalanceOf(alice));
         assertEq(0 ether, vault.totalFees());
@@ -788,8 +881,9 @@ contract VaultTest is Test {
         assertEq(30 ether, vault.totalStaked());
         assertEq(0 ether, vault.totalUnstaked());
         assertEq(2 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
         assertEq(30 ether, vault.balanceOf(alice));
-        assertEq(2 ether, vault.claimableBalanceOf(alice));
+        assertEq(0 ether, vault.claimableBalanceOf(alice));
         assertEq(0 ether, vault.totalFees());
 
         // deposit 2 more ether to register validator
@@ -800,8 +894,9 @@ contract VaultTest is Test {
         assertEq(30 ether, vault.totalStaked());
         assertEq(2 ether, vault.totalUnstaked());
         assertEq(2 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
         assertEq(32 ether, vault.balanceOf(alice));
-        assertEq(2 ether, vault.claimableBalanceOf(alice));
+        assertEq(0 ether, vault.claimableBalanceOf(alice));
         assertEq(0 ether, vault.totalFees());
 
         vm.prank(oracle);
@@ -815,6 +910,7 @@ contract VaultTest is Test {
         assertEq(0 ether, vault.totalStaked());
         assertEq(32 ether, vault.totalUnstaked());
         assertEq(2 ether, vault.totalPendingWithdrawal());
+        assertEq(2 ether, vault.totalClaimable());
         assertEq(32 ether, vault.balanceOf(alice));
         assertEq(2 ether, vault.claimableBalanceOf(alice));
         assertEq(0 ether, vault.totalFees());
@@ -847,6 +943,7 @@ contract VaultTest is Test {
         assertEq(96 ether, vault.totalStaked());
         assertEq(0 ether, vault.totalUnstaked());
         assertEq(0 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
         assertEq(96 ether, vault.balanceOf(alice));
         assertEq(0 ether, vault.pendingBalanceOf(alice));
         assertEq(0 ether, vault.claimableBalanceOf(alice));
@@ -859,6 +956,7 @@ contract VaultTest is Test {
         assertEq(30 ether, vault.totalStaked());
         assertEq(0 ether, vault.totalUnstaked());
         assertEq(66 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
         assertEq(30 ether, vault.balanceOf(alice));
         assertEq(66 ether, vault.pendingBalanceOf(alice));
         assertEq(0 ether, vault.claimableBalanceOf(alice));
@@ -871,9 +969,10 @@ contract VaultTest is Test {
         assertEq(30 ether, vault.totalStaked());
         assertEq(0 ether, vault.totalUnstaked());
         assertEq(66 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
         assertEq(30 ether, vault.balanceOf(alice));
         assertEq(66 ether, vault.pendingBalanceOf(alice));
-        assertEq(32 ether, vault.claimableBalanceOf(alice));
+        assertEq(0 ether, vault.claimableBalanceOf(alice));
         assertEq(0 ether, vault.totalFees());
 
         vm.prank(oracle);
@@ -883,6 +982,7 @@ contract VaultTest is Test {
         assertEq(30 ether, vault.totalStaked());
         assertEq(0 ether, vault.totalUnstaked());
         assertEq(66 ether, vault.totalPendingWithdrawal());
+        assertEq(32 ether, vault.totalClaimable());
         assertEq(30 ether, vault.balanceOf(alice));
         assertEq(66 ether, vault.pendingBalanceOf(alice));
         assertEq(32 ether, vault.claimableBalanceOf(alice));
@@ -898,6 +998,7 @@ contract VaultTest is Test {
         assertEq(30 ether, vault.totalStaked());
         assertEq(0 ether, vault.totalUnstaked());
         assertEq(66 ether, vault.totalPendingWithdrawal());
+        assertEq(64 ether, vault.totalClaimable());
         assertEq(30 ether, vault.balanceOf(alice));
         assertEq(66 ether, vault.pendingBalanceOf(alice));
         assertEq(64 ether, vault.claimableBalanceOf(alice));
@@ -913,6 +1014,7 @@ contract VaultTest is Test {
         assertEq(0 ether, vault.totalStaked());
         assertEq(30 ether, vault.totalUnstaked());
         assertEq(66 ether, vault.totalPendingWithdrawal());
+        assertEq(66 ether, vault.totalClaimable());
         assertEq(30 ether, vault.balanceOf(alice));
         assertEq(66 ether, vault.pendingBalanceOf(alice));
         assertEq(66 ether, vault.claimableBalanceOf(alice));
