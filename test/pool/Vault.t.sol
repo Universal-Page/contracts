@@ -336,6 +336,27 @@ contract VaultTest is Test {
         assertEq(5 ether, alice.balance);
     }
 
+    function test_DepositBySending() public {
+        vm.startPrank(owner);
+        vault.setDepositLimit(100 ether);
+        vault.enableOracle(oracle, true);
+        vm.stopPrank();
+
+        address alice = vm.addr(100);
+        vm.deal(alice, 40 ether);
+
+        vm.prank(alice);
+        (bool success,) = address(vault).call{value: 40 ether}("");
+        assertTrue(success);
+
+        assertEq(0 ether, vault.totalStaked());
+        assertEq(40 ether, vault.totalUnstaked());
+        assertEq(40 ether, vault.totalShares());
+        assertEq(40 ether, vault.sharesOf(alice));
+        assertEq(0, vault.validators());
+        assertEq(40 ether, address(vault).balance);
+    }
+
     function test_Revert_WithdrawalExceedsDeposits() public {
         vm.prank(owner);
         vault.setDepositLimit(100 ether);
