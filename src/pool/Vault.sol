@@ -255,34 +255,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     }
 
     function rebalance() external onlyOracle whenNotPaused {
-        uint256 previousTotalStaked = totalStaked;
-        uint256 previousTotalUnstaked = totalUnstaked;
-
-        (uint256 unstaked, uint256 staked, uint256 inactive, uint256 claimable) = _calculateStake();
-
-        // payout fees on rewards difference
-        uint256 effectiveInactive = totalStaked == staked ? 0 : inactive;
-        if (unstaked > totalUnstaked + effectiveInactive) {
-            uint256 rewards = unstaked - totalUnstaked - effectiveInactive;
-            uint256 feeAmount = Math.mulDiv(rewards, fee, 100_000);
-            totalFees += feeAmount;
-            unstaked -= feeAmount;
-            emit RewardsDistributed(previousTotalStaked + previousTotalUnstaked, rewards, feeAmount);
-        }
-
-        totalClaimable = claimable;
-        totalUnstaked = unstaked;
-        totalStaked = staked;
-        emit Rebalanced(previousTotalStaked, previousTotalUnstaked, totalStaked, totalUnstaked);
-    }
-
-    function _calculateStake()
-        private
-        view
-        returns (uint256 unstaked, uint256 staked, uint256 inactive, uint256 claimable)
-    {
-        unstaked = address(this).balance;
-        staked = totalStaked;
+        uint256 unstaked = address(this).balance;
+        uint256 staked = totalStaked;
+        uint256 claimable;
 
         // account for staking fees
         unstaked = unstaked < totalFees ? 0 : unstaked - totalFees;
@@ -297,11 +272,25 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         }
 
         // account for partially withdrawn validators
-        inactive = staked % DEPOSIT_AMOUNT;
+        uint256 inactive = staked % DEPOSIT_AMOUNT;
         if (unstaked >= totalUnstaked + inactive) {
             // redistribute inactive stake from staked to unstaked balance
             staked -= inactive;
         }
+
+        // payout fees on rewards difference
+        if (staked + unstaked > totalStaked + totalUnstaked) {
+            uint256 rewards = staked + unstaked - totalStaked - totalUnstaked;
+            uint256 feeAmount = Math.mulDiv(rewards, fee, 100_000);
+            emit RewardsDistributed(totalStaked + totalUnstaked, rewards, feeAmount);
+            totalFees += feeAmount;
+            unstaked -= feeAmount;
+        }
+
+        emit Rebalanced(totalStaked, totalUnstaked, staked, unstaked);
+        totalClaimable = claimable;
+        totalUnstaked = unstaked;
+        totalStaked = staked;
     }
 
     function isValidatorRegistered(bytes calldata pubkey) external view returns (bool) {
