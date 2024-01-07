@@ -261,8 +261,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         (uint256 unstaked, uint256 staked, uint256 inactive, uint256 claimable) = _calculateStake();
 
         // payout fees on rewards difference
-        if (unstaked > totalUnstaked + inactive) {
-            uint256 rewards = unstaked - totalUnstaked - inactive;
+        uint256 effectiveInactive = totalStaked == staked ? 0 : inactive;
+        if (unstaked > totalUnstaked + effectiveInactive) {
+            uint256 rewards = unstaked - totalUnstaked - effectiveInactive;
             uint256 feeAmount = Math.mulDiv(rewards, fee, 100_000);
             totalFees += feeAmount;
             unstaked -= feeAmount;
@@ -297,7 +298,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
 
         // account for partially withdrawn validators
         inactive = staked % DEPOSIT_AMOUNT;
-        if (unstaked == totalUnstaked + inactive) {
+        if (unstaked >= totalUnstaked + inactive) {
             // redistribute inactive stake from staked to unstaked balance
             staked -= inactive;
         }
