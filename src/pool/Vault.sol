@@ -89,6 +89,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     }
 
     function setFeeRecipient(address newFeeRecipient) external onlyOwner {
+        if (newFeeRecipient == address(0)) {
+            revert InvalidAddress(newFeeRecipient);
+        }
         address previousFeeRecipient = feeRecipient;
         feeRecipient = newFeeRecipient;
         emit FeeRecipientChanged(previousFeeRecipient, newFeeRecipient);
@@ -146,6 +149,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     }
 
     function claim(uint256 amount, address beneficiary) external nonReentrant whenNotPaused {
+        if (beneficiary == address(0)) {
+            revert InvalidAddress(beneficiary);
+        }
         address account = msg.sender;
         if (amount == 0) {
             revert InvalidAmount(amount);
@@ -181,21 +187,21 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     }
 
     function deposit(address beneficiary) public payable whenNotPaused {
+        if (beneficiary == address(0)) {
+            revert InvalidAddress(beneficiary);
+        }
         address account = msg.sender;
         if (restricted && !isAllowlisted(account)) {
             revert InvalidAddress(account);
         }
-
         uint256 amount = msg.value;
         if (amount == 0) {
             revert InvalidAmount(amount);
         }
-
         uint256 newTotalDeposits = Math.max(validators * DEPOSIT_AMOUNT, totalStaked + totalUnstaked) + amount;
         if (newTotalDeposits > depositLimit) {
             revert DepositLimitExceeded(newTotalDeposits, depositLimit);
         }
-
         uint256 shares = _toShares(amount);
         _shares[beneficiary] += shares;
         totalShares += shares;
@@ -204,6 +210,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     }
 
     function withdraw(uint256 amount, address beneficiary) external nonReentrant whenNotPaused {
+        if (beneficiary == address(0)) {
+            revert InvalidAddress(beneficiary);
+        }
         address account = msg.sender;
         if (amount == 0) {
             revert InvalidAmount(amount);
@@ -218,8 +227,12 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         uint256 immediateAmount = amount > totalUnstaked ? totalUnstaked : amount;
         uint256 delayedAmount = amount - immediateAmount;
 
+        totalUnstaked -= immediateAmount;
+        totalStaked -= delayedAmount;
+        totalPendingWithdrawal += delayedAmount;
+        _pendingWithdrawals[beneficiary] += delayedAmount;
+
         if (immediateAmount > 0) {
-            totalUnstaked -= immediateAmount;
             (bool success,) = beneficiary.call{value: immediateAmount}("");
             if (!success) {
                 revert WithdrawalFailed(account, beneficiary, immediateAmount);
@@ -228,14 +241,14 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         }
 
         if (delayedAmount > 0) {
-            totalStaked -= delayedAmount;
-            totalPendingWithdrawal += delayedAmount;
-            _pendingWithdrawals[beneficiary] += delayedAmount;
             emit WithdrawalRequested(account, beneficiary, delayedAmount);
         }
     }
 
     function claimFees(uint256 amount, address beneficiary) external nonReentrant whenNotPaused {
+        if (beneficiary == address(0)) {
+            revert InvalidAddress(beneficiary);
+        }
         address account = msg.sender;
         if (account != feeRecipient) {
             revert CallerNotFeeRecipient(account);
