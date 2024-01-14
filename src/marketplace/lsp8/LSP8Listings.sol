@@ -64,8 +64,12 @@ contract LSP8Listings is ILSP8Listings, Module {
         {
             bytes32 existingKey = _listingKey(asset, tokenId);
             uint256 existingId = _listingIds[existingKey];
-            if (isListed(existingId)) {
-                if (isActiveListing(existingId) && _listings[existingId].seller == seller) {
+            LSP8Listing memory existingListing = _listings[existingId];
+            if (existingListing.seller != address(0)) {
+                if (
+                    existingListing.seller == seller
+                        && ((existingListing.endTime == 0) || (block.timestamp < existingListing.endTime))
+                ) {
                     revert AlreadyListed(existingId);
                 }
                 delete _listings[existingId];
