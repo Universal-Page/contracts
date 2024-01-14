@@ -345,9 +345,8 @@ contract LSP8ListingsTest is Test {
         listings.unlist(1);
     }
 
-    function test_Revert_UnlistIfNotActiveListing() public {
+    function testFuzz_Revert_UnlistIfNotActiveListing(bytes32 tokenId) public {
         (UniversalProfile profile,) = deployProfile();
-        bytes32 tokenId = bytes32(0);
         asset.mint(address(profile), tokenId, false, "");
 
         vm.prank(address(profile));
@@ -369,5 +368,71 @@ contract LSP8ListingsTest is Test {
         vm.prank(marketplace);
         vm.expectRevert(abi.encodeWithSelector(Module.IllegalAccess.selector, marketplace, MARKETPLACE_ROLE));
         listings.unlist(1);
+    }
+
+    function testFuzz_Revert_ListSameTokenForActiveListing(bytes32 tokenId) public {
+        (UniversalProfile profile,) = deployProfile();
+        asset.mint(address(profile), tokenId, false, "");
+
+        vm.prank(address(profile));
+        listings.list(address(asset), tokenId, 1 ether, block.timestamp, 10 days);
+        assertTrue(listings.isListed(1));
+        assertTrue(listings.isActiveListing(1));
+
+        vm.prank(address(profile));
+        vm.expectRevert(abi.encodeWithSelector(LSP8Listings.AlreadyListed.selector, 1));
+        listings.list(address(asset), tokenId, 1 ether, block.timestamp, 10 days);
+    }
+
+    function test_DelistIfListSameTokenForInactiveListing() public {
+        (UniversalProfile profile,) = deployProfile();
+        bytes32 tokenId = bytes32(0);
+        asset.mint(address(profile), tokenId, false, "");
+
+        vm.prank(address(profile));
+        listings.list(address(asset), tokenId, 1 ether, block.timestamp, 10 days);
+        assertTrue(listings.isListed(1));
+        assertTrue(listings.isActiveListing(1));
+
+        vm.warp(block.timestamp + 10 days);
+        assertTrue(listings.isListed(1));
+        assertFalse(listings.isActiveListing(1));
+
+        vm.prank(address(profile));
+        vm.expectEmit(address(listings));
+        emit Delisted(1, address(asset));
+        listings.list(address(asset), tokenId, 1 ether, block.timestamp, 10 days);
+
+        assertFalse(listings.isListed(1));
+        assertFalse(listings.isActiveListing(1));
+        assertTrue(listings.isListed(2));
+        assertTrue(listings.isActiveListing(2));
+    }
+
+    function test_DelistIfListSameTokenByDifferentSeller() public {
+        (UniversalProfile alice,) = deployProfile();
+        bytes32 tokenId = bytes32(0);
+        asset.mint(address(alice), tokenId, false, "");
+
+        vm.prank(address(alice));
+        listings.list(address(asset), tokenId, 1 ether, block.timestamp, 10 days);
+        assertTrue(listings.isListed(1));
+        assertTrue(listings.isActiveListing(1));
+        assertEq(listings.getListing(1).seller, address(alice));
+
+        (UniversalProfile bob,) = deployProfile();
+        vm.prank(address(alice));
+        asset.transfer(address(alice), address(bob), tokenId, false, "");
+
+        vm.prank(address(bob));
+        vm.expectEmit(address(listings));
+        emit Delisted(1, address(asset));
+        listings.list(address(asset), tokenId, 1 ether, block.timestamp, 10 days);
+        assertEq(listings.getListing(2).seller, address(bob));
+
+        assertFalse(listings.isListed(1));
+        assertFalse(listings.isActiveListing(1));
+        assertTrue(listings.isListed(2));
+        assertTrue(listings.isActiveListing(2));
     }
 }

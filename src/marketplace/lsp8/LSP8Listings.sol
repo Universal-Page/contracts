@@ -12,9 +12,13 @@ contract LSP8Listings is ILSP8Listings, Module {
     error NotListed(uint256 id);
     error UnathorizedSeller(address account);
     error InactiveListing(uint256 id);
+    error AlreadyListed(uint256 id);
 
     uint256 public totalListings;
+    // id -> listing
     mapping(uint256 => LSP8Listing) private _listings;
+    // hash(asset, tokenId) -> id
+    mapping(bytes32 => uint256) private _listingIds;
 
     constructor() {
         _disableInitializers();
@@ -56,6 +60,19 @@ contract LSP8Listings is ILSP8Listings, Module {
         }
         totalListings += 1;
         uint256 id = totalListings;
+        // verify existing possible listing
+        {
+            bytes32 existingKey = _listingKey(asset, tokenId);
+            uint256 existingId = _listingIds[existingKey];
+            if (isListed(existingId)) {
+                if (isActiveListing(existingId) && _listings[existingId].seller == seller) {
+                    revert AlreadyListed(existingId);
+                }
+                delete _listings[existingId];
+                emit Delisted(existingId, asset);
+            }
+            _listingIds[existingKey] = id;
+        }
         uint256 endTime = 0;
         if (secondsUntilEndTime > 0) {
             endTime = startTime + secondsUntilEndTime;
@@ -109,6 +126,7 @@ contract LSP8Listings is ILSP8Listings, Module {
             revert UnathorizedSeller(msg.sender);
         }
         delete _listings[id];
+        delete _listingIds[_listingKey(listing.asset, listing.tokenId)];
         emit Delisted(id, listing.asset);
     }
 
@@ -118,6 +136,11 @@ contract LSP8Listings is ILSP8Listings, Module {
             revert InactiveListing(id);
         }
         delete _listings[id];
+        delete _listingIds[_listingKey(listing.asset, listing.tokenId)];
         emit Unlisted(id, listing.asset);
+    }
+
+    function _listingKey(address asset, bytes32 tokenId) private pure returns (bytes32) {
+        return keccak256(abi.encodePacked(asset, tokenId));
     }
 }
