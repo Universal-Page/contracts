@@ -53,7 +53,11 @@ contract Claim is Script {
         LSP7Marketplace marketplace = LSP7Marketplace(payable(vm.envAddress("CONTRACT_LSP7_MARKETPLACE_ADDRESS")));
 
         if (address(marketplace).balance > 0) {
-            console.log(string.concat("LSP7Marketplace: withdraw ", Strings.toString(address(marketplace).balance)));
+            console.log(
+                string.concat("LSP7Marketplace: withdraw ", Strings.toString(address(marketplace).balance)),
+                "wei to",
+                Strings.toHexString(marketplace.beneficiary())
+            );
             vm.broadcast(owner);
             marketplace.withdraw(address(marketplace).balance);
         }
