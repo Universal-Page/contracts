@@ -13,9 +13,11 @@ contract LSP7Listings is ILSP7Listings, Module {
     error UnathorizedSeller(address account);
     error InactiveListing(uint256 id);
     error InvalidDeduction(uint256 available, uint256 deducted);
+    error InvalidListingAmount(uint256 total, uint256 authorizedAllowance);
 
     uint256 public totalListings;
     mapping(uint256 => LSP7Listing) private _listings;
+    mapping(bytes32 => uint256) private _listedAmount;
 
     constructor() {
         _disableInitializers();
@@ -58,6 +60,12 @@ contract LSP7Listings is ILSP7Listings, Module {
         if (allowance < itemCount) {
             revert InsufficientAuthorization(seller, itemCount, allowance);
         }
+        bytes32 key = _listingKey(asset, owner);
+        uint256 listedAmount = _listedAmount[key] + itemCount;
+        if (listedAmount > allowance) {
+            revert InvalidListingAmount(listedAmount, allowance);
+        }
+        _listedAmount[key] = listedAmount;
         totalListings += 1;
         uint256 id = totalListings;
         uint256 endTime = 0;
@@ -91,6 +99,16 @@ contract LSP7Listings is ILSP7Listings, Module {
         if (allowance < itemCount) {
             revert InsufficientAuthorization(listing.seller, itemCount, allowance);
         }
+        bytes32 key = _listingKey(listing.asset, listing.owner);
+        uint256 listedAmount = _listedAmount[key];
+        if (listedAmount >= listing.itemCount) {
+            listedAmount -= listing.itemCount;
+        }
+        listedAmount += itemCount;
+        if (listedAmount > allowance) {
+            revert InvalidListingAmount(listedAmount, allowance);
+        }
+        _listedAmount[key] = listedAmount;
         uint256 endTime = 0;
         if (secondsUntilEndTime > 0) {
             endTime = startTime + secondsUntilEndTime;
@@ -112,6 +130,11 @@ contract LSP7Listings is ILSP7Listings, Module {
         if (msg.sender != listing.seller) {
             revert UnathorizedSeller(msg.sender);
         }
+        bytes32 key = _listingKey(listing.asset, listing.owner);
+        uint256 listedAmount = _listedAmount[key];
+        if (listedAmount >= listing.itemCount) {
+            _listedAmount[key] -= listing.itemCount;
+        }
         delete _listings[id];
         emit Delisted(id, listing.asset);
     }
@@ -124,11 +147,20 @@ contract LSP7Listings is ILSP7Listings, Module {
         if (itemCount == 0 || itemCount > listing.itemCount) {
             revert InvalidDeduction(listing.itemCount, itemCount);
         }
+        bytes32 key = _listingKey(listing.asset, listing.owner);
+        uint256 listedAmount = _listedAmount[key];
+        if (listedAmount >= itemCount) {
+            _listedAmount[key] -= itemCount;
+        }
         _listings[id].itemCount -= itemCount;
         emit Deducted(id, listing.asset, itemCount);
         if (_listings[id].itemCount == 0) {
             delete _listings[id];
             emit Unlisted(id, listing.asset);
         }
+    }
+
+    function _listingKey(address asset, address seller) private pure returns (bytes32) {
+        return keccak256(abi.encodePacked(asset, seller));
     }
 }

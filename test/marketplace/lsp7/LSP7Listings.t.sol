@@ -440,4 +440,23 @@ contract LSP7ListingsTest is Test {
         vm.expectRevert(abi.encodeWithSelector(LSP7Listings.InvalidDeduction.selector, 10, 11));
         listings.deduct(1, 11);
     }
+
+    function test_Revert_ListMultipleTimes() public {
+        address operator = vm.addr(10);
+        (UniversalProfile profile,) = deployProfile();
+        asset.mint(address(profile), 10, false, "");
+
+        vm.prank(address(profile));
+        asset.authorizeOperator(operator, 10, "");
+
+        vm.prank(operator);
+        listings.list(address(asset), address(profile), 7, 1 ether, block.timestamp, 10 days);
+
+        assertEq(1, listings.totalListings());
+        assertTrue(listings.isListed(1));
+
+        vm.prank(operator);
+        vm.expectRevert(abi.encodeWithSelector(LSP7Listings.InvalidListingAmount.selector, 11, 10));
+        listings.list(address(asset), address(profile), 4, 1 ether, block.timestamp, 10 days);
+    }
 }
