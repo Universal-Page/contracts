@@ -338,6 +338,19 @@
   },
   {
     "type": "function",
+    "name": "interfaceId",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes4",
+        "internalType": "bytes4"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
     "name": "mint",
     "inputs": [
       {
@@ -537,7 +550,7 @@
     "name": "supportsInterface",
     "inputs": [
       {
-        "name": "interfaceId",
+        "name": "id",
         "type": "bytes4",
         "internalType": "bytes4"
       }
