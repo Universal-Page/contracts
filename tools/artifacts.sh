@@ -94,9 +94,13 @@ exportAbi "assets/lsp8/CollectorIdentifiableDigitalAsset"
 
 exportAbi "drops/LSP7DropsDigitalAsset"
 exportBytecode "drops/LSP7DropsDigitalAsset"
+exportAbi "drops/LSP7DropsLightAsset"
+exportBytecode "drops/LSP7DropsLightAsset"
 
 exportAbi "drops/LSP8DropsDigitalAsset"
 exportBytecode "drops/LSP8DropsDigitalAsset"
+exportAbi "drops/LSP8DropsLightAsset"
+exportBytecode "drops/LSP8DropsLightAsset"
 
 exportAbi "marketplace/Participant"
 
