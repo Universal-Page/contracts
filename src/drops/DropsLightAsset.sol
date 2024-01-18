@@ -54,6 +54,11 @@ abstract contract DropsLightAsset is OwnableUnset, ReentrancyGuard {
         serviceFeePoints = serviceFeePoints_;
     }
 
+    function interfaceId() public pure virtual returns (bytes4) {
+        return this.activate.selector ^ this.deactivate.selector ^ this.configure.selector ^ this.mintNonceOf.selector
+            ^ this.mint.selector ^ this.claimBalanceOf.selector ^ this.claim.selector;
+    }
+
     function activate() external onlyOwner {
         _activate();
     }

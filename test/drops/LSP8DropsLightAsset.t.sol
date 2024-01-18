@@ -12,6 +12,8 @@ import {IndexedDrop} from "../../src/common/IndexedDrop.sol";
 import {LSP8DropsLightAsset, DropsLightAsset} from "../../src/drops/LSP8DropsLightAsset.sol";
 import {deployProfile} from "../utils/profile.sol";
 
+bytes4 constant INTERFACE_ID = 0xbf6dba32;
+
 contract LSP8DropsLightAssetTest is Test {
     event Activated();
     event Deactivated();
@@ -38,6 +40,8 @@ contract LSP8DropsLightAssetTest is Test {
     }
 
     function test_Initialize() public {
+        assertEq(drop.interfaceId(), INTERFACE_ID);
+        assertTrue(drop.supportsInterface(INTERFACE_ID));
         assertFalse(drop.activated());
         assertEq("Drops", drop.getData(_LSP4_TOKEN_NAME_KEY));
         assertEq("DRP", drop.getData(_LSP4_TOKEN_SYMBOL_KEY));

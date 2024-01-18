@@ -5,6 +5,7 @@ import {
     LSP8IdentifiableDigitalAsset,
     LSP8IdentifiableDigitalAssetCore
 } from "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8IdentifiableDigitalAsset.sol";
+import {_INTERFACEID_LSP8} from "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8Constants.sol";
 import {LSP8CappedSupply} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/extensions/LSP8CappedSupply.sol";
 import {LSP8Enumerable} from
@@ -40,6 +41,10 @@ contract LSP8DropsLightAsset is LSP8CappedSupply, LSP8Enumerable, DropsLightAsse
         DropsLightAsset(service_, verifier_, serviceFeePoints_)
     {
         // noop
+    }
+
+    function interfaceId() public pure virtual override returns (bytes4) {
+        return super.interfaceId() ^ _INTERFACEID_LSP8 ^ this.setDefaultTokenUri.selector;
     }
 
     function setDefaultTokenUri(bytes calldata newTokenUri) external onlyOwner {
@@ -97,5 +102,9 @@ contract LSP8DropsLightAsset is LSP8CappedSupply, LSP8Enumerable, DropsLightAsse
         override(LSP8IdentifiableDigitalAssetCore, LSP8Enumerable)
     {
         super._beforeTokenTransfer(from, to, tokenId, data);
+    }
+
+    function supportsInterface(bytes4 id) public view virtual override returns (bool) {
+        return id == interfaceId() || super.supportsInterface(id);
     }
 }
