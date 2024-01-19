@@ -186,6 +186,45 @@ contract LSP7DropsLightAssetTest is Test {
         drop.mint{value: 2 ether}(address(profile), 2, v, r, s);
     }
 
+    function test_Revert_MintIfReuseSignature() public {
+        (UniversalProfile profile,) = deployProfile();
+
+        vm.prank(owner);
+        drop.activate();
+
+        vm.prank(owner);
+        drop.configure(block.timestamp, 1 ether, 3);
+
+        assertEq(drop.mintNonceOf(address(profile)), 0);
+
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                address(drop),
+                block.chainid,
+                address(profile),
+                drop.mintNonceOf(address(profile)),
+                uint256(3),
+                uint256(3 ether)
+            )
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(verifierKey, hash);
+
+        vm.deal(address(profile), 3 ether);
+        vm.prank(address(profile));
+        vm.expectEmit(address(drop));
+        emit Minted(address(profile), 3, 3 ether);
+        drop.mint{value: 3 ether}(address(profile), 3, v, r, s);
+
+        vm.deal(address(profile), 3 ether);
+        vm.prank(address(profile));
+        vm.expectRevert(abi.encodeWithSelector(DropsLightAsset.MintInvalidSignature.selector));
+        drop.mint{value: 3 ether}(address(profile), 3, v, r, s);
+
+        assertEq(drop.mintNonceOf(address(profile)), 1);
+        assertEq(drop.totalSupply(), 3);
+        assertEq(drop.balanceOf(address(profile)), 3);
+    }
+
     function test_Claim() public {
         (UniversalProfile profile,) = deployProfile();
 

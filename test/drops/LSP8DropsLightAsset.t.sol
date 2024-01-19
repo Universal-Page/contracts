@@ -117,6 +117,52 @@ contract LSP8DropsLightAssetTest is Test {
         assertEq(drop.tokenOwnerOf(tokenIds[2]), address(profile));
     }
 
+    function test_Revert_MintIfReuseSignature() public {
+        (UniversalProfile profile,) = deployProfile();
+
+        vm.prank(owner);
+        drop.activate();
+
+        vm.prank(owner);
+        drop.configure(block.timestamp, 1 ether, 3);
+
+        assertEq(drop.mintNonceOf(address(profile)), 0);
+
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                address(drop),
+                block.chainid,
+                address(profile),
+                drop.mintNonceOf(address(profile)),
+                uint256(3),
+                uint256(3 ether)
+            )
+        );
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(verifierKey, hash);
+
+        vm.deal(address(profile), 3 ether);
+        vm.prank(address(profile));
+        vm.expectEmit(address(drop));
+        bytes32[] memory tokenIds = new bytes32[](3);
+        tokenIds[0] = bytes32(uint256(1));
+        tokenIds[1] = bytes32(uint256(2));
+        tokenIds[2] = bytes32(uint256(3));
+        emit Minted(address(profile), tokenIds, 3 ether);
+        drop.mint{value: 3 ether}(address(profile), 3, v, r, s);
+
+        vm.deal(address(profile), 3 ether);
+        vm.prank(address(profile));
+        vm.expectRevert(abi.encodeWithSelector(DropsLightAsset.MintInvalidSignature.selector));
+        drop.mint{value: 3 ether}(address(profile), 3, v, r, s);
+
+        assertEq(drop.mintNonceOf(address(profile)), 1);
+        assertEq(drop.totalSupply(), 3);
+        assertEq(drop.balanceOf(address(profile)), 3);
+        assertEq(drop.tokenOwnerOf(tokenIds[0]), address(profile));
+        assertEq(drop.tokenOwnerOf(tokenIds[1]), address(profile));
+        assertEq(drop.tokenOwnerOf(tokenIds[2]), address(profile));
+    }
+
     function test_Revert_MintIfInactive() public {
         (UniversalProfile profile,) = deployProfile();
 
