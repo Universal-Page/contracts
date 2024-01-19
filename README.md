@@ -33,9 +33,45 @@
 | testnet | Points                | 0x3582f474F6E9FB087651b135d6224500A89e6f44 |
 | testnet | Royalties             | 0x1c51619209EFE37C759e4a9Ca91F1e68A96E19E3 |
 
+## Development
+
+Start local node: `./tools/local_network.sh` and verify deployment locally:
+
+```
+./tools/deploy.sh --libraries --target local
+./tools/deploy.sh --script marketplace/Participant.s.sol --target local --broadcast
+```
+
 ## Analyze
 
 Run `slither` by `slither . --triage-mode`.
+
+## Deploy
+
+```
+./tools/deploy.sh --script page/PageName.s.sol --target testnet --broadcast
+```
+
+## Configure
+
+```
+ ./tools/configure.sh --script page/PageName.s.sol --target testnet --profile --broadcast
+```
+
+## Export
+
+```
+ ./tools/artifacts.sh --target testnet
+```
+
+## Publish
+
+Publishes functon selectors and source code on blockscout
+
+```
+./tools/submit_selectors.sh --target testnet
+./tools/verify.sh --target testnet
+```
 
 ## License
 
