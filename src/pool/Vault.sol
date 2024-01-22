@@ -33,15 +33,27 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         uint256 previousTotalStaked, uint256 previousTotalUnstaked, uint256 totalStaked, uint256 totalUnstaked
     );
 
+    // limit of total deposits in wei.
+    // This limits the total number of validators that can be registered.
     uint256 public depositLimit;
+    // total number of shares in the vault
     uint256 public totalShares;
+    // total amount of active stake in wei on beacon chain
     uint256 public totalStaked;
+    // total amount of inactive stake in wei on execution layer
     uint256 public totalUnstaked;
+    // total amount of pending withdrawals in wei.
+    // This is the amount that is taken from staked balance and may not be immidiately available for withdrawal.
     uint256 public totalPendingWithdrawal;
+    // Total number of ever registered validators
     uint256 public validators;
+    // Vault fee in parts per 100,000
     uint32 public fee;
+    // Recipient of the vault fee
     address public feeRecipient;
+    // Total amount of fees available for withdrawal
     uint256 public totalFees;
+    // Whether only allowlisted accounts can deposit
     bool public restricted;
     IDepositContract private _depositContract;
     mapping(address => uint256) private _shares;
@@ -49,6 +61,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     mapping(address => uint256) private _pendingWithdrawals;
     mapping(address => bool) private _allowlisted;
     mapping(bytes => bool) private _registeredKeys;
+    // Total amount of pending withdrawals that can be claimed immidiately
     uint256 public totalClaimable;
 
     modifier onlyOracle() {
@@ -176,6 +189,8 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         if (totalShares == 0) {
             return 0;
         }
+        // In some cases, totalShares may be slightly less than totalStaked + totalUnstaked due to rounding errors.
+        // This is acceptable since rewards will easily cover the possible loss of 1 wei in a short time.
         return Math.mulDiv(shares, totalStaked + totalUnstaked, totalShares);
     }
 
