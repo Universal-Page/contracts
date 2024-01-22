@@ -8,6 +8,8 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {IDepositContract, DEPOSIT_AMOUNT} from "./IDepositContract.sol";
 
 contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable {
+    uint32 private constant _FEE_BASIS = 100_000;
+
     error InvalidAmount(uint256 amount);
     error WithdrawalFailed(address account, address beneficiary, uint256 amount);
     error ClaimFailed(address account, address beneficiary, uint256 amount);
@@ -96,6 +98,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     }
 
     function setFee(uint32 newFee) external onlyOwner {
+        if (newFee > _FEE_BASIS) {
+            revert InvalidAmount(newFee);
+        }
         uint32 previousFee = fee;
         fee = newFee;
         emit FeeChanged(previousFee, newFee);
@@ -309,7 +314,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         // payout fees on rewards difference
         if (staked + unstaked > totalStaked + totalUnstaked) {
             uint256 rewards = staked + unstaked - totalStaked - totalUnstaked;
-            uint256 feeAmount = Math.mulDiv(rewards, fee, 100_000);
+            uint256 feeAmount = Math.mulDiv(rewards, fee, _FEE_BASIS);
             emit RewardsDistributed(totalStaked + totalUnstaked, rewards, feeAmount);
             totalFees += feeAmount;
             unstaked -= feeAmount;
