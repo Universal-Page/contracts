@@ -195,7 +195,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
             return 0;
         }
         // In some cases, totalShares may be slightly less than totalStaked + totalUnstaked due to rounding errors.
-        // This is acceptable since rewards will easily cover the possible loss of 1 wei in a short time.
+        // The error is 1 wei considered insignificant and can be ignored.
         return Math.mulDiv(shares, totalStaked + totalUnstaked, totalShares);
     }
 
@@ -295,7 +295,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         // account for staking fees
         unstaked = unstaked < totalFees ? 0 : unstaked - totalFees;
 
-        // account for pending withdrawals to claim later
+        // account for pending withdrawals to claim later.
         if (totalPendingWithdrawal > unstaked) {
             claimable = unstaked;
             unstaked = 0;
@@ -304,14 +304,17 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
             unstaked -= totalPendingWithdrawal;
         }
 
-        // account for partially withdrawn validators
+        // calculate inactive part of staked balance.
+        // In a case of a partial withdrawal, the inactive part will be redistributed to unstaked balance.
+        // This only happens when full withdrawal is completed and deposited back into the contract.
         uint256 inactive = staked % DEPOSIT_AMOUNT;
         if (unstaked >= totalUnstaked + inactive) {
-            // redistribute inactive stake from staked to unstaked balance
+            // redistribute inactive stake from staked to unstaked balance only if there is sufficient unstaked balance
             staked -= inactive;
         }
 
-        // payout fees on rewards difference
+        // at this point the difference represents the rewards.
+        // if the difference is positive, it means that the rewards are available for distribution.
         if (staked + unstaked > totalStaked + totalUnstaked) {
             uint256 rewards = staked + unstaked - totalStaked - totalUnstaked;
             uint256 feeAmount = Math.mulDiv(rewards, fee, _FEE_BASIS);
