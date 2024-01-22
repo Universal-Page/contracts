@@ -287,10 +287,22 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         emit FeeClaimed(account, beneficiary, amount);
     }
 
+    // Rebalance the vault by accounting balance of the vault.
+    // This is called periodically by the oracle.
+    // The balance of the vault is the sum of:
+    // - totalStaked + totalUnstaked: the total amount of stake on beacon chain and execution layer
+    // - totalPendingWithdrawal: the total amount of pending withdrawals
+    // - totalClaimable: the total amount of pending withdrawals that can be claimed immidiately
+    // - totalFees: the total amount of fees available for withdrawal
+    //
+    // Rebalancing is not accounting for potential validator penalties. It is assumed that the penalties
+    // shall not occur or shall be negligible.
     function rebalance() external onlyOracle whenNotPaused {
         uint256 unstaked = address(this).balance;
         uint256 staked = totalStaked;
         uint256 claimable;
+
+        // take out any claimable balances from unstaked balance prior to calculating rewards.
 
         // account for staking fees
         unstaked = unstaked < totalFees ? 0 : unstaked - totalFees;
