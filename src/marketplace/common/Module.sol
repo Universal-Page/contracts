@@ -6,6 +6,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 bytes32 constant MARKETPLACE_ROLE = keccak256("MARKETPLACE_ROLE");
+bytes32 constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
 abstract contract Module is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable {
     error IllegalAccess(address account, bytes32 role);
@@ -17,6 +18,13 @@ abstract contract Module is OwnableUnset, ReentrancyGuardUpgradeable, PausableUp
     modifier onlyMarketplace() {
         if (!hasRole(msg.sender, MARKETPLACE_ROLE)) {
             revert IllegalAccess(msg.sender, MARKETPLACE_ROLE);
+        }
+        _;
+    }
+
+    modifier onlyOperator() {
+        if (!hasRole(msg.sender, OPERATOR_ROLE)) {
+            revert IllegalAccess(msg.sender, OPERATOR_ROLE);
         }
         _;
     }

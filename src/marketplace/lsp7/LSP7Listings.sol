@@ -6,7 +6,7 @@ import {
     _LSP4_TOKEN_TYPE_NFT
 } from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {ILSP7DigitalAsset} from "@lukso/lsp-smart-contracts/contracts/LSP7DigitalAsset/ILSP7DigitalAsset.sol";
-import {Module} from "../common/Module.sol";
+import {Module, OPERATOR_ROLE} from "../common/Module.sol";
 import {ILSP7Listings, LSP7Listing} from "./ILSP7Listings.sol";
 
 contract LSP7Listings is ILSP7Listings, Module {
@@ -143,7 +143,7 @@ contract LSP7Listings is ILSP7Listings, Module {
 
     function delist(uint256 id) external override whenNotPaused nonReentrant {
         LSP7Listing memory listing = getListing(id);
-        if (msg.sender != listing.seller) {
+        if (msg.sender != listing.seller && !hasRole(msg.sender, OPERATOR_ROLE)) {
             revert UnathorizedSeller(msg.sender);
         }
         bytes32 key = _listingKey(listing.asset, listing.owner);

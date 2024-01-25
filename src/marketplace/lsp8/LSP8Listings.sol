@@ -3,7 +3,7 @@ pragma solidity =0.8.22;
 
 import {ILSP8IdentifiableDigitalAsset} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/ILSP8IdentifiableDigitalAsset.sol";
-import {Module, MARKETPLACE_ROLE} from "../common/Module.sol";
+import {Module, MARKETPLACE_ROLE, OPERATOR_ROLE} from "../common/Module.sol";
 import {ILSP8Listings, LSP8Listing} from "./ILSP8Listings.sol";
 
 contract LSP8Listings is ILSP8Listings, Module {
@@ -126,7 +126,7 @@ contract LSP8Listings is ILSP8Listings, Module {
 
     function delist(uint256 id) external override whenNotPaused nonReentrant {
         LSP8Listing memory listing = getListing(id);
-        if (msg.sender != listing.seller) {
+        if (msg.sender != listing.seller && !hasRole(msg.sender, OPERATOR_ROLE)) {
             revert UnathorizedSeller(msg.sender);
         }
         delete _listings[id];
