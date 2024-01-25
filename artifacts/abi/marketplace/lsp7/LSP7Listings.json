@@ -675,6 +675,27 @@
   },
   {
     "type": "error",
+    "name": "InvalidListingType",
+    "inputs": [
+      {
+        "name": "asset",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "lsp4TokenType",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "isNonDivisible",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ]
+  },
+  {
+    "type": "error",
     "name": "InvalidListingZeroItems",
     "inputs": []
   },
