@@ -7,6 +7,7 @@ import {
     TransparentUpgradeableProxy
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
+import {_LSP4_TOKEN_TYPE_NFT} from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {Module, MARKETPLACE_ROLE} from "../../../src/marketplace/common/Module.sol";
 import {LSP7Listings, LSP7Listing} from "../../../src/marketplace/lsp7/LSP7Listings.sol";
@@ -31,7 +32,7 @@ contract LSP7OffersTest is Test {
         admin = vm.addr(1);
         owner = vm.addr(2);
 
-        asset = new LSP7DigitalAssetMock("Mock", "MCK", owner, 0, true);
+        asset = new LSP7DigitalAssetMock("Mock", "MCK", owner, _LSP4_TOKEN_TYPE_NFT, true);
 
         listings = LSP7Listings(
             address(

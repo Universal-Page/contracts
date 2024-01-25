@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity =0.8.22;
 
+import {
+    _LSP4_TOKEN_TYPE_KEY,
+    _LSP4_TOKEN_TYPE_NFT
+} from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {ILSP7DigitalAsset} from "@lukso/lsp-smart-contracts/contracts/LSP7DigitalAsset/ILSP7DigitalAsset.sol";
 import {Module} from "../common/Module.sol";
 import {ILSP7Listings, LSP7Listing} from "./ILSP7Listings.sol";
@@ -14,6 +18,7 @@ contract LSP7Listings is ILSP7Listings, Module {
     error InactiveListing(uint256 id);
     error InvalidDeduction(uint256 available, uint256 deducted);
     error InvalidListingAmount(uint256 total, uint256 authorizedAllowance);
+    error InvalidListingType(address asset, uint256 lsp4TokenType, bool isNonDivisible);
 
     uint256 public totalListings;
     mapping(uint256 => LSP7Listing) private _listings;
@@ -55,17 +60,28 @@ contract LSP7Listings is ILSP7Listings, Module {
         if (itemCount == 0) {
             revert InvalidListingZeroItems();
         }
+        // verify that the asset is a non-divisible NFT
+        {
+            uint256 tokenType = uint256(bytes32(ILSP7DigitalAsset(asset).getData(_LSP4_TOKEN_TYPE_KEY)));
+            bool divisible = ILSP7DigitalAsset(asset).decimals() != 0;
+            if (tokenType != _LSP4_TOKEN_TYPE_NFT || divisible) {
+                revert InvalidListingType(asset, tokenType, !divisible);
+            }
+        }
         address seller = msg.sender;
         uint256 allowance = ILSP7DigitalAsset(asset).authorizedAmountFor(seller, owner);
         if (allowance < itemCount) {
             revert InsufficientAuthorization(seller, itemCount, allowance);
         }
-        bytes32 key = _listingKey(asset, owner);
-        uint256 listedAmount = _listedAmount[key] + itemCount;
-        if (listedAmount > allowance) {
-            revert InvalidListingAmount(listedAmount, allowance);
+        // verify that the listing is valid
+        {
+            bytes32 key = _listingKey(asset, owner);
+            uint256 listedAmount = _listedAmount[key] + itemCount;
+            if (listedAmount > allowance) {
+                revert InvalidListingAmount(listedAmount, allowance);
+            }
+            _listedAmount[key] = listedAmount;
         }
-        _listedAmount[key] = listedAmount;
         totalListings += 1;
         uint256 id = totalListings;
         uint256 endTime = 0;

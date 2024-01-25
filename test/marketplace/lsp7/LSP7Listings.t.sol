@@ -7,6 +7,11 @@ import {
     TransparentUpgradeableProxy
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
+import {
+    _LSP4_TOKEN_TYPE_TOKEN,
+    _LSP4_TOKEN_TYPE_NFT,
+    _LSP4_TOKEN_TYPE_COLLECTION
+} from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {Module, MARKETPLACE_ROLE} from "../../../src/marketplace/common/Module.sol";
 import {LSP7Listings, LSP7Listing} from "../../../src/marketplace/lsp7/LSP7Listings.sol";
@@ -45,7 +50,7 @@ contract LSP7ListingsTest is Test {
         admin = vm.addr(1);
         owner = vm.addr(2);
 
-        asset = new LSP7DigitalAssetMock("Mock", "MCK", owner, 0, true);
+        asset = new LSP7DigitalAssetMock("Mock", "MCK", owner, _LSP4_TOKEN_TYPE_NFT, true);
 
         listings = LSP7Listings(
             address(
@@ -458,5 +463,35 @@ contract LSP7ListingsTest is Test {
         vm.prank(operator);
         vm.expectRevert(abi.encodeWithSelector(LSP7Listings.InvalidListingAmount.selector, 11, 10));
         listings.list(address(asset), address(profile), 4, 1 ether, block.timestamp, 10 days);
+    }
+
+    function test_Revert_ListDivisibleNft() public {
+        LSP7DigitalAssetMock invalidAsset = new LSP7DigitalAssetMock("Mock", "MCK", owner, _LSP4_TOKEN_TYPE_NFT, false);
+
+        (UniversalProfile profile,) = deployProfile();
+        invalidAsset.mint(address(profile), 10, false, "");
+
+        vm.prank(address(profile));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                LSP7Listings.InvalidListingType.selector, address(invalidAsset), _LSP4_TOKEN_TYPE_NFT, false
+            )
+        );
+        listings.list(address(invalidAsset), address(profile), 10, 1 ether, block.timestamp, 10 days);
+    }
+
+    function test_Revert_ListNonNft() public {
+        LSP7DigitalAssetMock invalidAsset = new LSP7DigitalAssetMock("Mock", "MCK", owner, _LSP4_TOKEN_TYPE_TOKEN, true);
+
+        (UniversalProfile profile,) = deployProfile();
+        invalidAsset.mint(address(profile), 10, false, "");
+
+        vm.prank(address(profile));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                LSP7Listings.InvalidListingType.selector, address(invalidAsset), _LSP4_TOKEN_TYPE_TOKEN, true
+            )
+        );
+        listings.list(address(invalidAsset), address(profile), 10, 1 ether, block.timestamp, 10 days);
     }
 }
