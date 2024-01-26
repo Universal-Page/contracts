@@ -44,14 +44,11 @@ contract CollectorIdentifiableDigitalAssetTest is Test {
         assertEq(100, asset.tokenSupplyCap());
         assertEq(owner, asset.owner());
         assertEq(controller, asset.controller());
-        assertFalse(asset.paused());
     }
 
     function test_ConfigureIfOwner() public {
         vm.startPrank(owner);
         asset.setController(address(10));
-        asset.pause();
-        asset.unpause();
         vm.stopPrank();
     }
 
@@ -62,24 +59,7 @@ contract CollectorIdentifiableDigitalAssetTest is Test {
 
         vm.prank(address(1));
         vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
-        asset.pause();
-
-        vm.prank(address(1));
-        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
-        asset.unpause();
-
-        vm.prank(address(1));
-        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         asset.withdraw(0 ether);
-    }
-
-    function test_Revert_WhenPaused() public {
-        vm.prank(owner);
-        asset.pause();
-        vm.expectRevert("Pausable: paused");
-        bytes32[] memory tokenIds = new bytes32[](1);
-        tokenIds[0] = bytes32(uint256(1));
-        asset.purchase(address(100), tokenIds, 0, 0, 0);
     }
 
     function test_Revert_PurchaseIfUnathorized() public {

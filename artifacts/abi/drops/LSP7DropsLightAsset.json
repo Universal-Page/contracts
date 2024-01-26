@@ -156,7 +156,7 @@
     "name": "claim",
     "inputs": [
       {
-        "name": "beneficiary",
+        "name": "recipient",
         "type": "address",
         "internalType": "address"
       },

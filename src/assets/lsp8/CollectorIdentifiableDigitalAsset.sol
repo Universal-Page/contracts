@@ -3,7 +3,6 @@ pragma solidity =0.8.22;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 import {LSP8IdentifiableDigitalAsset} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8IdentifiableDigitalAsset.sol";
 import {LSP8CappedSupply} from
@@ -23,7 +22,6 @@ contract CollectorIdentifiableDigitalAsset is
     LSP8IdentifiableDigitalAsset,
     LSP8CappedSupply,
     LSP8Enumerable,
-    Pausable,
     ReentrancyGuard,
     Withdrawable
 {
@@ -80,19 +78,10 @@ contract CollectorIdentifiableDigitalAsset is
         emit ControllerChanged(oldController, newController);
     }
 
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    function unpause() external onlyOwner {
-        _unpause();
-    }
-
     function purchase(address recipient, bytes32[] calldata tokenIds, uint8 v, bytes32 r, bytes32 s)
         external
         payable
         override
-        whenNotPaused
         nonReentrant
     {
         bytes32 hash = keccak256(abi.encodePacked(address(this), block.chainid, recipient, tokenIds, msg.value));
@@ -123,7 +112,6 @@ contract CollectorIdentifiableDigitalAsset is
         internal
         virtual
         override(LSP8IdentifiableDigitalAssetCore, LSP8Enumerable)
-        whenNotPaused
     {
         super._beforeTokenTransfer(from, to, tokenId, data);
     }
