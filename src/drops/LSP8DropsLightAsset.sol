@@ -31,6 +31,7 @@ contract LSP8DropsLightAsset is LSP8CappedSupply, LSP8Enumerable, DropsLightAsse
         string memory name_,
         string memory symbol_,
         address newOwner_,
+        address beneficiary_,
         address service_,
         address verifier_,
         uint256 tokenSupplyCap_,
@@ -38,14 +39,8 @@ contract LSP8DropsLightAsset is LSP8CappedSupply, LSP8Enumerable, DropsLightAsse
     )
         LSP8IdentifiableDigitalAsset(name_, symbol_, newOwner_, _LSP4_TOKEN_TYPE_NFT, _LSP8_TOKENID_FORMAT_NUMBER)
         LSP8CappedSupply(tokenSupplyCap_)
-        DropsLightAsset(service_, verifier_, serviceFeePoints_)
-    {
-        // noop
-    }
-
-    function interfaceId() public pure virtual override returns (bytes4) {
-        return super.interfaceId() ^ _INTERFACEID_LSP8 ^ this.setDefaultTokenUri.selector;
-    }
+        DropsLightAsset(beneficiary_, service_, verifier_, serviceFeePoints_)
+    {}
 
     function setDefaultTokenUri(bytes calldata newTokenUri) external onlyOwner {
         defaultTokenUri = newTokenUri;
@@ -74,7 +69,7 @@ contract LSP8DropsLightAsset is LSP8CappedSupply, LSP8Enumerable, DropsLightAsse
         emit Minted(recipient, tokenIds, totalPrice);
         // mint tokens
         for (uint256 i = 0; i < amount; i++) {
-            _mint(recipient, tokenIds[i], false, "");
+            _mint(recipient, tokenIds[i], true, "");
         }
     }
 
@@ -102,9 +97,5 @@ contract LSP8DropsLightAsset is LSP8CappedSupply, LSP8Enumerable, DropsLightAsse
         override(LSP8IdentifiableDigitalAssetCore, LSP8Enumerable)
     {
         super._beforeTokenTransfer(from, to, tokenId, data);
-    }
-
-    function supportsInterface(bytes4 id) public view virtual override returns (bool) {
-        return id == interfaceId() || super.supportsInterface(id);
     }
 }

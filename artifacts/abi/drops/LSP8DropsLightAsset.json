@@ -18,6 +18,11 @@
         "internalType": "address"
       },
       {
+        "name": "beneficiary_",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
         "name": "service_",
         "type": "address",
         "internalType": "address"
@@ -47,26 +52,6 @@
   {
     "type": "receive",
     "stateMutability": "payable"
-  },
-  {
-    "type": "function",
-    "name": "activate",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "activated",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -131,6 +116,19 @@
   },
   {
     "type": "function",
+    "name": "beneficiary",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "claim",
     "inputs": [
       {
@@ -165,36 +163,6 @@
       }
     ],
     "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "configure",
-    "inputs": [
-      {
-        "name": "startTime_",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "mintPrice_",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "profileMintLimit_",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "deactivate",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -316,19 +284,6 @@
   },
   {
     "type": "function",
-    "name": "interfaceId",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes4",
-        "internalType": "bytes4"
-      }
-    ],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
     "name": "isOperatorFor",
     "inputs": [
       {
@@ -405,19 +360,6 @@
   },
   {
     "type": "function",
-    "name": "mintPrice",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "owner",
     "inputs": [],
     "outputs": [
@@ -425,19 +367,6 @@
         "name": "",
         "type": "address",
         "internalType": "address"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "profileMintLimit",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -600,23 +529,10 @@
   },
   {
     "type": "function",
-    "name": "startTime",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "supportsInterface",
     "inputs": [
       {
-        "name": "id",
+        "name": "interfaceId",
         "type": "bytes4",
         "internalType": "bytes4"
       }
@@ -807,12 +723,6 @@
   },
   {
     "type": "event",
-    "name": "Activated",
-    "inputs": [],
-    "anonymous": false
-  },
-  {
-    "type": "event",
     "name": "Claimed",
     "inputs": [
       {
@@ -822,38 +732,13 @@
         "internalType": "address"
       },
       {
-        "name": "beneficiary",
+        "name": "recipient",
         "type": "address",
         "indexed": true,
         "internalType": "address"
       },
       {
         "name": "amount",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "ConfigurationChanged",
-    "inputs": [
-      {
-        "name": "startTime",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "mintPrice",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "profileMintLimit",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -878,12 +763,6 @@
         "internalType": "bytes"
       }
     ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "Deactivated",
-    "inputs": [],
     "anonymous": false
   },
   {
@@ -1107,11 +986,6 @@
   },
   {
     "type": "error",
-    "name": "Inactive",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "InvalidExtensionAddress",
     "inputs": [
       {
@@ -1138,17 +1012,6 @@
     "inputs": [
       {
         "name": "fee",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "InvalidStartTime",
-    "inputs": [
-      {
-        "name": "startTime",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -1400,11 +1263,6 @@
   {
     "type": "error",
     "name": "OwnableCannotSetZeroAddressAsOwner",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "ProfileMintZeroLimit",
     "inputs": []
   },
   {

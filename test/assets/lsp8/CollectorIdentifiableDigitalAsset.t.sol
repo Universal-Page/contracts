@@ -71,12 +71,6 @@ contract CollectorIdentifiableDigitalAssetTest is Test {
         vm.prank(address(1));
         vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
         asset.withdraw(0 ether);
-
-        vm.prank(address(1));
-        vm.expectRevert(abi.encodeWithSelector(OwnableCallerNotTheOwner.selector, address(1)));
-        bytes32[] memory tokenIds = new bytes32[](1);
-        tokenIds[0] = bytes32(uint256(1));
-        asset.reserve(address(100), tokenIds);
     }
 
     function test_Revert_WhenPaused() public {
@@ -86,23 +80,6 @@ contract CollectorIdentifiableDigitalAssetTest is Test {
         bytes32[] memory tokenIds = new bytes32[](1);
         tokenIds[0] = bytes32(uint256(1));
         asset.purchase(address(100), tokenIds, 0, 0, 0);
-    }
-
-    function testFuzz_TokenId(uint256 index, uint256 tier) public {
-        vm.assume(tier <= 3);
-        vm.assume(index <= 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
-
-        bytes32 tokenId = bytes32((index << 4) | tier);
-
-        bytes32[] memory tokenIds = new bytes32[](1);
-        tokenIds[0] = tokenId;
-
-        vm.startPrank(owner);
-        asset.reserve(address(100), tokenIds);
-        vm.stopPrank();
-
-        assertEq(asset.tokenIndexOf(tokenId), index);
-        assertEq(asset.tokenTierOf(tokenId), tier);
     }
 
     function test_Revert_PurchaseIfUnathorized() public {
@@ -147,15 +124,12 @@ contract CollectorIdentifiableDigitalAssetTest is Test {
         }
     }
 
-    function testFuzz_Purchase(bytes32 tokenId0, bytes32 tokenId1, bytes32 tokenId2, uint256 price, uint256 supplyLimit)
-        public
-    {
+    function testFuzz_Purchase(bytes32 tokenId0, bytes32 tokenId1, bytes32 tokenId2, uint256 price) public {
         vm.assume(
             ((uint256(tokenId0) >> 4) != (uint256(tokenId1) >> 4))
                 && ((uint256(tokenId0) >> 4) != (uint256(tokenId2) >> 4))
                 && ((uint256(tokenId1) >> 4) != (uint256(tokenId2) >> 4))
         );
-        vm.assume(supplyLimit >= 3 && supplyLimit <= asset.tokenSupplyCap());
         vm.assume(price <= 10 ether);
 
         bytes32[] memory tokenIds = new bytes32[](3);
@@ -175,33 +149,6 @@ contract CollectorIdentifiableDigitalAssetTest is Test {
         vm.expectEmit(address(asset));
         emit TokensPurchased(address(profile), tokenIds, price * tokenIds.length);
         asset.purchase{value: price * tokenIds.length}(address(profile), tokenIds, v, r, s);
-
-        assertEq(tokenIds.length, asset.totalSupply());
-        assertEq(tokenIds.length, asset.balanceOf(address(profile)));
-        assertEq(address(profile), asset.tokenOwnerOf(tokenId0));
-        assertEq(address(profile), asset.tokenOwnerOf(tokenId1));
-        assertEq(address(profile), asset.tokenOwnerOf(tokenId2));
-    }
-
-    function testFuzz_Reserve(bytes32 tokenId0, bytes32 tokenId1, bytes32 tokenId2, uint256 supplyLimit) public {
-        vm.assume(
-            ((uint256(tokenId0) >> 4) != (uint256(tokenId1) >> 4))
-                && ((uint256(tokenId0) >> 4) != (uint256(tokenId2) >> 4))
-                && ((uint256(tokenId1) >> 4) != (uint256(tokenId2) >> 4))
-        );
-        vm.assume(supplyLimit >= 3 && supplyLimit <= asset.tokenSupplyCap());
-
-        bytes32[] memory tokenIds = new bytes32[](3);
-        tokenIds[0] = tokenId0;
-        tokenIds[1] = tokenId1;
-        tokenIds[2] = tokenId2;
-
-        (UniversalProfile profile,) = deployProfile();
-
-        vm.prank(owner);
-        vm.expectEmit(address(asset));
-        emit TokensReserved(address(profile), tokenIds);
-        asset.reserve(address(profile), tokenIds);
 
         assertEq(tokenIds.length, asset.totalSupply());
         assertEq(tokenIds.length, asset.balanceOf(address(profile)));

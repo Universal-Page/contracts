@@ -329,24 +329,6 @@
   },
   {
     "type": "function",
-    "name": "reserve",
-    "inputs": [
-      {
-        "name": "recipient",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "tokenIds",
-        "type": "bytes32[]",
-        "internalType": "bytes32[]"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "revokeOperator",
     "inputs": [
       {
@@ -923,25 +905,6 @@
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "TokensReserved",
-    "inputs": [
-      {
-        "name": "recipient",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "tokenIds",
-        "type": "bytes32[]",
-        "indexed": false,
-        "internalType": "bytes32[]"
       }
     ],
     "anonymous": false

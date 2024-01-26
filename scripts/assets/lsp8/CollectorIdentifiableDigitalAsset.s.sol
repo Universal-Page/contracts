@@ -17,7 +17,7 @@ contract Deploy is Script {
 
         vm.broadcast(admin);
         CollectorIdentifiableDigitalAsset asset =
-            new CollectorIdentifiableDigitalAsset("Universal Page Collector", "UPC", owner, controller, 4200);
+            new CollectorIdentifiableDigitalAsset("Universal Page Collector", "UPC", owner, controller, 1000);
         console.log(string.concat("CollectorIdentifiableDigitalAsset: deploy ", Strings.toHexString(address(asset))));
     }
 }

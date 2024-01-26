@@ -120,8 +120,13 @@ contract ParticipantTest is Test {
             bytes32[] memory tokenIds = new bytes32[](1);
             tokenIds[0] = bytes32(uint256(((i + 1) << 4) | i));
 
-            vm.prank(assetOwner);
-            collectorAsset.reserve(address(profile), tokenIds);
+            bytes32 hash = keccak256(
+                abi.encodePacked(address(collectorAsset), block.chainid, address(profile), tokenIds, uint256(0 ether))
+            );
+            (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
+
+            vm.prank(address(profile));
+            collectorAsset.purchase(address(profile), tokenIds, v, r, s);
             assertEq(collectorAsset.balanceOf(address(profile)), i + 1);
 
             uint32 discount = participant.feeDiscountFor(address(profile));

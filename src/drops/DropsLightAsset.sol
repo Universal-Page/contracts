@@ -7,115 +7,51 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {Points} from "../common/Points.sol";
 
 abstract contract DropsLightAsset is OwnableUnset, ReentrancyGuard {
-    event Activated();
-    event Deactivated();
-    event Claimed(address indexed account, address indexed beneficiary, uint256 amount);
-    event ConfigurationChanged(uint256 startTime, uint256 mintPrice, uint256 profileMintLimit);
+    event Claimed(address indexed account, address indexed recipient, uint256 amount);
 
-    error Inactive();
     error ZeroAddress();
     error ZeroAmount();
     error ClaimInvalidAmount(uint256 amount);
-    error ProfileMintZeroLimit();
     error InvalidServiceFee(uint256 fee);
     error UnpaidClaim(address account, uint256 amount);
     error MintInvalidSignature();
     error MintInvalidAmount(uint256 amount);
     error MintExceedLimit(uint256 amount);
-    error InvalidStartTime(uint256 startTime);
 
+    address public immutable beneficiary;
     uint32 public immutable serviceFeePoints;
     address public immutable service;
     address public immutable verifier;
-    uint256 public startTime;
-    uint256 public mintPrice;
-    uint256 public profileMintLimit;
-    bool public activated;
     mapping(address => uint256) private _balances;
     mapping(address => uint256) private _mintNonce;
 
-    modifier whenActivate() {
-        if (!activated || block.timestamp < startTime) {
-            revert Inactive();
-        }
-        _;
-    }
-
-    constructor(address service_, address verifier_, uint32 serviceFeePoints_) {
+    constructor(address beneficiary_, address service_, address verifier_, uint32 serviceFeePoints_) {
         if (!Points.isValid(serviceFeePoints_)) {
             revert InvalidServiceFee(serviceFeePoints_);
         }
         if (service_ == address(0) || verifier_ == address(0)) {
             revert ZeroAddress();
         }
-        activated = false;
+        beneficiary = beneficiary_;
         service = service_;
         verifier = verifier_;
         serviceFeePoints = serviceFeePoints_;
-    }
-
-    function interfaceId() public pure virtual returns (bytes4) {
-        return this.activate.selector ^ this.deactivate.selector ^ this.configure.selector ^ this.mintNonceOf.selector
-            ^ this.mint.selector ^ this.claimBalanceOf.selector ^ this.claim.selector;
-    }
-
-    function activate() external onlyOwner {
-        _activate();
-    }
-
-    function _activate() internal {
-        if (!activated) {
-            activated = true;
-            emit Activated();
-        }
-    }
-
-    function deactivate() external onlyOwner {
-        if (activated) {
-            activated = false;
-            emit Deactivated();
-        }
-    }
-
-    function configure(uint256 startTime_, uint256 mintPrice_, uint256 profileMintLimit_) external onlyOwner {
-        if (startTime_ < block.timestamp) {
-            revert InvalidStartTime(startTime_);
-        }
-        if (profileMintLimit_ == 0) {
-            revert ProfileMintZeroLimit();
-        }
-        startTime = startTime_;
-        mintPrice = mintPrice_;
-        profileMintLimit = profileMintLimit_;
-        emit ConfigurationChanged(startTime_, mintPrice_, profileMintLimit_);
     }
 
     function mintNonceOf(address recipient) external view returns (uint256) {
         return _mintNonce[recipient];
     }
 
-    function mint(address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s)
-        external
-        payable
-        whenActivate
-        nonReentrant
-    {
+    function mint(address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s) external payable nonReentrant {
+        uint256 totalPrice = msg.value;
         bytes32 hash = keccak256(
-            abi.encodePacked(address(this), block.chainid, recipient, _mintNonce[recipient], amount, msg.value)
+            abi.encodePacked(address(this), block.chainid, recipient, _mintNonce[recipient], amount, totalPrice)
         );
         if (ECDSA.recover(hash, v, r, s) != verifier) {
             revert MintInvalidSignature();
         }
-        uint256 newBalance = balanceOf(recipient) + amount;
-        if (newBalance > profileMintLimit) {
-            revert MintExceedLimit(newBalance);
-        }
-        uint256 totalPrice = amount * mintPrice;
-        if (msg.value != totalPrice) {
-            revert MintInvalidAmount(msg.value);
-        }
         uint256 serviceFeeAmount = Points.realize(totalPrice, serviceFeePoints);
-        _balances[owner()] += totalPrice - serviceFeeAmount;
+        _balances[beneficiary] += totalPrice - serviceFeeAmount;
         _balances[service] += serviceFeeAmount;
         _mintNonce[recipient] += 1;
         _doMint(recipient, amount, totalPrice);

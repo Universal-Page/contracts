@@ -32,7 +32,6 @@ contract CollectorIdentifiableDigitalAsset is
     error InvalidTokenId(bytes32 tokenId);
 
     event TokensPurchased(address indexed recipient, bytes32[] tokenIds, uint256 totalPaid);
-    event TokensReserved(address indexed recipient, bytes32[] tokenIds);
     event ControllerChanged(address indexed oldController, address indexed newController);
 
     mapping(uint256 => bool) private _reservedTokenIds;
@@ -87,14 +86,6 @@ contract CollectorIdentifiableDigitalAsset is
 
     function unpause() external onlyOwner {
         _unpause();
-    }
-
-    function reserve(address recipient, bytes32[] calldata tokenIds) external onlyOwner {
-        uint256 amount = tokenIds.length;
-        for (uint256 i = 0; i < amount; i++) {
-            _mint(recipient, tokenIds[i], true, "");
-        }
-        emit TokensReserved(recipient, tokenIds);
     }
 
     function purchase(address recipient, bytes32[] calldata tokenIds, uint8 v, bytes32 r, bytes32 s)
