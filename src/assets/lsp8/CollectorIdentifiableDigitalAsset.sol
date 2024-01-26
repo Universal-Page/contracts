@@ -90,7 +90,7 @@ contract CollectorIdentifiableDigitalAsset is
         }
         uint256 amount = tokenIds.length;
         for (uint256 i = 0; i < amount; i++) {
-            _mint(recipient, tokenIds[i], false, "");
+            _mint(recipient, tokenIds[i], true, "");
         }
         emit TokensPurchased(recipient, tokenIds, msg.value);
     }

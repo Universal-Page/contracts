@@ -136,4 +136,30 @@ contract CollectorIdentifiableDigitalAssetTest is Test {
         assertEq(address(profile), asset.tokenOwnerOf(tokenId1));
         assertEq(address(profile), asset.tokenOwnerOf(tokenId2));
     }
+
+    function test_TokenIdentifiers() public {
+        bytes32[] memory tokenIds = new bytes32[](4);
+        tokenIds[0] = bytes32(uint256((1 << 4) | 0));
+        tokenIds[1] = bytes32(uint256((2 << 4) | 1));
+        tokenIds[2] = bytes32(uint256((3 << 4) | 2));
+        tokenIds[3] = bytes32(uint256((4 << 4) | 3));
+
+        address recipient = vm.addr(1000);
+
+        bytes32 hash = keccak256(abi.encodePacked(address(asset), block.chainid, recipient, tokenIds, uint256(0 ether)));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(controllerKey, hash);
+
+        vm.prank(recipient);
+        asset.purchase(recipient, tokenIds, v, r, s);
+
+        assertEq(4, asset.totalSupply());
+        assertEq(0, asset.tokenTierOf(tokenIds[0]));
+        assertEq(1, asset.tokenIndexOf(tokenIds[0]));
+        assertEq(1, asset.tokenTierOf(tokenIds[1]));
+        assertEq(2, asset.tokenIndexOf(tokenIds[1]));
+        assertEq(2, asset.tokenTierOf(tokenIds[2]));
+        assertEq(3, asset.tokenIndexOf(tokenIds[2]));
+        assertEq(3, asset.tokenTierOf(tokenIds[3]));
+        assertEq(4, asset.tokenIndexOf(tokenIds[3]));
+    }
 }
