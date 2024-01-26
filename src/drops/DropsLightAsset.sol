@@ -61,8 +61,8 @@ abstract contract DropsLightAsset is OwnableUnset, ReentrancyGuard {
         return _balances[account];
     }
 
-    function claim(address beneficiary, uint256 amount) external nonReentrant {
-        if (beneficiary == address(0)) {
+    function claim(address recipient, uint256 amount) external nonReentrant {
+        if (recipient == address(0)) {
             revert ZeroAddress();
         }
         if (amount == 0) {
@@ -73,11 +73,11 @@ abstract contract DropsLightAsset is OwnableUnset, ReentrancyGuard {
             revert ClaimInvalidAmount(amount);
         }
         _balances[msg.sender] -= amount;
-        (bool success,) = beneficiary.call{value: amount}("");
+        (bool success,) = recipient.call{value: amount}("");
         if (!success) {
-            revert UnpaidClaim(beneficiary, amount);
+            revert UnpaidClaim(recipient, amount);
         }
-        emit Claimed(msg.sender, beneficiary, amount);
+        emit Claimed(msg.sender, recipient, amount);
     }
 
     function balanceOf(address tokenOwner) public view virtual returns (uint256);
