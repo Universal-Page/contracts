@@ -5,12 +5,6 @@ import {ILSP8IdentifiableDigitalAsset} from
     "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/ILSP8IdentifiableDigitalAsset.sol";
 
 interface ICollectorIdentifiableDigitalAsset is ILSP8IdentifiableDigitalAsset {
-    /// A price of an asset in wei to purchase one token from the contract.
-    function price() external view returns (uint256);
-
-    /// A token limit tokens can be purchased up to.
-    function tokenSupplyLimit() external view returns (uint256);
-
     /// A tier of a token if any. A tier is a number from 0 to 3. 3 is the highest tier.
     /// @param tokenId A token id to get a tier for.
     function tokenTierOf(bytes32 tokenId) external view returns (uint8 tier);

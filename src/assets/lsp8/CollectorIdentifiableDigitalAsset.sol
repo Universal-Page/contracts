@@ -27,24 +27,16 @@ contract CollectorIdentifiableDigitalAsset is
     ReentrancyGuard,
     Withdrawable
 {
-    error TokenSupplyLimitExceeded(uint256 supply, uint256 limit, uint256 amount);
-    error InvalidPurchaseAmount(uint256 required, uint256 amount);
-    error InvalidTokenSupplyCap(uint256 cap);
-    error InvalidTokenSupplyLimit(uint256 limit);
     error InvalidController();
     error UnauthorizedPurchase(address recipient, bytes32[] tokenIds, uint256 totalPrice);
     error InvalidTokenId(bytes32 tokenId);
 
     event TokensPurchased(address indexed recipient, bytes32[] tokenIds, uint256 totalPaid);
-    event TokenSupplyLimitChanged(uint256 limit);
-    event PriceChanged(uint256 price);
     event TokensReserved(address indexed recipient, bytes32[] tokenIds);
     event ControllerChanged(address indexed oldController, address indexed newController);
 
     mapping(uint256 => bool) private _reservedTokenIds;
     address public controller;
-    uint256 public override price;
-    uint256 public override tokenSupplyLimit;
 
     constructor(
         string memory name_,
@@ -97,25 +89,8 @@ contract CollectorIdentifiableDigitalAsset is
         _unpause();
     }
 
-    function setPrice(uint256 newPrice) external onlyOwner {
-        price = newPrice;
-        emit PriceChanged(newPrice);
-    }
-
-    function setTokenSupplyLimit(uint256 limit) external onlyOwner {
-        if (limit < tokenSupplyLimit || limit > tokenSupplyCap()) {
-            revert InvalidTokenSupplyLimit(limit);
-        }
-        tokenSupplyLimit = limit;
-        emit TokenSupplyLimitChanged(limit);
-    }
-
     function reserve(address recipient, bytes32[] calldata tokenIds) external onlyOwner {
         uint256 amount = tokenIds.length;
-        uint256 supply = totalSupply();
-        if (supply + amount > tokenSupplyLimit) {
-            revert TokenSupplyLimitExceeded(supply, tokenSupplyLimit, amount);
-        }
         for (uint256 i = 0; i < amount; i++) {
             _mint(recipient, tokenIds[i], true, "");
         }
@@ -134,13 +109,6 @@ contract CollectorIdentifiableDigitalAsset is
             revert UnauthorizedPurchase(recipient, tokenIds, msg.value);
         }
         uint256 amount = tokenIds.length;
-        uint256 supply = totalSupply();
-        if (supply + amount > tokenSupplyLimit) {
-            revert TokenSupplyLimitExceeded(supply, tokenSupplyLimit, amount);
-        }
-        if (msg.value != amount * price) {
-            revert InvalidPurchaseAmount(amount * price, msg.value);
-        }
         for (uint256 i = 0; i < amount; i++) {
             _mint(recipient, tokenIds[i], false, "");
         }

@@ -113,9 +113,6 @@ contract ParticipantTest is Test {
     function test_CollectorTierFeeDiscount() public {
         (UniversalProfile profile,) = deployProfile();
 
-        vm.prank(assetOwner);
-        collectorAsset.setTokenSupplyLimit(4);
-
         vm.prank(owner);
         participant.setCollectorAsset(collectorAsset);
 

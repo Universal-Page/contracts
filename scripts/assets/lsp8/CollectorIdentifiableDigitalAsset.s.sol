@@ -9,9 +9,6 @@ import {LSP6KeyManager} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManage
 import {OPERATION_0_CALL} from "@erc725/smart-contracts/contracts/constants.sol";
 import {CollectorIdentifiableDigitalAsset} from "../../../src/assets/lsp8/CollectorIdentifiableDigitalAsset.sol";
 
-uint16 constant TOKEN_SUPPLY_LIMIT = 0;
-uint256 constant PRICE = 10 ether;
-
 contract Deploy is Script {
     function run() external {
         address admin = vm.envAddress("ADMIN_ADDRESS");
@@ -19,13 +16,8 @@ contract Deploy is Script {
         address controller = vm.envAddress("COLLECTOR_CONTROLLER_ADDRESS");
 
         vm.broadcast(admin);
-        CollectorIdentifiableDigitalAsset asset = new CollectorIdentifiableDigitalAsset(
-                "Universal Page Collector",
-                "UPC",
-                owner,
-                controller,
-                4200
-            );
+        CollectorIdentifiableDigitalAsset asset =
+            new CollectorIdentifiableDigitalAsset("Universal Page Collector", "UPC", owner, controller, 4200);
         console.log(string.concat("CollectorIdentifiableDigitalAsset: deploy ", Strings.toHexString(address(asset))));
     }
 }
@@ -65,22 +57,6 @@ contract Configure is Script {
             asset.setBeneficiary(treasury);
             console.log(
                 string.concat("CollectorIdentifiableDigitalAsset: setBeneficiary ", Strings.toHexString(treasury))
-            );
-        }
-
-        if (asset.price() != PRICE) {
-            vm.broadcast(owner);
-            asset.setPrice(PRICE);
-            console.log(string.concat("CollectorIdentifiableDigitalAsset: setPrice ", Strings.toHexString(PRICE)));
-        }
-
-        if (asset.tokenSupplyLimit() != TOKEN_SUPPLY_LIMIT) {
-            vm.broadcast(owner);
-            asset.setTokenSupplyLimit(TOKEN_SUPPLY_LIMIT);
-            console.log(
-                string.concat(
-                    "CollectorIdentifiableDigitalAsset: setTokenSupplyLimit ", Strings.toHexString(TOKEN_SUPPLY_LIMIT)
-                )
             );
         }
     }
