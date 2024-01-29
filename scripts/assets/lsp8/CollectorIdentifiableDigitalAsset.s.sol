@@ -12,12 +12,12 @@ import {CollectorIdentifiableDigitalAsset} from "../../../src/assets/lsp8/Collec
 contract Deploy is Script {
     function run() external {
         address admin = vm.envAddress("ADMIN_ADDRESS");
-        address owner = vm.envAddress("OWNER_ADDRESS");
+        address profile = vm.envAddress("PROFILE_ADDRESS");
         address controller = vm.envAddress("COLLECTOR_CONTROLLER_ADDRESS");
 
         vm.broadcast(admin);
         CollectorIdentifiableDigitalAsset asset =
-            new CollectorIdentifiableDigitalAsset("Universal Page Pro", "UPP", owner, controller, 1000);
+            new CollectorIdentifiableDigitalAsset("Universal Page Pro", "UPP", profile, controller, 1000);
         console.log(string.concat("CollectorIdentifiableDigitalAsset: deploy ", Strings.toHexString(address(asset))));
     }
 }
@@ -29,9 +29,10 @@ contract Configure is Script {
     bytes4 private constant _baseUriHash = bytes4(bytes32(keccak256("keccak256(utf8)")));
 
     function run() external {
-        address owner = vm.envAddress("OWNER_ADDRESS");
         address treasury = vm.envAddress("TREASURY_ADDRESS");
-        address controller = vm.envAddress("COLLECTOR_CONTROLLER_ADDRESS");
+        address assetController = vm.envAddress("COLLECTOR_CONTROLLER_ADDRESS");
+        address profileController = vm.envAddress("PROFILE_CONTROLLER_ADDRESS");
+        UniversalProfile profile = UniversalProfile(payable(vm.envAddress("PROFILE_ADDRESS")));
         CollectorIdentifiableDigitalAsset asset =
             CollectorIdentifiableDigitalAsset(payable(vm.envAddress("CONTRACT_COLLECTOR_DIGITAL_ASSET_ADDRESS")));
 
@@ -39,22 +40,34 @@ contract Configure is Script {
         string memory baseUri = vm.envString("COLLECTOR_DIGITAL_ASSET_BASE_URI");
         bytes memory encodedBaseUri = bytes.concat(_baseUriHash, bytes(baseUri));
         if (keccak256(encodedBaseUri) != keccak256(currentBaseUri)) {
-            vm.broadcast(owner);
-            asset.setData(_LSP8_TOKEN_METADATA_BASE_URI_KEY, encodedBaseUri);
+            vm.broadcast(profileController);
+            profile.execute(
+                OPERATION_0_CALL,
+                address(asset),
+                0,
+                abi.encodeWithSelector(asset.setData.selector, _LSP8_TOKEN_METADATA_BASE_URI_KEY, encodedBaseUri)
+            );
             console.log(string.concat("CollectorIdentifiableDigitalAsset: setBaseUri ", baseUri));
         }
 
-        if (asset.controller() != controller) {
-            vm.broadcast(owner);
-            asset.setController(controller);
+        if (asset.controller() != assetController) {
+            vm.broadcast(profileController);
+            profile.execute(
+                OPERATION_0_CALL,
+                address(asset),
+                0,
+                abi.encodeWithSelector(asset.setController.selector, assetController)
+            );
             console.log(
-                string.concat("CollectorIdentifiableDigitalAsset: setController ", Strings.toHexString(controller))
+                string.concat("CollectorIdentifiableDigitalAsset: setController ", Strings.toHexString(assetController))
             );
         }
 
         if (asset.beneficiary() != treasury) {
-            vm.broadcast(owner);
-            asset.setBeneficiary(treasury);
+            vm.broadcast(profileController);
+            profile.execute(
+                OPERATION_0_CALL, address(asset), 0, abi.encodeWithSelector(asset.setBeneficiary.selector, treasury)
+            );
             console.log(
                 string.concat("CollectorIdentifiableDigitalAsset: setBeneficiary ", Strings.toHexString(treasury))
             );
