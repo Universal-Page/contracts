@@ -106,9 +106,9 @@ contract CollectorIdentifiableDigitalAssetTest is Test {
 
     function testFuzz_Purchase(bytes32 tokenId0, bytes32 tokenId1, bytes32 tokenId2, uint256 price) public {
         vm.assume(
-            ((uint256(tokenId0) >> 4) != (uint256(tokenId1) >> 4))
-                && ((uint256(tokenId0) >> 4) != (uint256(tokenId2) >> 4))
-                && ((uint256(tokenId1) >> 4) != (uint256(tokenId2) >> 4))
+            uint16((uint256(tokenId0) >> 4) & 0xFFFF) != uint16((uint256(tokenId1) >> 4) & 0xFFFF)
+                && uint16((uint256(tokenId0) >> 4) & 0xFFFF) != uint16((uint256(tokenId2) >> 4) & 0xFFFF)
+                && uint16((uint256(tokenId1) >> 4) & 0xFFFF) != uint16((uint256(tokenId2) >> 4) & 0xFFFF)
         );
         vm.assume(price <= 10 ether);
 

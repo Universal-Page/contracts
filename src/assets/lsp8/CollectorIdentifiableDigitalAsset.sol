@@ -54,12 +54,12 @@ contract CollectorIdentifiableDigitalAsset is
 
     function tokenTierOf(bytes32 tokenId) external view override returns (uint8 tier) {
         _existsOrError(tokenId);
-        tier = uint8(uint256(tokenId) & 0x3);
+        tier = uint8(uint256(tokenId) & 0xF);
     }
 
-    function tokenIndexOf(bytes32 tokenId) public view override returns (uint256 index) {
+    function tokenIndexOf(bytes32 tokenId) public view override returns (uint16 index) {
         _existsOrError(tokenId);
-        index = uint256(tokenId) >> 4;
+        index = uint16((uint256(tokenId) >> 4) & 0xFFFF);
     }
 
     function setController(address newController) external onlyOwner {
