@@ -1166,7 +1166,29 @@ contract VaultTest is Test {
         assertEq(0 ether, vault.claimableBalanceOf(alice));
         assertEq(1 ether, alice.balance);
 
-        // simulate rewards
+        // simulate rewards not enough to cover withdrawal
+        vm.deal(address(vault), 0.4 ether);
+
+        vm.prank(oracle);
+        vm.expectEmit();
+        emit Rebalanced(31.5 ether, 0 ether, 31.5 ether, 0 ether);
+        vault.rebalance();
+
+        assertEq(31.5 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+        assertEq(31.5 ether, vault.totalShares());
+        assertEq(31.5 ether, vault.sharesOf(alice));
+        assertEq(31.5 ether, vault.balanceOf(alice));
+        assertEq(0 ether, vault.totalFees());
+        assertEq(1, vault.totalValidatorsRegistered());
+        assertEq(0.4 ether, address(vault).balance);
+
+        assertEq(0.5 ether, vault.totalPendingWithdrawal());
+        assertEq(0.5 ether, vault.pendingBalanceOf(alice));
+        assertEq(0.4 ether, vault.claimableBalanceOf(alice));
+        assertEq(1 ether, alice.balance);
+
+        // simulate rewards enough to cover withdrawal
         vm.deal(address(vault), 1.2 ether);
 
         vm.prank(oracle);
