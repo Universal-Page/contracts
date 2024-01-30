@@ -53,36 +53,43 @@ contract Configure is Script {
         Vault vault = Vault(payable(vm.envAddress("CONTRACT_POOL_VAULT")));
 
         if (vault.operator() != operator) {
+            console.log(string.concat("Vault: set operator ", Strings.toHexString(operator)));
             vm.broadcast(owner);
             vault.setOperator(operator);
         }
 
         if (vault.feeRecipient() != profile) {
+            console.log(string.concat("Vault: set fee recipient ", Strings.toHexString(profile)));
             vm.broadcast(owner);
             vault.setFeeRecipient(profile);
         }
 
         if (vault.fee() != SERVICE_FEE) {
+            console.log(string.concat("Vault: set fee ", Strings.toString(SERVICE_FEE)));
             vm.broadcast(owner);
             vault.setFee(SERVICE_FEE);
         }
 
         if (vault.depositLimit() != DEPOSIT_LIMIT) {
+            console.log(string.concat("Vault: set deposit limit ", Strings.toString(DEPOSIT_LIMIT)));
             vm.broadcast(owner);
             vault.setDepositLimit(DEPOSIT_LIMIT);
         }
 
         if (!vault.restricted()) {
+            console.log("Vault: set restricted");
             vm.broadcast(owner);
             vault.setRestricted(true);
         }
 
         if (!vault.isAllowlisted(profile)) {
+            console.log(string.concat("Vault: allowlist ", Strings.toHexString(profile)));
             vm.broadcast(owner);
             vault.allowlist(profile, true);
         }
 
         if (!vault.isOracle(oracle)) {
+            console.log(string.concat("Vault: enable oracle ", Strings.toHexString(oracle)));
             vm.broadcast(owner);
             vault.enableOracle(oracle, true);
         }
