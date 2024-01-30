@@ -18,6 +18,7 @@ contract Deploy is Script {
     function run() external {
         address admin = vm.envAddress("ADMIN_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
+        address operator = vm.envAddress("OWNER_ADDRESS");
 
         address proxy = vm.envOr("CONTRACT_POOL_VAULT", address(0));
 
@@ -30,7 +31,7 @@ contract Deploy is Script {
                 new TransparentUpgradeableProxy(
                     address(vault),
                     admin,
-                    abi.encodeWithSelector(Vault.initialize.selector, owner, DepositContract)
+                    abi.encodeWithSelector(Vault.initialize.selector, owner, operator, DepositContract)
                 )
             );
             console.log(string.concat("Vault: deploy ", Strings.toHexString(address(proxy))));
@@ -45,10 +46,16 @@ contract Deploy is Script {
 contract Configure is Script {
     function run() external {
         address owner = vm.envAddress("OWNER_ADDRESS");
+        address operator = vm.envAddress("OWNER_ADDRESS");
         address profile = vm.envAddress("PROFILE_ADDRESS");
         address oracle = vm.envAddress("POOL_ORACLE_ADDRESS");
 
         Vault vault = Vault(payable(vm.envAddress("CONTRACT_POOL_VAULT")));
+
+        if (vault.operator() != operator) {
+            vm.broadcast(owner);
+            vault.setOperator(operator);
+        }
 
         if (vault.feeRecipient() != profile) {
             vm.broadcast(owner);
