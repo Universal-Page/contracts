@@ -371,6 +371,15 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
             emit RewardsDistributed(totalStaked + totalUnstaked, rewards, feeAmount);
             totalFees += feeAmount;
             unstaked -= feeAmount;
+
+            // redistribute rewards from unstaked to staked balance only if there is sufficient unstaked balance
+            if (inactive > 0) {
+                uint256 inactiveRequested = DEPOSIT_AMOUNT - inactive;
+                if (rewards - feeAmount >= inactiveRequested) {
+                    unstaked -= inactiveRequested;
+                    staked += inactiveRequested;
+                }
+            }
         }
 
         emit Rebalanced(totalStaked, totalUnstaked, staked, unstaked);

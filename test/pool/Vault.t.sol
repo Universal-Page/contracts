@@ -1116,6 +1116,80 @@ contract VaultTest is Test {
         assertEq(66 ether, vault.claimableBalanceOf(alice));
         assertEq(0 ether, vault.totalFees());
     }
+
+    function test_AccountAfterPartialWithdrawalCoveredByRewards() public {
+        vm.startPrank(owner);
+        vault.setDepositLimit(100 ether);
+        vault.enableOracle(oracle, true);
+        vault.setFee(10_000);
+        vault.setFeeRecipient(feeRecipient);
+        vm.stopPrank();
+
+        address alice = vm.addr(100);
+        vm.deal(alice, 33 ether);
+        vm.prank(alice);
+        vault.deposit{value: 33 ether}(alice);
+
+        assertEq(0 ether, vault.totalStaked());
+        assertEq(33 ether, vault.totalUnstaked());
+        assertEq(33 ether, vault.totalShares());
+        assertEq(33 ether, vault.sharesOf(alice));
+        assertEq(0, vault.totalValidatorsRegistered());
+        assertEq(33 ether, address(vault).balance);
+
+        vm.prank(oracle);
+        vault.registerValidator(hex"1234", hex"5678", bytes32(0));
+
+        assertEq(32 ether, vault.totalStaked());
+        assertEq(1 ether, vault.totalUnstaked());
+        assertEq(33 ether, vault.totalShares());
+        assertEq(33 ether, vault.sharesOf(alice));
+        assertEq(33 ether, vault.balanceOf(alice));
+        assertEq(0, vault.totalFees());
+        assertEq(1, vault.totalValidatorsRegistered());
+        assertEq(1 ether, address(vault).balance);
+
+        vm.prank(alice);
+        vault.withdraw(1.5 ether, alice);
+
+        assertEq(31.5 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+        assertEq(31.5 ether, vault.totalShares());
+        assertEq(31.5 ether, vault.sharesOf(alice));
+        assertEq(31.5 ether, vault.balanceOf(alice));
+        assertEq(0, vault.totalFees());
+        assertEq(1, vault.totalValidatorsRegistered());
+        assertEq(0 ether, address(vault).balance);
+
+        assertEq(0.5 ether, vault.totalPendingWithdrawal());
+        assertEq(0.5 ether, vault.pendingBalanceOf(alice));
+        assertEq(0 ether, vault.claimableBalanceOf(alice));
+        assertEq(1 ether, alice.balance);
+
+        // simulate rewards
+        vm.deal(address(vault), 1.2 ether);
+
+        vm.prank(oracle);
+        vm.expectEmit();
+        emit RewardsDistributed(31.5 ether, 0.7 ether, 0.07 ether);
+        vm.expectEmit();
+        emit Rebalanced(31.5 ether, 0 ether, 32 ether, 0.13 ether);
+        vault.rebalance();
+
+        assertEq(32 ether, vault.totalStaked());
+        assertEq(0.13 ether, vault.totalUnstaked());
+        assertEq(31.5 ether, vault.totalShares());
+        assertEq(31.5 ether, vault.sharesOf(alice));
+        assertEq(32.13 ether, vault.balanceOf(alice));
+        assertEq(0.07 ether, vault.totalFees());
+        assertEq(1, vault.totalValidatorsRegistered());
+        assertEq(1.2 ether, address(vault).balance);
+
+        assertEq(0.5 ether, vault.totalPendingWithdrawal());
+        assertEq(0.5 ether, vault.pendingBalanceOf(alice));
+        assertEq(0.5 ether, vault.claimableBalanceOf(alice));
+        assertEq(1 ether, alice.balance);
+    }
 }
 
 contract MockDepositContract is IDepositContract {
