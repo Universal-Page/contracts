@@ -11,7 +11,7 @@ interface ICollectorIdentifiableDigitalAsset is ILSP8IdentifiableDigitalAsset {
 
     /// An index of a token.
     /// @param tokenId A token id to get an index for.
-    function tokenIndexOf(bytes32 tokenId) external view returns (uint256 index);
+    function tokenIndexOf(bytes32 tokenId) external view returns (uint16 index);
 
     /// Purchases tokens from the contract and transfers them to a recipient.
     /// Amount paid must be equal to the price multipled by the number of tokens.

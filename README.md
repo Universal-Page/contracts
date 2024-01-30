@@ -7,7 +7,7 @@
 | ------- | --------------------- | ------------------------------------------ |
 | mainnet | PageName              | 0x39456bcd4d450e55f851f97c30df828a4e1f6c66 |
 | mainnet | GenesisDigitalAsset   | 0x8da488c29fb873c9561ccf5ff44dda6c1deddc37 |
-| mainnet | CollectorDigitalAsset |                                            |
+| mainnet | CollectorDigitalAsset | 0x5599d0ae8576250db2b9a9975fd3db1f6399b4fd |
 | mainnet | Participant           | 0xa29aeaabb5da0cc3635576933a66c1b714f058c1 |
 | mainnet | LSP7Listings          | 0xe7f5c709d62bcc3701f4c0cb871eb77e301283b5 |
 | mainnet | LSP7Offers            | 0xb2379f3f3c623cd2ed18e97e407cdda8fe6c6da6 |
@@ -21,7 +21,7 @@
 | mainnet | Vault                 | 0xa5b37d755b97c272853b9726c905414706a0553a |
 | testnet | PageName              | 0x8b08eeb9183081de7e2d4ae49fad4afb56e31ab4 |
 | testnet | GenesisDigitalAsset   | 0xc06bcd7a286308861bd99da220acbc8901949fbd |
-| testnet | CollectorDigitalAsset |                                            |
+| testnet | CollectorDigitalAsset | 0x2eef6216274bf0ede21a8a55cbb5b896bb82ac8b |
 | testnet | Participant           | 0x5a485297a1b909032a6b7000354f3322047028ee |
 | testnet | LSP7Listings          | 0x44cd7d06ceb509370b75e426ea3c12824a665e36 |
 | testnet | LSP7Offers            | 0xdf9defd55365b7b073cae009cf53dd830902c5a7 |
