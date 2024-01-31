@@ -42,10 +42,14 @@ abstract contract DropsLightAsset is OwnableUnset, ReentrancyGuard {
         return _mintNonce[recipient];
     }
 
+    function _useMintNonce(address recipient) internal returns (uint256) {
+        return _mintNonce[recipient]++;
+    }
+
     function mint(address recipient, uint256 amount, uint8 v, bytes32 r, bytes32 s) external payable nonReentrant {
         uint256 totalPrice = msg.value;
         bytes32 hash = keccak256(
-            abi.encodePacked(address(this), block.chainid, recipient, _mintNonce[recipient], amount, totalPrice)
+            abi.encodePacked(address(this), block.chainid, recipient, _useMintNonce(recipient), amount, totalPrice)
         );
         if (ECDSA.recover(hash, v, r, s) != verifier) {
             revert MintInvalidSignature();
@@ -53,7 +57,6 @@ abstract contract DropsLightAsset is OwnableUnset, ReentrancyGuard {
         uint256 serviceFeeAmount = Points.realize(totalPrice, serviceFeePoints);
         _balances[beneficiary] += totalPrice - serviceFeeAmount;
         _balances[service] += serviceFeeAmount;
-        _mintNonce[recipient] += 1;
         _doMint(recipient, amount, totalPrice);
     }
 

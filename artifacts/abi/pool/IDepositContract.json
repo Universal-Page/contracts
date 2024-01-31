@@ -1,93 +1,93 @@
 [
   {
-    "type": "function",
-    "name": "deposit",
+    "anonymous": false,
     "inputs": [
       {
-        "name": "pubkey",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "withdrawal_credentials",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "signature",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "deposit_data_root",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "payable"
-  },
-  {
-    "type": "function",
-    "name": "get_deposit_count",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "get_deposit_root",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "event",
-    "name": "DepositEvent",
-    "inputs": [
-      {
-        "name": "pubkey",
-        "type": "bytes",
         "indexed": false,
-        "internalType": "bytes"
+        "internalType": "bytes",
+        "name": "pubkey",
+        "type": "bytes"
       },
       {
-        "name": "withdrawal_credentials",
-        "type": "bytes",
         "indexed": false,
-        "internalType": "bytes"
+        "internalType": "bytes",
+        "name": "withdrawal_credentials",
+        "type": "bytes"
       },
       {
+        "indexed": false,
+        "internalType": "bytes",
         "name": "amount",
-        "type": "bytes",
-        "indexed": false,
-        "internalType": "bytes"
+        "type": "bytes"
       },
       {
+        "indexed": false,
+        "internalType": "bytes",
         "name": "signature",
-        "type": "bytes",
-        "indexed": false,
-        "internalType": "bytes"
+        "type": "bytes"
       },
       {
-        "name": "index",
-        "type": "bytes",
         "indexed": false,
-        "internalType": "bytes"
+        "internalType": "bytes",
+        "name": "index",
+        "type": "bytes"
       }
     ],
-    "anonymous": false
+    "name": "DepositEvent",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "pubkey",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "withdrawal_credentials",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "deposit_data_root",
+        "type": "bytes32"
+      }
+    ],
+    "name": "deposit",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "get_deposit_count",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "get_deposit_root",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ]
