@@ -227,20 +227,24 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         emit Claimed(account, beneficiary, amount);
     }
 
+    function totalAssets() public view returns (uint256) {
+        return totalStaked + totalUnstaked + totalClaimable - totalPendingWithdrawal;
+    }
+
     function _toBalance(uint256 shares) private view returns (uint256) {
         if (totalShares == 0) {
             return 0;
         }
         // In some cases, totalShares may be slightly less than totalStaked + totalUnstaked due to rounding errors.
         // The error is 1 wei considered insignificant and can be ignored.
-        return Math.mulDiv(shares, totalStaked + totalUnstaked, totalShares);
+        return Math.mulDiv(shares, totalAssets(), totalShares);
     }
 
     function _toShares(uint256 amount) private view returns (uint256) {
         if (totalShares == 0) {
             return amount;
         }
-        return Math.mulDiv(amount, totalShares, totalStaked + totalUnstaked);
+        return Math.mulDiv(amount, totalShares, totalAssets());
     }
 
     function deposit(address beneficiary) public payable whenNotPaused {
@@ -286,7 +290,6 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         uint256 delayedAmount = amount - immediateAmount;
 
         totalUnstaked -= immediateAmount;
-        totalStaked -= delayedAmount;
         totalPendingWithdrawal += delayedAmount;
         _pendingWithdrawals[beneficiary] += delayedAmount;
 
@@ -339,11 +342,24 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         uint256 unstaked = address(this).balance;
         uint256 staked = totalStaked;
         uint256 claimable;
+        uint256 partialWithdrawal = 0;
 
         // take out any claimable balances from unstaked balance prior to calculating rewards.
 
         // account for staking fees
         unstaked = unstaked < totalFees ? 0 : unstaked - totalFees;
+
+        // account for completed withdrawals
+        uint256 pendingWithdrawal = totalPendingWithdrawal - totalClaimable;
+        uint256 partialPendingWithdrawal = pendingWithdrawal % DEPOSIT_AMOUNT;
+        uint256 completedWithdrawal = Math.min(
+            unstaked / DEPOSIT_AMOUNT, // actual completed withdrawals
+            pendingWithdrawal / DEPOSIT_AMOUNT // pending withdrawals
+                + (partialPendingWithdrawal == 0 ? 0 : 1) // partial withdrawals
+        ) * DEPOSIT_AMOUNT;
+
+        // adjust staked balance for completed withdrawals
+        staked -= completedWithdrawal;
 
         // account for pending withdrawals to claim later.
         if (totalPendingWithdrawal > unstaked) {
@@ -352,34 +368,23 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         } else {
             claimable = totalPendingWithdrawal;
             unstaked -= totalPendingWithdrawal;
-        }
 
-        // calculate inactive part of staked balance.
-        // In a case of a partial withdrawal, the inactive part will be redistributed to unstaked balance.
-        // This only happens when full withdrawal is completed and deposited back into the contract.
-        uint256 inactive = staked % DEPOSIT_AMOUNT;
-        if (unstaked >= totalUnstaked + inactive) {
-            // redistribute inactive stake from staked to unstaked balance only if there is sufficient unstaked balance
-            staked -= inactive;
+            // if unstaked balance covers all pending withdrawals,
+            // then calculate the partial withdrawal to exclude it from rewards
+            if (completedWithdrawal > 0 && partialPendingWithdrawal > 0) {
+                partialWithdrawal = DEPOSIT_AMOUNT - partialPendingWithdrawal;
+            }
         }
 
         // at this point the difference represents the rewards.
-        // if the difference is positive, it means that the rewards are available for distribution.
-        if (staked + unstaked > totalStaked + totalUnstaked) {
-            uint256 rewards = staked + unstaked - totalStaked - totalUnstaked;
+        // If the difference is positive, it means that the rewards are available for distribution.
+        // Fees are subsidized in attempt to prevent validator exits.
+        if (unstaked - partialWithdrawal > totalUnstaked) {
+            uint256 rewards = unstaked - partialWithdrawal - totalUnstaked;
             uint256 feeAmount = Math.mulDiv(rewards, fee, _FEE_BASIS);
             emit RewardsDistributed(totalStaked + totalUnstaked, rewards, feeAmount);
             totalFees += feeAmount;
             unstaked -= feeAmount;
-
-            // redistribute rewards from unstaked to staked balance only if there is sufficient unstaked balance
-            if (inactive > 0) {
-                uint256 inactiveRequested = DEPOSIT_AMOUNT - inactive;
-                if (rewards - feeAmount >= inactiveRequested) {
-                    unstaked -= inactiveRequested;
-                    staked += inactiveRequested;
-                }
-            }
         }
 
         emit Rebalanced(totalStaked, totalUnstaked, staked, unstaked);
