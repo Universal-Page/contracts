@@ -339,27 +339,27 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     // Rebalancing is not accounting for potential validator penalties. It is assumed that the penalties
     // shall not occur or shall be negligible.
     function rebalance() external onlyOracle whenNotPaused {
-        uint256 unstaked = address(this).balance;
-        uint256 staked = totalStaked;
+        uint256 balance = address(this).balance;
         uint256 claimable;
         uint256 partialWithdrawal = 0;
-
-        // take out any claimable balances from unstaked balance prior to calculating rewards.
-
-        // account for staking fees
-        unstaked = unstaked < totalFees ? 0 : unstaked - totalFees;
 
         // account for completed withdrawals
         uint256 pendingWithdrawal = totalPendingWithdrawal - totalClaimable;
         uint256 partialPendingWithdrawal = pendingWithdrawal % DEPOSIT_AMOUNT;
         uint256 completedWithdrawal = Math.min(
-            unstaked / DEPOSIT_AMOUNT, // actual completed withdrawals
+            (balance - totalFees - totalUnstaked) / DEPOSIT_AMOUNT, // actual completed withdrawals
             pendingWithdrawal / DEPOSIT_AMOUNT // pending withdrawals
                 + (partialPendingWithdrawal == 0 ? 0 : 1) // partial withdrawals
         ) * DEPOSIT_AMOUNT;
 
         // adjust staked balance for completed withdrawals
-        staked -= completedWithdrawal;
+        uint256 staked = totalStaked - completedWithdrawal;
+
+        // take out any claimable balances from unstaked balance prior to calculating rewards.
+        uint256 unstaked = balance;
+
+        // account for staking fees
+        unstaked -= totalFees;
 
         // account for pending withdrawals to claim later.
         if (totalPendingWithdrawal > unstaked) {
