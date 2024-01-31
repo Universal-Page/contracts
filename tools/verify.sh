@@ -62,7 +62,7 @@ verify() {
     --optimizer-runs 1000 \
     --chain-id ${CHAIN_ID} \
     --verifier blockscout \
-    --verifier-url "${BLOCKSCOUT_URL}/api?" \
+    --verifier-url "${BLOCKSCOUT_URL}/api" \
     --watch \
     ${address} ${name}
 }
