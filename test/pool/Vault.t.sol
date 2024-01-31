@@ -1214,6 +1214,65 @@ contract VaultTest is Test {
         assertEq(0.5 ether, vault.claimableBalanceOf(alice));
         assertEq(1 ether, alice.balance);
     }
+
+    function test_AccountAfterWithdrawalAndDeposit() public {
+        vm.startPrank(owner);
+        vault.setDepositLimit(100 ether);
+        vault.enableOracle(oracle, true);
+        vm.stopPrank();
+
+        address alice = vm.addr(100);
+        vm.deal(alice, 32 ether);
+        vm.prank(alice);
+        vault.deposit{value: 32 ether}(alice);
+
+        vm.prank(oracle);
+        vault.registerValidator(hex"1234", hex"5678", bytes32(0));
+
+        assertEq(0 ether, address(vault).balance);
+        assertEq(32 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+        assertEq(0 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
+        assertEq(32 ether, vault.balanceOf(alice));
+        assertEq(0 ether, vault.claimableBalanceOf(alice));
+        assertEq(0 ether, vault.totalFees());
+
+        vm.prank(alice);
+        vault.withdraw(32 ether, alice);
+
+        address bob = vm.addr(101);
+        vm.deal(bob, 32 ether);
+        vm.prank(bob);
+        vault.deposit{value: 32 ether}(bob);
+
+        assertEq(32 ether, address(vault).balance);
+        assertEq(32 ether, vault.totalStaked());
+        assertEq(32 ether, vault.totalUnstaked());
+        assertEq(32 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
+        assertEq(32 ether, vault.balanceOf(bob));
+        assertEq(0 ether, vault.balanceOf(alice));
+        assertEq(32 ether, vault.pendingBalanceOf(alice));
+        assertEq(0 ether, vault.claimableBalanceOf(alice));
+        assertEq(0 ether, vault.totalFees());
+
+        vm.prank(oracle);
+        vm.expectEmit();
+        emit Rebalanced(32 ether, 32 ether, 32 ether, 0 ether);
+        vault.rebalance();
+
+        assertEq(32 ether, address(vault).balance);
+        assertEq(32 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+        assertEq(32 ether, vault.totalPendingWithdrawal());
+        assertEq(32 ether, vault.totalClaimable());
+        assertEq(32 ether, vault.balanceOf(bob));
+        assertEq(0 ether, vault.balanceOf(alice));
+        assertEq(32 ether, vault.pendingBalanceOf(alice));
+        assertEq(32 ether, vault.claimableBalanceOf(alice));
+        assertEq(0 ether, vault.totalFees());
+    }
 }
 
 contract MockDepositContract is IDepositContract {
