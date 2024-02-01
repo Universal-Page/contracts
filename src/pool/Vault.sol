@@ -9,7 +9,7 @@ import {IDepositContract, DEPOSIT_AMOUNT} from "./IDepositContract.sol";
 
 contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable {
     uint32 private constant _FEE_BASIS = 100_000;
-    uint32 private constant _MIN_FEE = 2_000; // 2%
+    uint32 private constant _MIN_FEE = 0; // 0%
     uint32 private constant _MAX_FEE = 15_000; // 15%
     uint256 private constant _MAX_VALIDATORS_SUPPORTED = 1_000_000;
 
