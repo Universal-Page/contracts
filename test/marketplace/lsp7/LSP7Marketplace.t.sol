@@ -403,7 +403,7 @@ contract LSP7MarketplaceTest is Test {
 
         vm.deal(address(bob), totalPrice);
         vm.prank(address(bob));
-        offers.place{value: totalPrice}(1, itemCount, 1 hours);
+        offers.place{value: totalPrice}(1, itemCount, totalPrice, 1 hours);
 
         vm.prank(address(alice));
         vm.expectEmit(address(marketplace));

@@ -10,6 +10,7 @@ contract LSP7Offers is ILSP7Offers, Module {
     error NotPlaced(uint256 listingId, address buyer);
     error InvalidOfferZeroItems();
     error InvalidOfferDuration(uint256 secondsUntilExpiration);
+    error InvalidOfferTotalPrice(uint256 totalPrice);
     error InactiveListing(uint256 listingId);
     error InactiveOffer(uint256 listingId, address buyer);
     error Unpaid(uint256 listingId, address buyer, uint256 amount);
@@ -43,7 +44,7 @@ contract LSP7Offers is ILSP7Offers, Module {
         return _offers[listingId][buyer];
     }
 
-    function place(uint256 listingId, uint256 itemCount, uint256 secondsUntilExpiration)
+    function place(uint256 listingId, uint256 itemCount, uint256 totalPrice, uint256 secondsUntilExpiration)
         external
         payable
         override
@@ -60,11 +61,14 @@ contract LSP7Offers is ILSP7Offers, Module {
             revert InvalidOfferDuration(secondsUntilExpiration);
         }
         LSP7Offer memory lastOffer = _offers[listingId][msg.sender];
-        uint256 totalPrice = msg.value + lastOffer.totalPrice;
+        uint256 actualTotalPrice = msg.value + lastOffer.totalPrice;
+        if (actualTotalPrice != totalPrice) {
+            revert InvalidOfferTotalPrice(totalPrice);
+        }
         uint256 expirationTime = block.timestamp + secondsUntilExpiration;
         _offers[listingId][msg.sender] =
-            LSP7Offer({itemCount: itemCount, totalPrice: totalPrice, expirationTime: expirationTime});
-        emit Placed(listingId, msg.sender, itemCount, totalPrice, expirationTime);
+            LSP7Offer({itemCount: itemCount, totalPrice: actualTotalPrice, expirationTime: expirationTime});
+        emit Placed(listingId, msg.sender, itemCount, actualTotalPrice, expirationTime);
     }
 
     function cancel(uint256 listingId) external override whenNotPaused nonReentrant {

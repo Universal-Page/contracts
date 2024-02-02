@@ -91,6 +91,17 @@
     "type": "error"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "totalPrice",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvalidOfferTotalPrice",
+    "type": "error"
+  },
+  {
     "inputs": [],
     "name": "InvalidOfferZeroItems",
     "type": "error"
@@ -541,6 +552,11 @@
       {
         "internalType": "uint256",
         "name": "itemCount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalPrice",
         "type": "uint256"
       },
       {

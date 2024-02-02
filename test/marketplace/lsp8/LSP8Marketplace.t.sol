@@ -418,7 +418,7 @@ contract LSP8MarketplaceTest is Test {
 
         vm.deal(address(bob), totalPrice);
         vm.prank(address(bob));
-        offers.place{value: totalPrice}(1, 1 hours);
+        offers.place{value: totalPrice}(1, totalPrice, 1 hours);
 
         vm.prank(address(alice));
         vm.expectEmit(address(marketplace));
@@ -512,7 +512,7 @@ contract LSP8MarketplaceTest is Test {
 
         vm.deal(address(bob), 1 ether);
         vm.prank(address(bob));
-        offers.place(1, 1 hours);
+        offers.place(1, 0 ether, 1 hours);
 
         vm.prank(address(alice));
         vm.expectRevert(abi.encodeWithSelector(LSP8Marketplace.Auctioned.selector, 1));

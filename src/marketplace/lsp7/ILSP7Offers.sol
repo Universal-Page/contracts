@@ -34,8 +34,12 @@ interface ILSP7Offers {
 
     /// place an offer with a fixed price, number of items and seconds until the offer is expired.
     /// @param listingId listing id
+    /// @param itemCount number of items
+    /// @param totalPrice total price
     /// @param secondsUntilExpiration time in seconds until offer is expired
-    function place(uint256 listingId, uint256 itemCount, uint256 secondsUntilExpiration) external payable;
+    function place(uint256 listingId, uint256 itemCount, uint256 totalPrice, uint256 secondsUntilExpiration)
+        external
+        payable;
 
     /// cancel an offer by a buyer being a sender.
     /// @param listingId listing id
