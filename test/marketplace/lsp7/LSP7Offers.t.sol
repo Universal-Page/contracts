@@ -86,7 +86,7 @@ contract LSP7OffersTest is Test {
         vm.prank(owner);
         offers.pause();
         vm.expectRevert("Pausable: paused");
-        offers.place(1, 1, 1 hours);
+        offers.place(1, 1, 0 ether, 1 hours);
         vm.expectRevert("Pausable: paused");
         offers.cancel(1);
         vm.expectRevert("Pausable: paused");
@@ -127,7 +127,7 @@ contract LSP7OffersTest is Test {
         vm.prank(address(bob));
         vm.expectEmit(address(offers));
         emit Placed(1, address(bob), offerCount, offerPrice, block.timestamp + offerDuration);
-        offers.place{value: offerPrice}(1, offerCount, offerDuration);
+        offers.place{value: offerPrice}(1, offerCount, offerPrice, offerDuration);
 
         assertEq(address(bob).balance, 0);
         assertEq(address(offers).balance, offerPrice);
@@ -153,7 +153,7 @@ contract LSP7OffersTest is Test {
             vm.prank(address(bob));
             vm.expectEmit(address(offers));
             emit Placed(1, address(bob), 5, 3 ether, block.timestamp + 1 hours);
-            offers.place{value: 3 ether}(1, 5, 1 hours);
+            offers.place{value: 3 ether}(1, 5, 3 ether, 1 hours);
 
             assertEq(address(bob).balance, 7 ether);
             assertEq(address(offers).balance, 3 ether);
@@ -169,7 +169,7 @@ contract LSP7OffersTest is Test {
             vm.prank(address(bob));
             vm.expectEmit(address(offers));
             emit Placed(1, address(bob), 10, 9 ether, block.timestamp + 3 hours);
-            offers.place{value: 6 ether}(1, 10, 3 hours);
+            offers.place{value: 6 ether}(1, 10, 9 ether, 3 hours);
 
             assertEq(address(bob).balance, 1 ether);
             assertEq(address(offers).balance, 9 ether);
@@ -193,7 +193,7 @@ contract LSP7OffersTest is Test {
 
         vm.prank(address(bob));
         vm.expectRevert(abi.encodeWithSelector(LSP7Offers.InactiveListing.selector, 1));
-        offers.place(1, 10, 1 hours);
+        offers.place(1, 10, 0 ether, 1 hours);
     }
 
     function test_Cancel() public {
@@ -206,7 +206,7 @@ contract LSP7OffersTest is Test {
 
         vm.deal(address(bob), 1 ether);
         vm.prank(address(bob));
-        offers.place{value: 1 ether}(1, 10, 1 hours);
+        offers.place{value: 1 ether}(1, 10, 1 ether, 1 hours);
 
         assertEq(address(bob).balance, 0 ether);
         assertEq(address(offers).balance, 1 ether);
@@ -232,7 +232,7 @@ contract LSP7OffersTest is Test {
 
         vm.deal(address(bob), 1 ether);
         vm.prank(address(bob));
-        offers.place{value: 1 ether}(1, 10, 1 hours);
+        offers.place{value: 1 ether}(1, 10, 1 ether, 1 hours);
 
         vm.prank(address(100));
         vm.expectRevert(abi.encodeWithSelector(LSP7Offers.NotPlaced.selector, 1, address(100)));
@@ -256,7 +256,7 @@ contract LSP7OffersTest is Test {
 
         vm.deal(address(bob), 1 ether);
         vm.prank(address(bob));
-        offers.place{value: 1 ether}(1, 10, 1 hours);
+        offers.place{value: 1 ether}(1, 10, 1 ether, 1 hours);
 
         assertEq(address(marketplace).balance, 0 ether);
         assertEq(address(bob).balance, 0 ether);
@@ -293,7 +293,7 @@ contract LSP7OffersTest is Test {
 
         vm.deal(address(bob), 1 ether);
         vm.prank(address(bob));
-        offers.place{value: 1 ether}(1, 10, 1 hours);
+        offers.place{value: 1 ether}(1, 10, 1 ether, 1 hours);
 
         vm.warp(block.timestamp + 10 days);
 
@@ -316,7 +316,7 @@ contract LSP7OffersTest is Test {
 
         vm.deal(address(bob), 1 ether);
         vm.prank(address(bob));
-        offers.place{value: 1 ether}(1, 10, 1 hours);
+        offers.place{value: 1 ether}(1, 10, 1 ether, 1 hours);
 
         assertTrue(offers.isPlacedOffer(1, address(bob)));
         assertTrue(offers.isActiveOffer(1, address(bob)));
@@ -345,7 +345,7 @@ contract LSP7OffersTest is Test {
 
         vm.deal(address(bob), 1 ether);
         vm.prank(address(bob));
-        offers.place{value: 1 ether}(1, 10, 1 hours);
+        offers.place{value: 1 ether}(1, 10, 1 ether, 1 hours);
 
         vm.prank(address(alice));
         listings.update(1, 9, 1 ether, block.timestamp, 10 days);

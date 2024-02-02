@@ -10,6 +10,7 @@ import {ILSP8Offers, LSP8Offer} from "./ILSP8Offers.sol";
 contract LSP8Offers is ILSP8Offers, Module {
     error NotPlaced(uint256 listingId, address buyer);
     error InvalidOfferDuration(uint256 secondsUntilExpiration);
+    error InvalidOfferTotalPrice(uint256 totalPrice);
     error InactiveListing(uint256 listingId);
     error InactiveOffer(uint256 listingId, address buyer);
     error Unpaid(uint256 listingId, address buyer, uint256 amount);
@@ -42,7 +43,7 @@ contract LSP8Offers is ILSP8Offers, Module {
         return _offers[listingId][buyer];
     }
 
-    function place(uint256 listingId, uint256 secondsUntilExpiration)
+    function place(uint256 listingId, uint256 totalPrice, uint256 secondsUntilExpiration)
         external
         payable
         override
@@ -57,10 +58,13 @@ contract LSP8Offers is ILSP8Offers, Module {
             revert InvalidOfferDuration(secondsUntilExpiration);
         }
         LSP8Offer memory lastOffer = _offers[listingId][msg.sender];
-        uint256 price = msg.value + lastOffer.price;
+        uint256 actualTotalPrice = msg.value + lastOffer.price;
+        if (actualTotalPrice != totalPrice) {
+            revert InvalidOfferTotalPrice(totalPrice);
+        }
         uint256 expirationTime = block.timestamp + secondsUntilExpiration;
-        _offers[listingId][msg.sender] = LSP8Offer({price: price, expirationTime: expirationTime});
-        emit Placed(listingId, msg.sender, listing.tokenId, price, expirationTime);
+        _offers[listingId][msg.sender] = LSP8Offer({price: actualTotalPrice, expirationTime: expirationTime});
+        emit Placed(listingId, msg.sender, listing.tokenId, actualTotalPrice, expirationTime);
     }
 
     function cancel(uint256 listingId) external override whenNotPaused nonReentrant {
