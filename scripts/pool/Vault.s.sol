@@ -12,7 +12,7 @@ import {Vault} from "../../src/pool/Vault.sol";
 import {DepositContract} from "../../src/pool/IDepositContract.sol";
 
 uint32 constant SERVICE_FEE = 8_000; // 8%
-uint256 constant DEPOSIT_LIMIT = 1000 * 32 ether;
+uint256 constant DEPOSIT_LIMIT = 2000 * 32 ether;
 
 contract Deploy is Script {
     function run() external {
@@ -54,43 +54,43 @@ contract Configure is Script {
 
         if (vault.operator() != operator) {
             console.log(string.concat("Vault: set operator ", Strings.toHexString(operator)));
-            vm.broadcast(owner);
+            vm.broadcast(operator);
             vault.setOperator(operator);
         }
 
         if (vault.feeRecipient() != profile) {
             console.log(string.concat("Vault: set fee recipient ", Strings.toHexString(profile)));
-            vm.broadcast(owner);
+            vm.broadcast(operator);
             vault.setFeeRecipient(profile);
         }
 
         if (vault.fee() != SERVICE_FEE) {
             console.log(string.concat("Vault: set fee ", Strings.toString(SERVICE_FEE)));
-            vm.broadcast(owner);
+            vm.broadcast(operator);
             vault.setFee(SERVICE_FEE);
         }
 
         if (vault.depositLimit() != DEPOSIT_LIMIT) {
             console.log(string.concat("Vault: set deposit limit ", Strings.toString(DEPOSIT_LIMIT)));
-            vm.broadcast(owner);
+            vm.broadcast(operator);
             vault.setDepositLimit(DEPOSIT_LIMIT);
         }
 
         if (!vault.restricted()) {
             console.log("Vault: set restricted");
-            vm.broadcast(owner);
+            vm.broadcast(operator);
             vault.setRestricted(true);
         }
 
         if (!vault.isAllowlisted(profile)) {
             console.log(string.concat("Vault: allowlist ", Strings.toHexString(profile)));
-            vm.broadcast(owner);
+            vm.broadcast(operator);
             vault.allowlist(profile, true);
         }
 
         if (!vault.isOracle(oracle)) {
             console.log(string.concat("Vault: enable oracle ", Strings.toHexString(oracle)));
-            vm.broadcast(owner);
+            vm.broadcast(operator);
             vault.enableOracle(oracle, true);
         }
     }
