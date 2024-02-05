@@ -76,10 +76,10 @@ contract Configure is Script {
             vault.setDepositLimit(DEPOSIT_LIMIT);
         }
 
-        if (!vault.restricted()) {
-            console.log("Vault: set restricted");
+        if (vault.restricted()) {
+            console.log("Vault: set not restricted");
             vm.broadcast(operator);
-            vault.setRestricted(true);
+            vault.setRestricted(false);
         }
 
         if (!vault.isAllowlisted(profile)) {
