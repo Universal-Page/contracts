@@ -45,7 +45,6 @@ contract Deploy is Script {
 
 contract Configure is Script {
     function run() external {
-        address owner = vm.envAddress("OWNER_ADDRESS");
         address operator = vm.envAddress("OWNER_ADDRESS");
         address profile = vm.envAddress("PROFILE_ADDRESS");
         address oracle = vm.envAddress("POOL_ORACLE_ADDRESS");

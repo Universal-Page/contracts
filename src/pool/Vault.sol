@@ -340,40 +340,30 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     // shall not occur or shall be negligible.
     function rebalance() external onlyOracle whenNotPaused {
         uint256 balance = address(this).balance;
-        uint256 claimable;
-        uint256 partialWithdrawal = 0;
 
         // account for completed withdrawals
         uint256 pendingWithdrawal = totalPendingWithdrawal - totalClaimable;
-        uint256 partialPendingWithdrawal = pendingWithdrawal % DEPOSIT_AMOUNT;
         uint256 completedWithdrawal = Math.min(
             (balance - totalFees - totalUnstaked) / DEPOSIT_AMOUNT, // actual completed withdrawals
             pendingWithdrawal / DEPOSIT_AMOUNT // pending withdrawals
-                + (partialPendingWithdrawal == 0 ? 0 : 1) // partial withdrawals
+                + (pendingWithdrawal % DEPOSIT_AMOUNT == 0 ? 0 : 1) // partial withdrawals
         ) * DEPOSIT_AMOUNT;
 
         // adjust staked balance for completed withdrawals
         uint256 staked = totalStaked - completedWithdrawal;
 
         // take out any claimable balances from unstaked balance prior to calculating rewards.
-        uint256 unstaked = balance;
+        uint256 unstaked = balance - totalFees - totalClaimable - completedWithdrawal;
 
-        // account for staking fees
-        unstaked -= totalFees;
+        // account for withdrawals to claim later
+        uint256 claimable = totalClaimable + completedWithdrawal;
 
-        // account for pending withdrawals to claim later.
-        if (totalPendingWithdrawal > unstaked) {
-            claimable = unstaked;
-            unstaked = 0;
-        } else {
+        // account for partial completeted withdrawals
+        uint256 partialWithdrawal = 0;
+        if (claimable > totalPendingWithdrawal) {
+            partialWithdrawal = claimable - totalPendingWithdrawal;
+            unstaked += partialWithdrawal;
             claimable = totalPendingWithdrawal;
-            unstaked -= totalPendingWithdrawal;
-
-            // if unstaked balance covers all pending withdrawals,
-            // then calculate the partial withdrawal to exclude it from rewards
-            if (completedWithdrawal > 0 && partialPendingWithdrawal > 0) {
-                partialWithdrawal = DEPOSIT_AMOUNT - partialPendingWithdrawal;
-            }
         }
 
         // at this point the difference represents the rewards.
