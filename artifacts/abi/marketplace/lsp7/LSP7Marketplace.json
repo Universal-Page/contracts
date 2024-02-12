@@ -588,6 +588,24 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "orderId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "itemCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "fillOrder",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "newOwner_",
         "type": "address"

@@ -100,6 +100,11 @@ contract Configure is Script {
             offers.grantRole(address(marketplace), MARKETPLACE_ROLE);
         }
 
+        if (!orders.hasRole(address(marketplace), MARKETPLACE_ROLE)) {
+            vm.broadcast(owner);
+            orders.grantRole(address(marketplace), MARKETPLACE_ROLE);
+        }
+
         if (marketplace.beneficiary() != treasury) {
             vm.broadcast(owner);
             marketplace.setBeneficiary(treasury);

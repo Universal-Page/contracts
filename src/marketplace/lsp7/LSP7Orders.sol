@@ -54,6 +54,7 @@ contract LSP7Orders is ILSP7Orders, Module {
         override
         whenNotPaused
         nonReentrant
+        returns (uint256)
     {
         if (itemCount == 0) {
             revert InvalidItemCount(itemCount);
@@ -72,6 +73,7 @@ contract LSP7Orders is ILSP7Orders, Module {
         _orders[orderId] =
             LSP7Order({id: orderId, asset: asset, buyer: buyer, itemPrice: itemPrice, itemCount: itemCount});
         emit Placed(orderId, asset, buyer, itemPrice, itemCount);
+        return orderId;
     }
 
     function cancel(address asset) external override whenNotPaused nonReentrant {

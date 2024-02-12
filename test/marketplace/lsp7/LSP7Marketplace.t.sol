@@ -475,4 +475,46 @@ contract LSP7MarketplaceTest is Test {
         assertEq(asset.balanceOf(address(alice)), 0);
         assertEq(asset.balanceOf(address(bob)), itemCount);
     }
+
+    function testFuzz_FillOrder(uint256 itemCount, uint256 itemPrice, uint256 fillCount) public {
+        vm.assume(itemPrice < 100_000_000 ether);
+        vm.assume(itemCount > 0 && itemCount < 1_000_000);
+        vm.assume(fillCount > 0 && fillCount < itemCount);
+
+        (UniversalProfile alice,) = deployProfile();
+        (UniversalProfile bob,) = deployProfile();
+
+        vm.deal(address(alice), itemPrice * itemCount);
+        vm.prank(address(alice));
+        uint256 orderId = orders.place{value: itemPrice * itemCount}(address(asset), itemPrice, itemCount);
+        assertEq(orderId, 1);
+
+        asset.mint(address(bob), itemCount, false, "");
+        vm.prank(address(bob));
+        asset.authorizeOperator(address(marketplace), itemCount, "");
+
+        assertEq(address(alice).balance, 0);
+        assertEq(address(bob).balance, 0);
+        assertEq(asset.balanceOf(address(alice)), 0);
+        assertEq(asset.balanceOf(address(bob)), itemCount);
+
+        vm.prank(address(bob));
+        vm.expectEmit();
+        emit Sold(
+            address(asset),
+            address(bob),
+            address(alice),
+            fillCount,
+            itemPrice * fillCount,
+            0,
+            0,
+            hex"020000000000000000000000000000000000000000000000000000000000000001"
+        );
+        marketplace.fillOrder(orderId, fillCount);
+
+        assertEq(address(alice).balance, 0);
+        assertEq(address(bob).balance, itemPrice * fillCount);
+        assertEq(asset.balanceOf(address(alice)), fillCount);
+        assertEq(asset.balanceOf(address(bob)), itemCount - fillCount);
+    }
 }
