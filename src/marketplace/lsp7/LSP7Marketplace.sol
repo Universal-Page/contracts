@@ -55,8 +55,8 @@ contract LSP7Marketplace is Base {
         orders = orders_;
     }
 
-    function setOrders(ILSP7Orders orders_) external onlyOwner {
-        orders = orders_;
+    function setOrders(address orders_) external onlyOwner {
+        orders = ILSP7Orders(orders_);
     }
 
     function buy(uint256 listingId, uint256 itemCount, address recipient) external payable whenNotPaused nonReentrant {

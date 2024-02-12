@@ -22,6 +22,7 @@ contract Deploy is Script {
         address treasury = vm.envAddress("TREASURY_ADDRESS");
         address listings = vm.envAddress("CONTRACT_LSP7_LISTINGS_ADDRESS");
         address offers = vm.envAddress("CONTRACT_LSP7_OFFERS_ADDRESS");
+        address orders = vm.envAddress("CONTRACT_LSP7_ORDERS_ADDRESS");
         address participant = vm.envAddress("CONTRACT_PARTICIPANT_ADDRESS");
 
         address proxy = vm.envOr("CONTRACT_LSP7_MARKETPLACE_ADDRESS", address(0));
@@ -35,7 +36,7 @@ contract Deploy is Script {
                 new TransparentUpgradeableProxy(
                     address(marketplace),
                     admin,
-                    abi.encodeWithSelector(LSP7Marketplace.initialize.selector, owner, treasury, listings, offers, participant)
+                    abi.encodeWithSelector(LSP7Marketplace.initialize.selector, owner, treasury, listings, offers, orders, participant)
                 )
             );
             console.log(string.concat("LSP7Marketplace: deploy ", Strings.toHexString(address(proxy))));
@@ -71,7 +72,13 @@ contract Configure is Script {
         IParticipant participant = IParticipant(vm.envAddress("CONTRACT_PARTICIPANT_ADDRESS"));
         Module listings = Module(vm.envAddress("CONTRACT_LSP7_LISTINGS_ADDRESS"));
         Module offers = Module(vm.envAddress("CONTRACT_LSP7_OFFERS_ADDRESS"));
+        Module orders = Module(vm.envAddress("CONTRACT_LSP7_ORDERS_ADDRESS"));
         LSP7Marketplace marketplace = LSP7Marketplace(payable(vm.envAddress("CONTRACT_LSP7_MARKETPLACE_ADDRESS")));
+
+        if (address(marketplace.orders()) != address(orders)) {
+            vm.broadcast(owner);
+            marketplace.setOrders(address(orders));
+        }
 
         if (marketplace.feePoints() != FEE_POINTS) {
             vm.broadcast(owner);

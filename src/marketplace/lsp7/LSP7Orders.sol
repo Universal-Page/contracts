@@ -1,22 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity =0.8.22;
 
-import {ILSP7DigitalAsset} from "@lukso/lsp-smart-contracts/contracts/LSP7DigitalAsset/ILSP7DigitalAsset.sol";
 import {Module} from "../common/Module.sol";
 import {ILSP7Orders, LSP7Order} from "./ILSP7Orders.sol";
 
 contract LSP7Orders is ILSP7Orders, Module {
     error Unpaid(address buyer, uint256 amount);
-    error NotPlaced(address asset, address buyer);
-    error Inactive(address asset, address buyer);
+    error NotPlacedOf(address asset, address buyer);
+    error NotPlaced(uint256 id);
     error InvalidItemCount(uint256 itemCount);
-    error InvalidDuration(uint256 secondsUntilExpiration);
     error AlreadyPlaced(address asset, address buyer);
     error InvalidAmount(uint256 expected, uint256 actual);
     error InsufficientItemCount(uint256 orderCount, uint256 offeredCount);
 
     uint256 public totalOrders;
-    mapping(address asset => mapping(address buyer => LSP7Order order)) private _orders;
+    mapping(address asset => mapping(address buyer => uint256)) private _orderIds;
+    mapping(uint256 id => LSP7Order) private _orders;
 
     constructor() {
         _disableInitializers();
@@ -26,24 +25,30 @@ contract LSP7Orders is ILSP7Orders, Module {
         Module._initialize(newOwner_);
     }
 
-    function isPlacedOrder(address asset, address buyer) public view override returns (bool) {
-        LSP7Order memory order = _orders[asset][buyer];
+    function isPlacedOrderOf(address asset, address buyer) public view override returns (bool) {
+        return isPlacedOrder(_orderIds[asset][buyer]);
+    }
+
+    function orderOf(address asset, address buyer) public view override returns (LSP7Order memory) {
+        if (!isPlacedOrderOf(asset, buyer)) {
+            revert NotPlacedOf(asset, buyer);
+        }
+        return _orders[_orderIds[asset][buyer]];
+    }
+
+    function isPlacedOrder(uint256 id) public view override returns (bool) {
+        LSP7Order memory order = _orders[id];
         return order.itemCount > 0;
     }
 
-    function isActiveOrder(address asset, address buyer) public view override returns (bool) {
-        LSP7Order memory order = _orders[asset][buyer];
-        return (order.itemCount > 0) && (order.expirationTime > block.timestamp);
-    }
-
-    function getOrder(address asset, address buyer) public view override returns (LSP7Order memory) {
-        if (!isPlacedOrder(asset, buyer)) {
-            revert NotPlaced(asset, buyer);
+    function getOrder(uint256 id) public view override returns (LSP7Order memory) {
+        if (!isPlacedOrder(id)) {
+            revert NotPlaced(id);
         }
-        return _orders[asset][buyer];
+        return _orders[id];
     }
 
-    function place(address asset, uint256 itemPrice, uint256 itemCount, uint256 secondsUntilExpiration)
+    function place(address asset, uint256 itemPrice, uint256 itemCount)
         external
         payable
         override
@@ -53,33 +58,33 @@ contract LSP7Orders is ILSP7Orders, Module {
         if (itemCount == 0) {
             revert InvalidItemCount(itemCount);
         }
-        if ((secondsUntilExpiration < 1 hours) || (secondsUntilExpiration > 28 days)) {
-            revert InvalidDuration(secondsUntilExpiration);
-        }
         address buyer = msg.sender;
-        if (isPlacedOrder(asset, buyer)) {
+        if (isPlacedOrderOf(asset, buyer)) {
             revert AlreadyPlaced(asset, buyer);
         }
         uint256 totalValue = itemPrice * itemCount;
         if (msg.value != totalValue) {
             revert InvalidAmount(totalValue, msg.value);
         }
-        uint256 expirationTime = block.timestamp + secondsUntilExpiration;
         totalOrders += 1;
-        _orders[asset][buyer] =
-            LSP7Order({id: totalOrders, itemPrice: itemPrice, itemCount: itemCount, expirationTime: expirationTime});
-        emit Placed(asset, buyer, itemPrice, itemCount, expirationTime);
+        uint256 orderId = totalOrders;
+        _orderIds[asset][buyer] = orderId;
+        _orders[orderId] =
+            LSP7Order({id: orderId, asset: asset, buyer: buyer, itemPrice: itemPrice, itemCount: itemCount});
+        emit Placed(orderId, asset, buyer, itemPrice, itemCount);
     }
 
     function cancel(address asset) external override whenNotPaused nonReentrant {
-        LSP7Order memory order = getOrder(asset, msg.sender);
+        address buyer = msg.sender;
+        LSP7Order memory order = orderOf(asset, buyer);
+        delete _orders[order.id];
+        delete _orderIds[asset][buyer];
         uint256 totalValue = order.itemPrice * order.itemCount;
-        delete _orders[asset][msg.sender];
-        (bool success,) = msg.sender.call{value: totalValue}("");
+        (bool success,) = buyer.call{value: totalValue}("");
         if (!success) {
-            revert Unpaid(msg.sender, totalValue);
+            revert Unpaid(buyer, totalValue);
         }
-        emit Canceled(asset, msg.sender, order.itemCount, order.itemPrice);
+        emit Canceled(order.id, asset, buyer, order.itemPrice, order.itemCount);
     }
 
     function fill(address asset, address seller, address buyer, uint256 itemCount)
@@ -89,19 +94,16 @@ contract LSP7Orders is ILSP7Orders, Module {
         nonReentrant
         onlyMarketplace
     {
-        LSP7Order memory order = getOrder(asset, buyer);
-        if (!isActiveOrder(asset, buyer)) {
-            revert Inactive(asset, buyer);
-        }
+        LSP7Order memory order = orderOf(asset, buyer);
         if (itemCount > order.itemCount) {
             revert InsufficientItemCount(order.itemCount, itemCount);
         }
-        _orders[asset][buyer].itemCount -= itemCount;
+        _orders[order.id].itemCount -= itemCount;
         uint256 totalValue = order.itemPrice * itemCount;
         (bool success,) = msg.sender.call{value: totalValue}("");
         if (!success) {
             revert Unpaid(msg.sender, totalValue);
         }
-        emit Filled(asset, seller, buyer, order.itemPrice, itemCount);
+        emit Filled(order.id, asset, seller, buyer, order.itemPrice, itemCount);
     }
 }

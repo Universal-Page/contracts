@@ -11,6 +11,7 @@
 | mainnet | Participant           | 0xa29aeaabb5da0cc3635576933a66c1b714f058c1 |
 | mainnet | LSP7Listings          | 0xe7f5c709d62bcc3701f4c0cb871eb77e301283b5 |
 | mainnet | LSP7Offers            | 0xb2379f3f3c623cd2ed18e97e407cdda8fe6c6da6 |
+| mainnet | LSP7Orders            |  |
 | mainnet | LSP7Marketplace       | 0xe04cf97440cd191096c4103f9c48abd96184fb8d |
 | mainnet | LSP8Listings          | 0x4faab47b234c7f5da411429ee86cb15cb0754354 |
 | mainnet | LSP8Offers            | 0xed189b51455c9714aa49b0c55529469c512b10b6 |
@@ -25,6 +26,7 @@
 | testnet | Participant           | 0x5a485297a1b909032a6b7000354f3322047028ee |
 | testnet | LSP7Listings          | 0x44cd7d06ceb509370b75e426ea3c12824a665e36 |
 | testnet | LSP7Offers            | 0xdf9defd55365b7b073cae009cf53dd830902c5a7 |
+| testnet | LSP7Orders            | 0xf030798a7b2722c32b58fae3aee5019989cd409f |
 | testnet | LSP7Marketplace       | 0xc9c940a35fc8d3522085b991ce3e1a920354f19a |
 | testnet | LSP8Listings          | 0xf069f9b8e0f96d742c6dfd3d78b0e382f3411207 |
 | testnet | LSP8Offers            | 0xaebcc2c80abacb7e4d928d4c0a52c7bbeba4c4be |

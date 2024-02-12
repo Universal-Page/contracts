@@ -757,7 +757,7 @@
   {
     "inputs": [
       {
-        "internalType": "contract ILSP7Orders",
+        "internalType": "address",
         "name": "orders_",
         "type": "address"
       }
