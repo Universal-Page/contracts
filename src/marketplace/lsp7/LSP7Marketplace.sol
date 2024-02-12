@@ -66,7 +66,7 @@ contract LSP7Marketplace is Base {
         }
         listings.deduct(listingId, itemCount);
         _executeSale(
-            listing.asset, itemCount, listing.owner, recipient, msg.value, abi.encode(SALE_KIND_SPOT, listingId)
+            listing.asset, itemCount, listing.owner, recipient, msg.value, abi.encodePacked(SALE_KIND_SPOT, listingId)
         );
     }
 
@@ -84,7 +84,7 @@ contract LSP7Marketplace is Base {
             listing.owner,
             buyer,
             offer.totalPrice,
-            abi.encode(SALE_KIND_OFFER, listingId)
+            abi.encodePacked(SALE_KIND_OFFER, listingId)
         );
     }
 

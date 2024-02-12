@@ -17,7 +17,7 @@ import {Base} from "../../../src/marketplace/common/Base.sol";
 import {LSP7Listings} from "../../../src/marketplace/lsp7/LSP7Listings.sol";
 import {LSP7Offers} from "../../../src/marketplace/lsp7/LSP7Offers.sol";
 import {LSP7Orders} from "../../../src/marketplace/lsp7/LSP7Orders.sol";
-import {LSP7Marketplace, SALE_KIND_SPOT, SALE_KIND_OFFER} from "../../../src/marketplace/lsp7/LSP7Marketplace.sol";
+import {LSP7Marketplace} from "../../../src/marketplace/lsp7/LSP7Marketplace.sol";
 import {Participant, GENESIS_DISCOUNT} from "../../../src/marketplace/Participant.sol";
 import {deployProfile} from "../../utils/profile.sol";
 import {LSP7DigitalAssetMock} from "./LSP7DigitalAssetMock.sol";
@@ -204,7 +204,7 @@ contract LSP7MarketplaceTest is Test {
             totalPrice,
             0,
             0,
-            abi.encode(SALE_KIND_SPOT, uint256(1))
+            hex"000000000000000000000000000000000000000000000000000000000000000001"
         );
         marketplace.buy{value: totalPrice}(1, itemCount, address(bob));
 
@@ -246,7 +246,7 @@ contract LSP7MarketplaceTest is Test {
             totalPrice,
             feeAmount,
             0,
-            abi.encode(SALE_KIND_SPOT, uint256(1))
+            hex"000000000000000000000000000000000000000000000000000000000000000001"
         );
         marketplace.buy{value: totalPrice}(1, itemCount, address(bob));
 
@@ -292,7 +292,7 @@ contract LSP7MarketplaceTest is Test {
             totalPrice,
             feeAmount - discountFeeAmount,
             0,
-            abi.encode(SALE_KIND_SPOT, uint256(1))
+            hex"000000000000000000000000000000000000000000000000000000000000000001"
         );
         marketplace.buy{value: totalPrice}(1, 10, address(bob));
 
@@ -348,7 +348,7 @@ contract LSP7MarketplaceTest is Test {
             totalPrice,
             0,
             royaltiesAmount0 + royaltiesAmount1,
-            abi.encode(SALE_KIND_SPOT, uint256(1))
+            hex"000000000000000000000000000000000000000000000000000000000000000001"
         );
         if (royaltiesAmount0 > 0) {
             vm.expectEmit(address(marketplace));
@@ -394,7 +394,7 @@ contract LSP7MarketplaceTest is Test {
             10 ether,
             1 ether,
             0,
-            abi.encode(SALE_KIND_SPOT, uint256(1))
+            hex"000000000000000000000000000000000000000000000000000000000000000001"
         );
         marketplace.buy{value: 10 ether}(1, 10, address(bob));
 
@@ -465,7 +465,7 @@ contract LSP7MarketplaceTest is Test {
             totalPrice,
             0,
             0,
-            abi.encode(SALE_KIND_OFFER, uint256(1))
+            hex"010000000000000000000000000000000000000000000000000000000000000001"
         );
         marketplace.acceptOffer(1, address(bob));
 
