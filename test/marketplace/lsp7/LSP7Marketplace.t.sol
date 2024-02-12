@@ -16,7 +16,8 @@ import {Royalties, RoyaltiesInfo} from "../../../src/common/Royalties.sol";
 import {Base} from "../../../src/marketplace/common/Base.sol";
 import {LSP7Listings} from "../../../src/marketplace/lsp7/LSP7Listings.sol";
 import {LSP7Offers} from "../../../src/marketplace/lsp7/LSP7Offers.sol";
-import {LSP7Marketplace} from "../../../src/marketplace/lsp7/LSP7Marketplace.sol";
+import {LSP7Orders} from "../../../src/marketplace/lsp7/LSP7Orders.sol";
+import {LSP7Marketplace, SALE_KIND_SPOT, SALE_KIND_OFFER} from "../../../src/marketplace/lsp7/LSP7Marketplace.sol";
 import {Participant, GENESIS_DISCOUNT} from "../../../src/marketplace/Participant.sol";
 import {deployProfile} from "../../utils/profile.sol";
 import {LSP7DigitalAssetMock} from "./LSP7DigitalAssetMock.sol";
@@ -24,22 +25,24 @@ import {LSP7DigitalAssetMock} from "./LSP7DigitalAssetMock.sol";
 contract LSP7MarketplaceTest is Test {
     event FeePointsChanged(uint32 oldPoints, uint32 newPoints);
     event RoyaltiesThresholdPointsChanged(uint32 oldPoints, uint32 newPoints);
-    event Sale(
-        uint256 indexed listingId,
+    event Sold(
         address indexed asset,
-        uint256 itemCount,
         address indexed seller,
-        address buyer,
-        uint256 totalPaid
+        address indexed buyer,
+        uint256 itemCount,
+        uint256 totalPaid,
+        uint256 totalFee,
+        uint256 totalRoyalties,
+        bytes data
     );
-    event RoyaltiesPaid(
-        uint256 indexed listingId, address indexed asset, uint256 itemCount, address indexed recipient, uint256 amount
+    event RoyaltiesPaidOut(
+        address indexed asset, uint256 itemCount, uint256 totalPaid, address indexed recipient, uint256 amount
     );
-    event FeePaid(uint256 indexed listingId, address indexed asset, uint256 itemCount, uint256 amount);
     event ValueWithdrawn(address indexed beneficiary, uint256 indexed value);
 
     LSP7Listings listings;
     LSP7Offers offers;
+    LSP7Orders orders;
     LSP7Marketplace marketplace;
     Participant participant;
     address admin;
@@ -81,6 +84,15 @@ contract LSP7MarketplaceTest is Test {
                 )
             )
         );
+        orders = LSP7Orders(
+            address(
+                new TransparentUpgradeableProxy(
+                    address(new LSP7Orders()),
+                    admin,
+                    abi.encodeWithSelector(LSP7Orders.initialize.selector, owner)
+                )
+            )
+        );
         marketplace = LSP7Marketplace(
             payable(
                 address(
@@ -88,7 +100,7 @@ contract LSP7MarketplaceTest is Test {
                         address(new LSP7Marketplace()),
                         admin,
                         abi.encodeWithSelector(
-                            LSP7Marketplace.initialize.selector, owner, beneficiary, listings, offers, participant
+                            LSP7Marketplace.initialize.selector, owner, beneficiary, listings, offers, orders, participant
                         )
                     )
                 )
@@ -98,10 +110,12 @@ contract LSP7MarketplaceTest is Test {
         vm.startPrank(owner);
         listings.grantRole(address(marketplace), MARKETPLACE_ROLE);
         offers.grantRole(address(marketplace), MARKETPLACE_ROLE);
+        orders.grantRole(address(marketplace), MARKETPLACE_ROLE);
         vm.stopPrank();
 
         assertTrue(listings.hasRole(address(marketplace), MARKETPLACE_ROLE));
         assertTrue(offers.hasRole(address(marketplace), MARKETPLACE_ROLE));
+        assertTrue(orders.hasRole(address(marketplace), MARKETPLACE_ROLE));
     }
 
     function test_Initialized() public {
@@ -110,6 +124,7 @@ contract LSP7MarketplaceTest is Test {
         assertEq(beneficiary, marketplace.beneficiary());
         assertEq(address(listings), address(marketplace.listings()));
         assertEq(address(offers), address(marketplace.offers()));
+        assertEq(address(orders), address(marketplace.orders()));
         assertEq(address(participant), address(marketplace.participant()));
         assertEq(0, marketplace.feePoints());
         assertEq(0, marketplace.royaltiesThresholdPoints());
@@ -181,7 +196,16 @@ contract LSP7MarketplaceTest is Test {
 
         vm.prank(address(bob));
         vm.expectEmit(address(marketplace));
-        emit Sale(1, address(asset), itemCount, address(alice), address(bob), totalPrice);
+        emit Sold(
+            address(asset),
+            address(alice),
+            address(bob),
+            itemCount,
+            totalPrice,
+            0,
+            0,
+            abi.encode(SALE_KIND_SPOT, uint256(1))
+        );
         marketplace.buy{value: totalPrice}(1, itemCount, address(bob));
 
         assertFalse(listings.isListed(1));
@@ -213,12 +237,17 @@ contract LSP7MarketplaceTest is Test {
         vm.deal(address(bob), totalPrice);
 
         vm.prank(address(bob));
-        if (feeAmount > 0) {
-            vm.expectEmit(address(marketplace));
-            emit FeePaid(1, address(asset), itemCount, feeAmount);
-        }
         vm.expectEmit(address(marketplace));
-        emit Sale(1, address(asset), itemCount, address(alice), address(bob), totalPrice);
+        emit Sold(
+            address(asset),
+            address(alice),
+            address(bob),
+            itemCount,
+            totalPrice,
+            feeAmount,
+            0,
+            abi.encode(SALE_KIND_SPOT, uint256(1))
+        );
         marketplace.buy{value: totalPrice}(1, itemCount, address(bob));
 
         assertFalse(listings.isListed(1));
@@ -254,12 +283,17 @@ contract LSP7MarketplaceTest is Test {
         vm.deal(address(bob), totalPrice);
 
         vm.prank(address(bob));
-        if (feeAmount > 0) {
-            vm.expectEmit(address(marketplace));
-            emit FeePaid(1, address(asset), 10, feeAmount - discountFeeAmount);
-        }
         vm.expectEmit(address(marketplace));
-        emit Sale(1, address(asset), 10, address(alice), address(bob), totalPrice);
+        emit Sold(
+            address(asset),
+            address(alice),
+            address(bob),
+            10,
+            totalPrice,
+            feeAmount - discountFeeAmount,
+            0,
+            abi.encode(SALE_KIND_SPOT, uint256(1))
+        );
         marketplace.buy{value: totalPrice}(1, 10, address(bob));
 
         assertFalse(listings.isListed(1));
@@ -305,16 +339,25 @@ contract LSP7MarketplaceTest is Test {
         vm.deal(address(bob), totalPrice);
 
         vm.prank(address(bob));
+        vm.expectEmit(address(marketplace));
+        emit Sold(
+            address(asset),
+            address(alice),
+            address(bob),
+            itemCount,
+            totalPrice,
+            0,
+            royaltiesAmount0 + royaltiesAmount1,
+            abi.encode(SALE_KIND_SPOT, uint256(1))
+        );
         if (royaltiesAmount0 > 0) {
             vm.expectEmit(address(marketplace));
-            emit RoyaltiesPaid(1, address(asset), itemCount, royaltiesRecipient0, royaltiesAmount0);
+            emit RoyaltiesPaidOut(address(asset), itemCount, totalPrice, royaltiesRecipient0, royaltiesAmount0);
         }
         if (royaltiesAmount1 > 0) {
             vm.expectEmit(address(marketplace));
-            emit RoyaltiesPaid(1, address(asset), itemCount, royaltiesRecipient1, royaltiesAmount1);
+            emit RoyaltiesPaidOut(address(asset), itemCount, totalPrice, royaltiesRecipient1, royaltiesAmount1);
         }
-        vm.expectEmit(address(marketplace));
-        emit Sale(1, address(asset), itemCount, address(alice), address(bob), totalPrice);
         marketplace.buy{value: totalPrice}(1, itemCount, address(bob));
 
         assertFalse(listings.isListed(1));
@@ -343,9 +386,16 @@ contract LSP7MarketplaceTest is Test {
         vm.deal(address(bob), 10 ether);
         vm.prank(address(bob));
         vm.expectEmit(address(marketplace));
-        emit FeePaid(1, address(asset), 10, 1 ether);
-        vm.expectEmit(address(marketplace));
-        emit Sale(1, address(asset), 10, address(alice), address(bob), 10 ether);
+        emit Sold(
+            address(asset),
+            address(alice),
+            address(bob),
+            10,
+            10 ether,
+            1 ether,
+            0,
+            abi.encode(SALE_KIND_SPOT, uint256(1))
+        );
         marketplace.buy{value: 10 ether}(1, 10, address(bob));
 
         assertFalse(listings.isListed(1));
@@ -407,7 +457,16 @@ contract LSP7MarketplaceTest is Test {
 
         vm.prank(address(alice));
         vm.expectEmit(address(marketplace));
-        emit Sale(1, address(asset), itemCount, address(alice), address(bob), totalPrice);
+        emit Sold(
+            address(asset),
+            address(alice),
+            address(bob),
+            itemCount,
+            totalPrice,
+            0,
+            0,
+            abi.encode(SALE_KIND_OFFER, uint256(1))
+        );
         marketplace.acceptOffer(1, address(bob));
 
         assertFalse(listings.isListed(1));

@@ -106,6 +106,7 @@ exportAbi "marketplace/Participant"
 
 exportAbi "marketplace/lsp7/LSP7Listings"
 exportAbi "marketplace/lsp7/LSP7Offers"
+exportAbi "marketplace/lsp7/LSP7Orders"
 exportAbi "marketplace/lsp7/LSP7Marketplace"
 
 exportAbi "marketplace/lsp8/LSP8Listings"
