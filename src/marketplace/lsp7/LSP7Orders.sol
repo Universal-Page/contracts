@@ -76,27 +76,30 @@ contract LSP7Orders is ILSP7Orders, Module {
         return orderId;
     }
 
-    function cancel(address asset) external override whenNotPaused nonReentrant {
+    function cancel(uint256 id) external override whenNotPaused nonReentrant {
         address buyer = msg.sender;
-        LSP7Order memory order = orderOf(asset, buyer);
-        delete _orders[order.id];
-        delete _orderIds[asset][buyer];
-        uint256 totalValue = order.itemPrice * order.itemCount;
-        (bool success,) = buyer.call{value: totalValue}("");
-        if (!success) {
-            revert Unpaid(buyer, totalValue);
+        LSP7Order memory order = getOrder(id);
+        if (order.buyer != buyer) {
+            revert NotPlacedOf(order.asset, buyer);
         }
-        emit Canceled(order.id, asset, buyer, order.itemPrice, order.itemCount);
+        delete _orders[id];
+        delete _orderIds[order.asset][order.buyer];
+        uint256 totalValue = order.itemPrice * order.itemCount;
+        (bool success,) = order.buyer.call{value: totalValue}("");
+        if (!success) {
+            revert Unpaid(order.buyer, totalValue);
+        }
+        emit Canceled(order.id, order.asset, order.buyer, order.itemPrice, order.itemCount);
     }
 
-    function fill(address asset, address seller, address buyer, uint256 itemCount)
+    function fill(uint256 id, address seller, uint256 itemCount)
         external
         override
         whenNotPaused
         nonReentrant
         onlyMarketplace
     {
-        LSP7Order memory order = orderOf(asset, buyer);
+        LSP7Order memory order = getOrder(id);
         if (itemCount > order.itemCount) {
             revert InsufficientItemCount(order.itemCount, itemCount);
         }
@@ -106,6 +109,6 @@ contract LSP7Orders is ILSP7Orders, Module {
         if (!success) {
             revert Unpaid(msg.sender, totalValue);
         }
-        emit Filled(order.id, asset, seller, buyer, order.itemPrice, itemCount, order.itemCount);
+        emit Filled(order.id, order.asset, seller, order.buyer, order.itemPrice, itemCount, order.itemCount);
     }
 }

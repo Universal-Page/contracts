@@ -91,7 +91,7 @@ contract LSP7Marketplace is Base {
     function fillOrder(uint256 orderId, uint256 itemCount) external whenNotPaused nonReentrant {
         address seller = msg.sender;
         LSP7Order memory order = orders.getOrder(orderId);
-        orders.fill(order.asset, seller, order.buyer, itemCount);
+        orders.fill(orderId, seller, itemCount);
         _executeSale(
             order.asset,
             itemCount,

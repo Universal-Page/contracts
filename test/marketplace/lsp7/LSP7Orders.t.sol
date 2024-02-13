@@ -86,9 +86,9 @@ contract LSP7OrdersTest is Test {
         vm.expectRevert("Pausable: paused");
         orders.place(address(asset), 1 ether, 1);
         vm.expectRevert("Pausable: paused");
-        orders.cancel(address(asset));
+        orders.cancel(1);
         vm.expectRevert("Pausable: paused");
-        orders.fill(address(asset), address(100), address(101), 100);
+        orders.fill(1, address(100), 100);
     }
 
     function testFuzz_NotPlacedOf(address someAsset, address buyer) public {
@@ -150,7 +150,7 @@ contract LSP7OrdersTest is Test {
         vm.prank(address(alice));
         vm.expectEmit();
         emit Canceled(1, address(asset), address(alice), 0.5 ether, 2);
-        orders.cancel(address(asset));
+        orders.cancel(1);
 
         assertFalse(orders.isPlacedOrder(1));
         assertFalse(orders.isPlacedOrderOf(address(asset), address(alice)));
@@ -169,7 +169,7 @@ contract LSP7OrdersTest is Test {
 
         vm.prank(buyer);
         vm.expectRevert(abi.encodeWithSelector(LSP7Orders.NotPlacedOf.selector, address(asset), buyer));
-        orders.cancel(address(asset));
+        orders.cancel(1);
 
         assertTrue(orders.isPlacedOrderOf(address(asset), address(alice)));
     }
@@ -204,7 +204,7 @@ contract LSP7OrdersTest is Test {
         vm.prank(marketplace);
         vm.expectEmit();
         emit Filled(1, address(asset), address(bob), address(alice), itemPrice, fillCount, itemCount);
-        orders.fill(address(asset), address(bob), address(alice), fillCount);
+        orders.fill(1, address(bob), fillCount);
 
         assertEq(marketplace.balance, fillCount * itemPrice);
 
@@ -246,7 +246,7 @@ contract LSP7OrdersTest is Test {
         vm.prank(marketplace);
         vm.expectEmit();
         emit Filled(1, address(asset), address(bob), address(alice), itemPrice, itemCount, itemCount);
-        orders.fill(address(asset), address(bob), address(alice), itemCount);
+        orders.fill(1, address(bob), itemCount);
 
         assertEq(marketplace.balance, itemCount * itemPrice);
         assertFalse(orders.isPlacedOrderOf(address(asset), address(alice)));

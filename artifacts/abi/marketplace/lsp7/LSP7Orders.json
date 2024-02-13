@@ -333,9 +333,9 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "asset",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
       }
     ],
     "name": "cancel",
@@ -346,18 +346,13 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "asset",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
       },
       {
         "internalType": "address",
         "name": "seller",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "buyer",
         "type": "address"
       },
       {

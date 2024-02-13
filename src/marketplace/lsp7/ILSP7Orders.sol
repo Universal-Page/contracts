@@ -52,13 +52,12 @@ interface ILSP7Orders {
     function place(address asset, uint256 itemPrice, uint256 itemCount) external payable returns (uint256);
 
     /// cancel an order by a buyer being a sender.
-    /// @param asset asset address
-    function cancel(address asset) external;
+    /// @param id order id
+    function cancel(uint256 id) external;
 
     /// fill an order.
-    /// @param asset asset address
+    /// @param id order id
     /// @param seller seller
-    /// @param buyer buyer
     /// @param itemCount number of items
-    function fill(address asset, address seller, address buyer, uint256 itemCount) external;
+    function fill(uint256 id, address seller, uint256 itemCount) external;
 }
