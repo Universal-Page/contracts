@@ -99,6 +99,9 @@ contract LSP7Orders is ILSP7Orders, Module {
         nonReentrant
         onlyMarketplace
     {
+        if (itemCount == 0) {
+            revert InvalidItemCount(itemCount);
+        }
         LSP7Order memory order = getOrder(id);
         if (itemCount > order.itemCount) {
             revert InsufficientItemCount(order.itemCount, itemCount);
