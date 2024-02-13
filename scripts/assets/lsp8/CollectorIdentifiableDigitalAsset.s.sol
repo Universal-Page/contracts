@@ -22,6 +22,30 @@ contract Deploy is Script {
     }
 }
 
+contract Claim is Script {
+    function run() external {
+        address profileController = vm.envAddress("PROFILE_CONTROLLER_ADDRESS");
+        UniversalProfile profile = UniversalProfile(payable(vm.envAddress("PROFILE_ADDRESS")));
+        CollectorIdentifiableDigitalAsset asset =
+            CollectorIdentifiableDigitalAsset(payable(vm.envAddress("CONTRACT_COLLECTOR_DIGITAL_ASSET_ADDRESS")));
+
+        if (address(asset).balance > 0) {
+            console.log(
+                string.concat("CollectorIdentifiableDigitalAsset: withdraw ", Strings.toString(address(asset).balance)),
+                "wei to",
+                Strings.toHexString(asset.beneficiary())
+            );
+            vm.broadcast(profileController);
+            profile.execute(
+                OPERATION_0_CALL,
+                address(asset),
+                0,
+                abi.encodeWithSelector(asset.withdraw.selector, address(asset).balance)
+            );
+        }
+    }
+}
+
 contract Configure is Script {
     bytes32 private constant _LSP8_TOKEN_METADATA_BASE_URI_KEY =
         0x1a7628600c3bac7101f53697f48df381ddc36b9015e7d7c9c5633d1252aa2843;
