@@ -222,7 +222,13 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "itemCount",
+        "name": "fillCount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalCount",
         "type": "uint256"
       }
     ],

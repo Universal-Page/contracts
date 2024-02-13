@@ -22,7 +22,8 @@ interface ILSP7Orders {
         address indexed seller,
         address indexed buyer,
         uint256 itemPrice,
-        uint256 itemCount
+        uint256 fillCount,
+        uint256 totalCount
     );
 
     /// confirms an order has been placed by a buyer

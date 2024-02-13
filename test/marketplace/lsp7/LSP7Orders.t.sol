@@ -24,7 +24,8 @@ contract LSP7OrdersTest is Test {
         address indexed seller,
         address indexed buyer,
         uint256 itemPrice,
-        uint256 itemCount
+        uint256 fillCount,
+        uint256 totalCount
     );
 
     LSP7Orders orders;
@@ -202,7 +203,7 @@ contract LSP7OrdersTest is Test {
 
         vm.prank(marketplace);
         vm.expectEmit();
-        emit Filled(1, address(asset), address(bob), address(alice), itemPrice, fillCount);
+        emit Filled(1, address(asset), address(bob), address(alice), itemPrice, fillCount, itemCount);
         orders.fill(address(asset), address(bob), address(alice), fillCount);
 
         assertEq(marketplace.balance, fillCount * itemPrice);
@@ -244,7 +245,7 @@ contract LSP7OrdersTest is Test {
 
         vm.prank(marketplace);
         vm.expectEmit();
-        emit Filled(1, address(asset), address(bob), address(alice), itemPrice, itemCount);
+        emit Filled(1, address(asset), address(bob), address(alice), itemPrice, itemCount, itemCount);
         orders.fill(address(asset), address(bob), address(alice), itemCount);
 
         assertEq(marketplace.balance, itemCount * itemPrice);

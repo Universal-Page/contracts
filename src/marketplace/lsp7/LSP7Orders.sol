@@ -106,6 +106,6 @@ contract LSP7Orders is ILSP7Orders, Module {
         if (!success) {
             revert Unpaid(msg.sender, totalValue);
         }
-        emit Filled(order.id, asset, seller, buyer, order.itemPrice, itemCount);
+        emit Filled(order.id, asset, seller, buyer, order.itemPrice, itemCount, order.itemCount);
     }
 }
