@@ -9,10 +9,10 @@ import {ICollectorIdentifiableDigitalAsset} from "../assets/lsp8/ICollectorIdent
 import {IParticipant} from "./IParticipant.sol";
 
 uint32 constant GENESIS_DISCOUNT = 20_000;
-uint32 constant COLLECTOR_TIER_0_DISCOUNT = 25_000;
+uint32 constant COLLECTOR_TIER_0_DISCOUNT = 35_000;
 uint32 constant COLLECTOR_TIER_1_DISCOUNT = 50_000;
 uint32 constant COLLECTOR_TIER_2_DISCOUNT = 75_000;
-uint32 constant COLLECTOR_TIER_3_DISCOUNT = 100_000;
+uint32 constant COLLECTOR_TIER_3_DISCOUNT = 90_000;
 
 contract Participant is IParticipant, OwnableUnset, PausableUpgradeable {
     event AssetFeeDiscountChanged(address indexed asset, uint32 previousDiscountPoints, uint32 newDiscountPoints);

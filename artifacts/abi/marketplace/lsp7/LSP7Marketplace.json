@@ -130,11 +130,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "listingId",
-        "type": "uint256"
-      },
-      {
         "internalType": "address",
         "name": "account",
         "type": "address"
@@ -322,6 +317,43 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "itemCount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalPaid",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "RoyaltiesPaidOut",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": false,
         "internalType": "uint32",
         "name": "oldPoints",
@@ -378,6 +410,61 @@
       }
     ],
     "name": "Sale",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "seller",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "buyer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "itemCount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalPaid",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalRoyalties",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "Sold",
     "type": "event"
   },
   {
@@ -501,6 +588,24 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "orderId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "itemCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "fillOrder",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "newOwner_",
         "type": "address"
@@ -518,6 +623,11 @@
       {
         "internalType": "contract ILSP7Offers",
         "name": "offers_",
+        "type": "address"
+      },
+      {
+        "internalType": "contract ILSP7Orders",
+        "name": "orders_",
         "type": "address"
       },
       {
@@ -550,6 +660,19 @@
     "outputs": [
       {
         "internalType": "contract ILSP7Offers",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "orders",
+    "outputs": [
+      {
+        "internalType": "contract ILSP7Orders",
         "name": "",
         "type": "address"
       }
@@ -645,6 +768,19 @@
       }
     ],
     "name": "setFeePoints",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "orders_",
+        "type": "address"
+      }
+    ],
+    "name": "setOrders",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
