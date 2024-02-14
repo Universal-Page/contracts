@@ -388,7 +388,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     }
 
     function registerValidator(bytes calldata pubkey, bytes calldata signature, bytes32 depositDataRoot)
-        external
+        public
         onlyOracle
         nonReentrant
         whenNotPaused
@@ -405,5 +405,19 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         totalUnstaked -= DEPOSIT_AMOUNT;
         bytes memory withdrawalCredentials = abi.encodePacked(hex"010000000000000000000000", address(this));
         _depositContract.deposit{value: DEPOSIT_AMOUNT}(pubkey, withdrawalCredentials, signature, depositDataRoot);
+    }
+
+    function registerValidators(
+        bytes[] calldata pubkeys,
+        bytes[] calldata signatures,
+        bytes32[] calldata depositDataRoots
+    ) external {
+        uint256 length = pubkeys.length;
+        if (length != signatures.length || length != depositDataRoots.length) {
+            revert InvalidAmount(length);
+        }
+        for (uint256 i = 0; i < length; i++) {
+            registerValidator(pubkeys[i], signatures[i], depositDataRoots[i]);
+        }
     }
 }
