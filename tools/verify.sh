@@ -87,6 +87,11 @@ verifyProxy() {
   verify ${name} ${implementationAddress}
 }
 
+verify LSP8DropsDigitalAsset 0x86e817172b5c07f7036bf8aa46e2db9063743a83
+verify LSP7DropsDigitalAsset 0x1d5166e8247e70a2cf01881924a1ac6fc1b91128
+
+verify LSP7DropsLightAsset 0x6A938ff85df044772cbc358ACE7BeD2F7798fb98
+
 verify CollectorIdentifiableDigitalAsset ${CONTRACT_COLLECTOR_DIGITAL_ASSET_ADDRESS}
 verify GenesisDigitalAsset ${CONTRACT_GENESIS_DIGITAL_ASSET_ADDRESS}
 

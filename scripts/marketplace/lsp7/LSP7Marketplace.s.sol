@@ -75,11 +75,6 @@ contract Configure is Script {
         Module orders = Module(vm.envAddress("CONTRACT_LSP7_ORDERS_ADDRESS"));
         LSP7Marketplace marketplace = LSP7Marketplace(payable(vm.envAddress("CONTRACT_LSP7_MARKETPLACE_ADDRESS")));
 
-        if (address(marketplace.orders()) != address(orders)) {
-            vm.broadcast(owner);
-            marketplace.setOrders(address(orders));
-        }
-
         if (marketplace.feePoints() != FEE_POINTS) {
             vm.broadcast(owner);
             marketplace.setFeePoints(FEE_POINTS);

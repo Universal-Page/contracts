@@ -11,7 +11,7 @@
 | mainnet | Participant           | 0xa29aeaabb5da0cc3635576933a66c1b714f058c1 |
 | mainnet | LSP7Listings          | 0xe7f5c709d62bcc3701f4c0cb871eb77e301283b5 |
 | mainnet | LSP7Offers            | 0xb2379f3f3c623cd2ed18e97e407cdda8fe6c6da6 |
-| mainnet | LSP7Orders            |  |
+| mainnet | LSP7Orders            | 0x07d815d546072547471d9cde244367d274268b35 |
 | mainnet | LSP7Marketplace       | 0xe04cf97440cd191096c4103f9c48abd96184fb8d |
 | mainnet | LSP8Listings          | 0x4faab47b234c7f5da411429ee86cb15cb0754354 |
 | mainnet | LSP8Offers            | 0xed189b51455c9714aa49b0c55529469c512b10b6 |
