@@ -12,6 +12,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
     uint32 private constant _MIN_FEE = 0; // 0%
     uint32 private constant _MAX_FEE = 15_000; // 15%
     uint256 private constant _MAX_VALIDATORS_SUPPORTED = 1_000_000;
+    uint256 private constant _MINIMUM_REQUIRED_SHARES = 1e3;
 
     error InvalidAmount(uint256 amount);
     error WithdrawalFailed(address account, address beneficiary, uint256 amount);
@@ -265,6 +266,15 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
             revert DepositLimitExceeded(newTotalDeposits, depositLimit);
         }
         uint256 shares = _toShares(amount);
+        // burn minimum shares of first depositor to prevent share inflation and dust shares attacks.
+        if (totalShares == 0) {
+            if (shares < _MINIMUM_REQUIRED_SHARES) {
+                revert InvalidAmount(amount);
+            }
+            _shares[address(0)] = _MINIMUM_REQUIRED_SHARES;
+            totalShares += _MINIMUM_REQUIRED_SHARES;
+            shares -= _MINIMUM_REQUIRED_SHARES;
+        }
         _shares[beneficiary] += shares;
         totalShares += shares;
         totalUnstaked += amount;
