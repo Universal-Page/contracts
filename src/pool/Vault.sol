@@ -191,7 +191,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         return _shares[account];
     }
 
-    function balanceOf(address account) external view returns (uint256) {
+    function balanceOf(address account) public view returns (uint256) {
         return _toBalance(_shares[account]);
     }
 
@@ -291,6 +291,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         address account = msg.sender;
         if (amount == 0) {
             revert InvalidAmount(amount);
+        }
+        if (amount > balanceOf(account)) {
+            revert InsufficientBalance(balanceOf(account), amount);
         }
         uint256 shares = _toShares(amount);
         if (shares == 0) {
