@@ -266,6 +266,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
             revert DepositLimitExceeded(newTotalDeposits, depositLimit);
         }
         uint256 shares = _toShares(amount);
+        if (shares == 0) {
+            revert InvalidAmount(amount);
+        }
         // burn minimum shares of first depositor to prevent share inflation and dust shares attacks.
         if (totalShares == 0) {
             if (shares < _MINIMUM_REQUIRED_SHARES) {
@@ -290,6 +293,9 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
             revert InvalidAmount(amount);
         }
         uint256 shares = _toShares(amount);
+        if (shares == 0) {
+            revert InvalidAmount(amount);
+        }
         if (shares > _shares[account]) {
             revert InsufficientBalance(_shares[account], shares);
         }

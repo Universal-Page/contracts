@@ -1422,6 +1422,7 @@ contract VaultTest is Test {
 
         uint256 withdraw_amount = vault.balanceOf(alice) - 2;
         vm.prank(alice);
+        vm.expectRevert(abi.encodeWithSelector(Vault.InvalidAmount.selector, withdraw_amount));
         vault.withdraw(withdraw_amount, alice);
 
         assertNotEq(vault.totalAssets(), 0);
