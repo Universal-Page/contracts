@@ -520,6 +520,115 @@ contract VaultTest is Test {
         assertEq(0, vault.claimableBalanceOf(alice));
     }
 
+    function test_MultipleWithdrawals() public {
+        vm.prank(owner);
+        vault.setDepositLimit(1000 ether);
+
+        vm.prank(owner);
+        vault.enableOracle(oracle, true);
+
+        address alice = vm.addr(100);
+        vm.deal(alice, 1000 ether);
+
+        vm.prank(alice);
+        vault.deposit{value: 10 * 32 ether}(alice);
+
+        assertEq(10 * 32 ether, vault.totalAssets());
+        assertEq(0 ether, vault.totalStaked());
+        assertEq(10 * 32 ether, vault.totalUnstaked());
+        assertEq(0 ether, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
+        assertEq(10 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.balanceOf(alice));
+        assertEq(0 ether, vault.pendingBalanceOf(alice));
+        assertEq(0 ether, vault.claimableBalanceOf(alice));
+        assertEq(10 * 32 ether, address(vault).balance);
+
+        for (uint256 i = 1; i <= 10; i++) {
+            vm.prank(oracle);
+            vault.registerValidator(abi.encodePacked(bytes32(i)), abi.encodePacked(bytes32(11 - i)), bytes32(0));
+        }
+
+        assertEq(10 * 32 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+
+        vm.prank(alice);
+        vault.withdraw(10 * 32 ether - _MINIMUM_REQUIRED_SHARES, alice);
+
+        assertEq(_MINIMUM_REQUIRED_SHARES, vault.totalAssets());
+        assertEq(10 * 32 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+        assertEq(10 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.totalPendingWithdrawal());
+        assertEq(0 ether, vault.totalClaimable());
+        assertEq(0 ether, vault.balanceOf(alice));
+        assertEq(10 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.pendingBalanceOf(alice));
+        assertEq(0 ether, vault.claimableBalanceOf(alice));
+        assertEq(0 ether, address(vault).balance);
+
+        // simulate widthdrawal from deposit contract +2
+        vm.deal(address(vault), 2 * 32 ether);
+
+        vm.prank(oracle);
+        vault.rebalance();
+
+        assertEq(_MINIMUM_REQUIRED_SHARES, vault.totalAssets());
+        assertEq(8 * 32 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+        assertEq(10 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.totalPendingWithdrawal());
+        assertEq(2 * 32 ether, vault.totalClaimable());
+        assertEq(0 ether, vault.balanceOf(alice));
+        assertEq(10 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.pendingBalanceOf(alice));
+        assertEq(2 * 32 ether, vault.claimableBalanceOf(alice));
+        assertEq(2 * 32 ether, address(vault).balance);
+
+        // simulate widthdrawal from deposit contract +5
+        vm.deal(address(vault), 7 * 32 ether);
+
+        vm.prank(oracle);
+        vault.rebalance();
+
+        assertEq(_MINIMUM_REQUIRED_SHARES, vault.totalAssets());
+        assertEq(3 * 32 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+        assertEq(10 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.totalPendingWithdrawal());
+        assertEq(7 * 32 ether, vault.totalClaimable());
+        assertEq(0 ether, vault.balanceOf(alice));
+        assertEq(10 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.pendingBalanceOf(alice));
+        assertEq(7 * 32 ether, vault.claimableBalanceOf(alice));
+        assertEq(7 * 32 ether, address(vault).balance);
+
+        // claim
+        vm.prank(alice);
+        vm.expectEmit();
+        emit Claimed(alice, alice, 4 * 32 ether);
+        vault.claim(4 * 32 ether, alice);
+
+        assertEq(_MINIMUM_REQUIRED_SHARES, vault.totalAssets());
+        assertEq(3 * 32 ether, vault.totalStaked());
+        assertEq(0 ether, vault.totalUnstaked());
+        assertEq(6 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.totalPendingWithdrawal());
+        assertEq(3 * 32 ether, vault.totalClaimable());
+        assertEq(0 ether, vault.balanceOf(alice));
+        assertEq(6 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.pendingBalanceOf(alice));
+        assertEq(3 * 32 ether, vault.claimableBalanceOf(alice));
+        assertEq(3 * 32 ether, address(vault).balance);
+
+        // simulate widthdrawal from deposit contract +3
+        vm.deal(address(vault), 6 * 32 ether);
+
+        vm.prank(oracle);
+        vault.rebalance();
+
+        assertEq(_MINIMUM_REQUIRED_SHARES, vault.totalAssets());
+        assertEq(0 ether, vault.totalStaked());
+        assertEq(_MINIMUM_REQUIRED_SHARES, vault.totalUnstaked());
+        assertEq(6 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.totalPendingWithdrawal());
+        assertEq(6 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.totalClaimable());
+        assertEq(0 ether, vault.balanceOf(alice));
+        assertEq(6 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.pendingBalanceOf(alice));
+        assertEq(6 * 32 ether - _MINIMUM_REQUIRED_SHARES, vault.claimableBalanceOf(alice));
+        assertEq(6 * 32 ether, address(vault).balance);
+    }
+
     function test_DistributeRewardsAndFees() public {
         vm.startPrank(owner);
         vault.setDepositLimit(100 ether);

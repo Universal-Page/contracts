@@ -363,7 +363,7 @@ contract Vault is OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable 
         // account for completed withdrawals
         uint256 pendingWithdrawal = totalPendingWithdrawal - totalClaimable;
         uint256 completedWithdrawal = Math.min(
-            (balance - totalFees - totalUnstaked) / DEPOSIT_AMOUNT, // actual completed withdrawals
+            (balance - totalFees - totalUnstaked - totalClaimable) / DEPOSIT_AMOUNT, // actual completed withdrawals
             pendingWithdrawal / DEPOSIT_AMOUNT // pending withdrawals
                 + (pendingWithdrawal % DEPOSIT_AMOUNT == 0 ? 0 : 1) // partial withdrawals
         ) * DEPOSIT_AMOUNT;
