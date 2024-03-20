@@ -18,13 +18,13 @@ contract Deploy is Script {
         address proxy = vm.envOr("CONTRACT_LSP7_ORDERS_ADDRESS", address(0));
 
         vm.broadcast(admin);
-        LSP7Orders offers = new LSP7Orders();
+        LSP7Orders orders = new LSP7Orders();
 
         if (proxy == address(0)) {
             vm.broadcast(admin);
             proxy = address(
                 new TransparentUpgradeableProxy(
-                    address(offers),
+                    address(orders),
                     admin,
                     abi.encodeWithSelector(LSP7Orders.initialize.selector, owner)
                 )
@@ -32,7 +32,7 @@ contract Deploy is Script {
             console.log(string.concat("LSP7Orders: deploy ", Strings.toHexString(address(proxy))));
         } else {
             vm.broadcast(admin);
-            ITransparentUpgradeableProxy(proxy).upgradeTo(address(offers));
+            ITransparentUpgradeableProxy(proxy).upgradeTo(address(orders));
             console.log(string.concat("LSP7Orders: upgrade ", Strings.toHexString(address(proxy))));
         }
     }
