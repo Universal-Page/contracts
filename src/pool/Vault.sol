@@ -23,7 +23,7 @@ interface IVault {
     event Rebalanced(
         uint256 previousTotalStaked, uint256 previousTotalUnstaked, uint256 totalStaked, uint256 totalUnstaked
     );
-    event SharesTransferred(address indexed from, address indexed to, uint256 amount, bytes data);
+    event StakeTransferred(address indexed from, address indexed to, uint256 amount, bytes data);
 
     function depositLimit() external view returns (uint256);
     function totalAssets() external view returns (uint256);
@@ -44,15 +44,15 @@ interface IVault {
     function withdraw(uint256 amount, address beneficiary) external;
     function claim(uint256 amount, address beneficiary) external;
     function claimFees(uint256 amount, address beneficiary) external;
-    function transferShares(address to, uint256 amount, bytes calldata data) external;
+    function transferStake(address to, uint256 amount, bytes calldata data) external;
 }
 
-interface IVaultSharesRecipient {
-    /// @notice Shares have been transfered to the recipient.
+interface IVaultStakeRecipient {
+    /// @notice Amount of stake have been transfered to the recipient.
     /// @param from The address of the sender.
-    /// @param amount The amount of shares.
+    /// @param amount The amount of stake.
     /// @param data Additional data.
-    function onSharesReceived(address from, uint256 amount, bytes calldata data) external;
+    function onVaultStakeReceived(address from, uint256 amount, bytes calldata data) external;
 }
 
 contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, PausableUpgradeable {
@@ -479,7 +479,7 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
         }
     }
 
-    function transferShares(address to, uint256 amount, bytes calldata data)
+    function transferStake(address to, uint256 amount, bytes calldata data)
         external
         override
         whenNotPaused
@@ -489,17 +489,24 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
         if (amount == 0) {
             revert InvalidAmount(amount);
         }
-        if (amount > _shares[account]) {
-            revert InsufficientBalance(_shares[account], amount);
+        if (amount > balanceOf(account)) {
+            revert InsufficientBalance(balanceOf(account), amount);
+        }
+        uint256 shares = _toShares(amount);
+        if (shares == 0) {
+            revert InvalidAmount(shares);
+        }
+        if (shares > _shares[account]) {
+            revert InsufficientBalance(_shares[account], shares);
         }
         if (to == address(0)) {
             revert InvalidAddress(to);
         }
-        _shares[account] -= amount;
-        _shares[to] += amount;
-        emit SharesTransferred(account, to, amount, data);
-        if (ERC165Checker.supportsInterface(to, type(IVaultSharesRecipient).interfaceId)) {
-            IVaultSharesRecipient(to).onSharesReceived(account, amount, data);
+        _shares[account] -= shares;
+        _shares[to] += shares;
+        emit StakeTransferred(account, to, amount, data);
+        if (ERC165Checker.supportsInterface(to, type(IVaultStakeRecipient).interfaceId)) {
+            IVaultStakeRecipient(to).onVaultStakeReceived(account, amount, data);
         }
     }
 }
