@@ -5,7 +5,9 @@ import {Test} from "forge-std/Test.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {OwnableCallerNotTheOwner} from "@erc725/smart-contracts/contracts/errors.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {Vault} from "../../src/pool/Vault.sol";
+import {ERC165} from "openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
+import {ERC165Checker} from "openzeppelin-contracts/contracts/utils/introspection/ERC165Checker.sol";
+import {IVault, Vault, IVaultSharesRecipient} from "../../src/pool/Vault.sol";
 import {IDepositContract} from "../../src/pool/IDepositContract.sol";
 
 contract VaultTest is Test {
@@ -24,6 +26,7 @@ contract VaultTest is Test {
         uint256 previousTotalStaked, uint256 previousTotalUnstaked, uint256 totalStaked, uint256 totalUnstaked
     );
     event ValidatorExited(bytes pubkey, uint256 total);
+    event SharesTransferred(address indexed from, address indexed to, uint256 amount, bytes data);
 
     Vault vault;
     address admin;
@@ -63,6 +66,7 @@ contract VaultTest is Test {
     }
 
     function test_Initialize() public {
+        assertTrue(ERC165Checker.supportsInterface(address(vault), type(IVault).interfaceId));
         assertTrue(!vault.paused());
         assertEq(owner, vault.owner());
         assertEq(0, vault.depositLimit());
@@ -1589,6 +1593,127 @@ contract VaultTest is Test {
         assertTrue(
             vault.balanceOf(bob) >= 1 ether - 1e15 /* rounding error of 18 decimals - 3 of minimum shares amount */
         );
+    }
+
+    function test_TransferShares() public {
+        vm.startPrank(owner);
+        vault.setDepositLimit(1_000_000 ether);
+        vault.enableOracle(oracle, true);
+        vault.setFee(10_000);
+        vault.setFeeRecipient(feeRecipient);
+        vm.stopPrank();
+
+        address alice = vm.addr(100);
+        address bob = vm.addr(101);
+
+        vm.deal(alice, 100 ether);
+        vm.prank(alice);
+        vault.deposit{value: 100 ether}(alice);
+
+        uint256 shares = vault.sharesOf(alice);
+        uint256 balance = vault.balanceOf(alice);
+
+        assertEq(0, vault.sharesOf(bob));
+        assertEq(0, vault.balanceOf(bob));
+
+        vm.prank(alice);
+        vm.expectEmit();
+        emit SharesTransferred(alice, bob, shares, "0x1234");
+        vault.transferShares(bob, shares, "0x1234");
+
+        assertEq(shares, vault.sharesOf(bob));
+        assertEq(0, vault.balanceOf(alice));
+        assertEq(0, vault.sharesOf(alice));
+        assertEq(0, bob.balance);
+
+        vm.prank(bob);
+        vault.withdraw(balance, bob);
+
+        assertEq(balance, bob.balance);
+        assertEq(0, vault.sharesOf(bob));
+        assertEq(0, vault.balanceOf(bob));
+        assertEq(0, vault.balanceOf(alice));
+        assertEq(0, vault.sharesOf(alice));
+    }
+
+    function test_Revert_TransferShares() public {
+        vm.startPrank(owner);
+        vault.setDepositLimit(1_000_000 ether);
+        vault.enableOracle(oracle, true);
+        vault.setFee(10_000);
+        vault.setFeeRecipient(feeRecipient);
+        vm.stopPrank();
+
+        address alice = vm.addr(100);
+        address bob = vm.addr(101);
+
+        vm.deal(alice, 100 ether);
+        vm.prank(alice);
+        vault.deposit{value: 100 ether}(alice);
+
+        uint256 shares = vault.sharesOf(alice);
+        uint256 balance = vault.balanceOf(alice);
+
+        assertEq(0, vault.sharesOf(bob));
+        assertEq(0, vault.balanceOf(bob));
+
+        vm.prank(bob);
+        vm.expectRevert(abi.encodeWithSelector(Vault.InsufficientBalance.selector, 0, shares));
+        vault.transferShares(bob, shares, "0x1234");
+
+        assertEq(0, vault.sharesOf(bob));
+        assertEq(0, vault.balanceOf(bob));
+        assertEq(shares, vault.sharesOf(alice));
+        assertEq(balance, vault.balanceOf(alice));
+    }
+
+    function test_NotifyAfterSharesTransferred() public {
+        vm.startPrank(owner);
+        vault.setDepositLimit(1_000_000 ether);
+        vault.enableOracle(oracle, true);
+        vault.setFee(10_000);
+        vault.setFeeRecipient(feeRecipient);
+        vm.stopPrank();
+
+        MockSharesRecipient recipient = new MockSharesRecipient();
+
+        address alice = vm.addr(100);
+
+        vm.deal(alice, 100 ether);
+        vm.prank(alice);
+        vault.deposit{value: 100 ether}(alice);
+
+        uint256 shares = vault.sharesOf(alice);
+
+        vm.prank(alice);
+        vm.expectEmit();
+        emit SharesTransferred(alice, address(recipient), shares, "0x1234");
+        vault.transferShares(address(recipient), shares, "0x1234");
+
+        assertEq(0, vault.sharesOf(alice));
+
+        assertEq(alice, recipient.lastFrom());
+        assertEq(address(vault), recipient.lastSender());
+        assertEq(shares, recipient.lastAmount());
+        assertEq("0x1234", recipient.lastData());
+    }
+}
+
+contract MockSharesRecipient is ERC165, IVaultSharesRecipient {
+    address public lastFrom;
+    uint256 public lastAmount;
+    bytes public lastData;
+    address public lastSender;
+
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        return interfaceId == type(IVaultSharesRecipient).interfaceId || super.supportsInterface(interfaceId);
+    }
+
+    function onSharesReceived(address from, uint256 amount, bytes calldata data) external override {
+        lastSender = msg.sender;
+        lastFrom = from;
+        lastAmount = amount;
+        lastData = data;
     }
 }
 
