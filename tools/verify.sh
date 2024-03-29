@@ -109,3 +109,5 @@ verifyProxy LSP8Marketplace ${CONTRACT_LSP8_MARKETPLACE_ADDRESS}
 verifyProxy PageName ${CONTRACT_PAGE_NAME_ADDRESS}
 
 verifyProxy Vault ${CONTRACT_POOL_VAULT}
+
+verifyProxy Receipts ${CONTRACT_RECEIPTS}
