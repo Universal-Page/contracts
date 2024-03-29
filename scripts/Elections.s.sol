@@ -18,25 +18,25 @@ contract Deploy is Script {
         address profile = vm.envAddress("PROFILE_ADDRESS");
         address treasury = vm.envAddress("TREASURY_ADDRESS");
 
-        address proxy = vm.envOr("CONTRACT_RECEIPTS", address(0));
+        address proxy = vm.envOr("CONTRACT_ELECTIONS", address(0));
 
         vm.broadcast(admin);
-        Receipts receipts = new Receipts();
+        Elections elections = new Elections();
 
         if (proxy == address(0)) {
             vm.broadcast(admin);
             proxy = address(
                 new TransparentUpgradeableProxy(
-                    address(receipts),
+                    address(elections),
                     admin,
-                    abi.encodeWithSelector(Receipts.initialize.selector, profile, treasury)
+                    abi.encodeWithSelector(Elections.initialize.selector, profile, treasury)
                 )
             );
-            console.log(string.concat("Receipts: deploy ", Strings.toHexString(address(proxy))));
+            console.log(string.concat("Elections: deploy ", Strings.toHexString(address(proxy))));
         } else {
             vm.broadcast(admin);
-            ITransparentUpgradeableProxy(proxy).upgradeTo(address(receipts));
-            console.log(string.concat("Receipts: upgrade ", Strings.toHexString(address(proxy))));
+            ITransparentUpgradeableProxy(proxy).upgradeTo(address(elections));
+            console.log(string.concat("Elections: upgrade ", Strings.toHexString(address(proxy))));
         }
     }
 }
@@ -46,15 +46,15 @@ contract Configure is Script {
         address controller = vm.envAddress("PROFILE_CONTROLLER_ADDRESS");
         address treasury = vm.envAddress("TREASURY_ADDRESS");
         UniversalProfile profile = UniversalProfile(payable(vm.envAddress("PROFILE_ADDRESS")));
-        Receipts receipts = Receipts(payable(vm.envAddress("CONTRACT_RECEIPTS")));
+        Elections elections = Elections(payable(vm.envAddress("CONTRACT_ELECTIONS")));
 
-        if (receipts.beneficiary() != treasury) {
+        if (elections.beneficiary() != treasury) {
             vm.broadcast(controller);
             profile.execute(
                 OPERATION_0_CALL,
-                address(receipts),
+                address(elections),
                 0,
-                abi.encodeWithSelector(receipts.setBeneficiary.selector, treasury)
+                abi.encodeWithSelector(elections.setBeneficiary.selector, treasury)
             );
         }
     }

@@ -110,4 +110,4 @@ verifyProxy PageName ${CONTRACT_PAGE_NAME_ADDRESS}
 
 verifyProxy Vault ${CONTRACT_POOL_VAULT}
 
-verifyProxy Receipts ${CONTRACT_RECEIPTS}
+verifyProxy Elections ${CONTRACT_ELECTIONS}

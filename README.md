@@ -20,7 +20,7 @@
 | mainnet | Points                | 0x157668416776c78EaB825D0d3969d75DC7dD7C0D |
 | mainnet | Royalties             | 0x391B24e80d85587C1cb698f0cD7Dfb7191D6875F |
 | mainnet | Vault                 | 0xa5b37d755b97c272853b9726c905414706a0553a |
-| mainnet | Receipts              | 0xd813fd267a5d3d10adbe9d22ba6dc7fda2ddf517 |
+| mainnet | Elections             | 0xd813fd267a5d3d10adbe9d22ba6dc7fda2ddf517 |
 | testnet | PageName              | 0x8b08eeb9183081de7e2d4ae49fad4afb56e31ab4 |
 | testnet | GenesisDigitalAsset   | 0xc06bcd7a286308861bd99da220acbc8901949fbd |
 | testnet | CollectorDigitalAsset | 0x2eef6216274bf0ede21a8a55cbb5b896bb82ac8b |
@@ -35,7 +35,7 @@
 | testnet | LSP8Marketplace       | 0xe9f0feab3d50ccbe40d99f669fe1e89172908cdf |
 | testnet | Points                | 0x3582f474F6E9FB087651b135d6224500A89e6f44 |
 | testnet | Royalties             | 0x1c51619209EFE37C759e4a9Ca91F1e68A96E19E3 |
-| testnet | Receipts              | 0xbe69df047c7e10766cbe5e8bd2fac3dc18a9b745 |
+| testnet | Elections             | 0xbe69df047c7e10766cbe5e8bd2fac3dc18a9b745 |
 
 ## Development
 
