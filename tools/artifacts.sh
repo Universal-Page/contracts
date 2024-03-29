@@ -118,3 +118,5 @@ exportAbi "page/PageName"
 
 exportAbi "pool/Vault"
 exportAbi "pool/IDepositContract"
+
+exportAbi "Receipts"
