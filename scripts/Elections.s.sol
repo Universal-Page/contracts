@@ -10,13 +10,12 @@ import {
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {UniversalProfile} from "@lukso/lsp-smart-contracts/contracts/UniversalProfile.sol";
 import {OPERATION_0_CALL} from "@erc725/smart-contracts/contracts/constants.sol";
-import {Receipts} from "../src/Receipts.sol";
+import {Elections} from "../src/Elections.sol";
 
 contract Deploy is Script {
     function run() external {
         address admin = vm.envAddress("ADMIN_ADDRESS");
         address profile = vm.envAddress("PROFILE_ADDRESS");
-        address treasury = vm.envAddress("TREASURY_ADDRESS");
 
         address proxy = vm.envOr("CONTRACT_ELECTIONS", address(0));
 
@@ -29,7 +28,7 @@ contract Deploy is Script {
                 new TransparentUpgradeableProxy(
                     address(elections),
                     admin,
-                    abi.encodeWithSelector(Elections.initialize.selector, profile, treasury)
+                    abi.encodeWithSelector(Elections.initialize.selector, profile)
                 )
             );
             console.log(string.concat("Elections: deploy ", Strings.toHexString(address(proxy))));
@@ -43,19 +42,19 @@ contract Deploy is Script {
 
 contract Configure is Script {
     function run() external {
-        address controller = vm.envAddress("PROFILE_CONTROLLER_ADDRESS");
-        address treasury = vm.envAddress("TREASURY_ADDRESS");
-        UniversalProfile profile = UniversalProfile(payable(vm.envAddress("PROFILE_ADDRESS")));
-        Elections elections = Elections(payable(vm.envAddress("CONTRACT_ELECTIONS")));
+        // address controller = vm.envAddress("PROFILE_CONTROLLER_ADDRESS");
+        // address treasury = vm.envAddress("TREASURY_ADDRESS");
+        // UniversalProfile profile = UniversalProfile(payable(vm.envAddress("PROFILE_ADDRESS")));
+        // Elections elections = Elections(payable(vm.envAddress("CONTRACT_ELECTIONS")));
 
-        if (elections.beneficiary() != treasury) {
-            vm.broadcast(controller);
-            profile.execute(
-                OPERATION_0_CALL,
-                address(elections),
-                0,
-                abi.encodeWithSelector(elections.setBeneficiary.selector, treasury)
-            );
-        }
+        // if (elections.beneficiary() != treasury) {
+        //     vm.broadcast(controller);
+        //     profile.execute(
+        //         OPERATION_0_CALL,
+        //         address(elections),
+        //         0,
+        //         abi.encodeWithSelector(elections.setBeneficiary.selector, treasury)
+        //     );
+        // }
     }
 }
