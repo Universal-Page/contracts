@@ -21,6 +21,7 @@
 | mainnet | Royalties             | 0x391B24e80d85587C1cb698f0cD7Dfb7191D6875F |
 | mainnet | Vault                 | 0xa5b37d755b97c272853b9726c905414706a0553a |
 | mainnet | Elections             | 0xd813fd267a5d3d10adbe9d22ba6dc7fda2ddf517 |
+| mainnet | ProfilesOracle        | 0x482a6fd801fe3290a49e465c168ad9f8772b8d7e |
 | testnet | PageName              | 0x8b08eeb9183081de7e2d4ae49fad4afb56e31ab4 |
 | testnet | GenesisDigitalAsset   | 0xc06bcd7a286308861bd99da220acbc8901949fbd |
 | testnet | CollectorDigitalAsset | 0x2eef6216274bf0ede21a8a55cbb5b896bb82ac8b |
