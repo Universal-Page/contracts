@@ -16,20 +16,8 @@ contract ProfilesOracle is ERC725YInitAbstract, AccessControlUpgradeable {
     function initialize(address initialOwner, address operator) external initializer {
         ERC725YInitAbstract._initialize(initialOwner);
         _setRoleAdmin(ORACLE_ROLE, OPERATOR_ROLE);
+        _setRoleAdmin(OPERATOR_ROLE, OPERATOR_ROLE);
         _grantRole(OPERATOR_ROLE, operator);
-    }
-
-    function setOperator(address operator) external onlyRole(OPERATOR_ROLE) {
-        _revokeRole(OPERATOR_ROLE, _msgSender());
-        _grantRole(OPERATOR_ROLE, operator);
-    }
-
-    function setOracle(address oracle, bool enabled) external onlyRole(OPERATOR_ROLE) {
-        if (enabled) {
-            _grantRole(ORACLE_ROLE, oracle);
-        } else {
-            _revokeRole(ORACLE_ROLE, oracle);
-        }
     }
 
     function supportsInterface(bytes4 interfaceId)
