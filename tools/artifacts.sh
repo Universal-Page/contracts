@@ -119,4 +119,6 @@ exportAbi "page/PageName"
 exportAbi "pool/Vault"
 exportAbi "pool/IDepositContract"
 
+exportAbi "profiles/ProfilesOracle"
+
 exportAbi "Elections"
