@@ -3,6 +3,10 @@ pragma solidity =0.8.22;
 
 import {ERC725YInitAbstract} from "@erc725/smart-contracts/contracts/ERC725YInitAbstract.sol";
 import {ERC725YCore} from "@erc725/smart-contracts/contracts/ERC725YCore.sol";
+import {
+    ERC725Y_DataKeysValuesLengthMismatch,
+    ERC725Y_DataKeysValuesEmptyArray
+} from "@erc725/smart-contracts/contracts/errors.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 bytes32 constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
@@ -29,12 +33,15 @@ contract ProfilesOracle is ERC725YInitAbstract, AccessControlUpgradeable {
         return super.supportsInterface(interfaceId);
     }
 
-    function setDataBatch(bytes32[] memory dataKeys, bytes[] memory dataValues)
-        public
-        payable
-        override
-        onlyRole(ORACLE_ROLE)
-    {
-        super.setDataBatch(dataKeys, dataValues);
+    function submitData(bytes32[] calldata dataKeys, bytes[] calldata dataValues) external onlyRole(ORACLE_ROLE) {
+        if (dataKeys.length != dataValues.length) {
+            revert ERC725Y_DataKeysValuesLengthMismatch();
+        }
+        if (dataKeys.length == 0) {
+            revert ERC725Y_DataKeysValuesEmptyArray();
+        }
+        for (uint256 i = 0; i < dataKeys.length; i++) {
+            _setData(dataKeys[i], dataValues[i]);
+        }
     }
 }
