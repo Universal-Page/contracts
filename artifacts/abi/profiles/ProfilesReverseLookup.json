@@ -125,6 +125,11 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "controller",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "profile",
         "type": "address"
       },
