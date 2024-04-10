@@ -22,6 +22,7 @@
 | mainnet | Vault                 | 0xa5b37d755b97c272853b9726c905414706a0553a |
 | mainnet | Elections             | 0xd813fd267a5d3d10adbe9d22ba6dc7fda2ddf517 |
 | mainnet | ProfilesOracle        | 0x482a6fd801fe3290a49e465c168ad9f8772b8d7e |
+| mainnet | ProfilesReverseLookup | 0xf70873b68c5c912072631d947b21cdf56fbbc2b0 |
 | testnet | PageName              | 0x8b08eeb9183081de7e2d4ae49fad4afb56e31ab4 |
 | testnet | GenesisDigitalAsset   | 0xc06bcd7a286308861bd99da220acbc8901949fbd |
 | testnet | CollectorDigitalAsset | 0x2eef6216274bf0ede21a8a55cbb5b896bb82ac8b |
@@ -37,6 +38,7 @@
 | testnet | Points                | 0x3582f474F6E9FB087651b135d6224500A89e6f44 |
 | testnet | Royalties             | 0x1c51619209EFE37C759e4a9Ca91F1e68A96E19E3 |
 | testnet | Elections             | 0xbe69df047c7e10766cbe5e8bd2fac3dc18a9b745 |
+| testnet | ProfilesReverseLookup | 0xa28d3307f5a09ad404385460062bad5d379d1925 |
 
 ## Development
 

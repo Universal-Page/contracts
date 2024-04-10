@@ -120,5 +120,6 @@ exportAbi "pool/Vault"
 exportAbi "pool/IDepositContract"
 
 exportAbi "profiles/ProfilesOracle"
+exportAbi "profiles/ProfilesReverseLookup"
 
 exportAbi "Elections"

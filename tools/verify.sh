@@ -53,8 +53,8 @@ set +a
 SRC_DIR=${PROJECT_DIR}/src
 
 verify() {
-  name=$1
-  address=$2
+  local name=$1
+  local address=$2
 
   echo "Verifying ${name} at ${address}"
 
@@ -68,8 +68,8 @@ verify() {
 }
 
 verifyProxy() {
-  name=$1
-  address=$2
+  local name=$1
+  local address=$2
 
   echo "Verifying proxy ${name} at ${address}"
 
@@ -110,4 +110,6 @@ verifyProxy PageName ${CONTRACT_PAGE_NAME_ADDRESS}
 
 verifyProxy Vault ${CONTRACT_POOL_VAULT}
 verifyProxy Elections ${CONTRACT_ELECTIONS}
+
 verifyProxy ProfilesOracle ${CONTRACT_PROFILES_ORACLE}
+verify ProfilesReverseLookup ${CONTRACT_PROFILES_REVERSE_LOOKUP}
