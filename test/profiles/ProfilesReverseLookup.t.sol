@@ -36,7 +36,7 @@ contract ProfilesReverseLookupTest is Test {
         vm.prank(controller);
         vm.expectEmit();
         emit ProfileRegistered(controller, address(alice), "0x");
-        lookup.register(address(alice), "0x");
+        lookup.register(controller, address(alice), "0x");
 
         assertEq(lookup.profilesOf(controller).length, 1);
         assertEq(lookup.profilesOf(controller)[0], address(alice));
@@ -50,7 +50,7 @@ contract ProfilesReverseLookupTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(ProfilesReverseLookup.UnathorizedController.selector, controller, address(alice))
         );
-        lookup.register(address(alice), "0x");
+        lookup.register(controller, address(alice), "0x");
     }
 
     function test_Revert_AlreadyRegistered() public {
@@ -62,13 +62,13 @@ contract ProfilesReverseLookupTest is Test {
         alice.setDataBatch(keys, values);
 
         vm.prank(controller);
-        lookup.register(address(alice), "0x");
+        lookup.register(controller, address(alice), "0x");
 
         vm.prank(controller);
         vm.expectRevert(
             abi.encodeWithSelector(ProfilesReverseLookup.AlreadyRegistered.selector, controller, address(alice))
         );
-        lookup.register(address(alice), "0x");
+        lookup.register(controller, address(alice), "0x");
     }
 
     function test_UnregisterAsController() public {
@@ -82,7 +82,7 @@ contract ProfilesReverseLookupTest is Test {
         vm.prank(controller);
         vm.expectEmit();
         emit ProfileRegistered(controller, address(alice), "0x");
-        lookup.register(address(alice), "0x");
+        lookup.register(controller, address(alice), "0x");
 
         assertEq(lookup.profilesOf(controller).length, 1);
         assertEq(lookup.profilesOf(controller)[0], address(alice));
@@ -108,7 +108,7 @@ contract ProfilesReverseLookupTest is Test {
         vm.prank(controller);
         vm.expectEmit();
         emit ProfileRegistered(controller, address(alice), "0x");
-        lookup.register(address(alice), "0x");
+        lookup.register(controller, address(alice), "0x");
 
         assertEq(lookup.profilesOf(controller).length, 1);
         assertEq(lookup.profilesOf(controller)[0], address(alice));

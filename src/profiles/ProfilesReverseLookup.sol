@@ -31,8 +31,10 @@ contract ProfilesReverseLookup {
         return keccak256(abi.encodePacked(controller, profile));
     }
 
-    function register(address profile, bytes calldata data) external {
-        address controller = msg.sender;
+    function register(address controller, address profile, bytes calldata data) external {
+        if (msg.sender != controller && msg.sender != profile) {
+            revert Unathorized();
+        }
 
         bytes32 permissions = LSP6Utils.getPermissionsFor(IERC725Y(profile), controller);
         bool granted = LSP6Utils.hasPermission(permissions, _PERMISSION_SIGN);
