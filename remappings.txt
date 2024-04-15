@@ -1,7 +1,7 @@
 @erc725/smart-contracts/=lib/erc725/implementations/
 @openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
-@lukso/lsp-smart-contracts/=lib/lsp-smart-contracts/
+@lukso/=lib/lsp-smart-contracts/packages/
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
 solidity-bytes-utils/=lib/solidity-bytes-utils/

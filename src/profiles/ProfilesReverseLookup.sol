@@ -2,8 +2,8 @@
 pragma solidity =0.8.22;
 
 import {IERC725Y} from "@erc725/smart-contracts/contracts/interfaces/IERC725Y.sol";
-import {LSP6Utils} from "lsp-smart-contracts/LSP6KeyManager/LSP6Utils.sol";
-import {_PERMISSION_SIGN} from "lsp-smart-contracts/LSP6KeyManager/LSP6Constants.sol";
+import {LSP6Utils} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Utils.sol";
+import {_PERMISSION_SIGN} from "@lukso/lsp-smart-contracts/contracts/LSP6KeyManager/LSP6Constants.sol";
 
 contract ProfilesReverseLookup {
     error UnathorizedController(address controller, address profile);
