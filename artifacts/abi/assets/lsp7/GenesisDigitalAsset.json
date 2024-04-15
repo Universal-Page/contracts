@@ -142,17 +142,33 @@
   },
   {
     "inputs": [],
-    "name": "LSP7CannotSendToSelf",
-    "type": "error"
-  },
-  {
-    "inputs": [],
     "name": "LSP7CannotSendWithAddressZero",
     "type": "error"
   },
   {
     "inputs": [],
     "name": "LSP7CannotUseAddressZeroAsOperator",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "caller",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "tokenOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      }
+    ],
+    "name": "LSP7DecreaseAllowanceNotAuthorized",
     "type": "error"
   },
   {
@@ -185,6 +201,27 @@
       }
     ],
     "name": "LSP7NotifyTokenReceiverIsEOA",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "caller",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "tokenOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      }
+    ],
+    "name": "LSP7RevokeOperatorNotAuthorized",
     "type": "error"
   },
   {
@@ -531,6 +568,11 @@
         "type": "address"
       },
       {
+        "internalType": "address",
+        "name": "tokenOwner",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "subtractedAmount",
         "type": "uint256"
@@ -677,6 +719,11 @@
       {
         "internalType": "address",
         "name": "operator",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "tokenOwner",
         "type": "address"
       },
       {
