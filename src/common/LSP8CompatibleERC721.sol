@@ -26,7 +26,12 @@ import {
 } from "@lukso/lsp-smart-contracts/contracts/LSP4DigitalAssetMetadata/LSP4Constants.sol";
 import {
     _LSP8_TOKEN_METADATA_BASE_URI,
-    _LSP8_TOKENID_FORMAT_KEY
+    _LSP8_TOKENID_FORMAT_KEY,
+    _LSP8_TOKENID_FORMAT_NUMBER,
+    _LSP8_TOKENID_FORMAT_STRING,
+    _LSP8_TOKENID_FORMAT_ADDRESS,
+    _LSP8_TOKENID_FORMAT_UNIQUE_ID,
+    _LSP8_TOKENID_FORMAT_HASH
 } from "@lukso/lsp-smart-contracts/contracts/LSP8IdentifiableDigitalAsset/LSP8Constants.sol";
 
 abstract contract LSP8CompatibleERC721 is IERC721Metadata, LSP8IdentifiableDigitalAsset {
@@ -97,13 +102,13 @@ abstract contract LSP8CompatibleERC721 is IERC721Metadata, LSP8IdentifiableDigit
         bytes memory baseUri = baseUriData.slice(baseUriOffset, baseUriData.length - baseUriOffset);
 
         uint256 tokenIdFormat = _getData(_LSP8_TOKENID_FORMAT_KEY).toUint256(0);
-        if (tokenIdFormat == 0) {
+        if (tokenIdFormat == _LSP8_TOKENID_FORMAT_NUMBER) {
             return string(BytesLib.concat(baseUri, bytes(Strings.toString(tokenId))));
-        } else if (tokenIdFormat == 1) {
+        } else if (tokenIdFormat == _LSP8_TOKENID_FORMAT_STRING) {
             return string(BytesLib.concat(baseUri, abi.encodePacked(tokenId)));
-        } else if (tokenIdFormat == 2) {
+        } else if (tokenIdFormat == _LSP8_TOKENID_FORMAT_ADDRESS) {
             return string(BytesLib.concat(baseUri, bytes(Strings.toHexString(tokenId, 20))));
-        } else if (tokenIdFormat == 3 || tokenIdFormat == 4) {
+        } else if (tokenIdFormat == _LSP8_TOKENID_FORMAT_UNIQUE_ID || tokenIdFormat == _LSP8_TOKENID_FORMAT_HASH) {
             return string(BytesLib.concat(baseUri, bytes(Strings.toHexString(tokenId, 32))));
         } else {
             return string(baseUri);
