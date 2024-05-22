@@ -20,8 +20,8 @@ contract Deploy is Script {
         address admin = vm.envAddress("ADMIN_ADDRESS");
         address owner = vm.envAddress("OWNER_ADDRESS");
         address treasury = vm.envAddress("TREASURY_ADDRESS");
-        address listings = vm.envAddress("CONTRACT_LSP7_LISTINGS_ADDRESS");
-        address offers = vm.envAddress("CONTRACT_LSP7_OFFERS_ADDRESS");
+        address listings = vm.envAddress("CONTRACT_LSP8_LISTINGS_ADDRESS");
+        address offers = vm.envAddress("CONTRACT_LSP8_OFFERS_ADDRESS");
         address auctions = vm.envAddress("CONTRACT_LSP8_AUCTIONS_ADDRESS");
         address participant = vm.envAddress("CONTRACT_PARTICIPANT_ADDRESS");
 
