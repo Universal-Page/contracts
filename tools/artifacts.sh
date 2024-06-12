@@ -38,7 +38,7 @@ if [ -z "${TARGET}" ]; then
 fi
 
 case "${TARGET}" in
-local | testnet | mainnet) ;;
+local | testnet | mainnet | base.sepolia) ;;
 *)
   echo -e "Unknown target: ${TARGET}"
   help

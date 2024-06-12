@@ -58,7 +58,7 @@ if [ -n "${SCRIPT}" ] && [ -n "${LIBRARIES}" ]; then
 fi
 
 case "${TARGET}" in
-local | testnet | mainnet) ;;
+local | testnet | mainnet | base.sepolia) ;;
 *)
   echo -e "Unknown target: ${TARGET}"
   help
@@ -84,6 +84,11 @@ if [ -n "${LIBRARIES}" ]; then
   if [ -z "${ADMIN_PRIVATE_KEY}" ]; then
     # fallback to enter private key
     ARGS+=" --interactive"
+  fi
+
+  # fallback to hardware wallet
+  if [ -z "${ADMIN_PRIVATE_KEY}" ] && [ -n "${ADMIN_LEDGER_DERIVATION_PATH}" ]; then
+    ARGS+=" --ledger --hd-path ${ADMIN_LEDGER_DERIVATION_PATH}"
   fi
 
   if [ -z "${LIBRARY_POINTS_ADDRESS}" ]; then
