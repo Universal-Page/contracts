@@ -5,6 +5,7 @@
 
 | network | contract / library    | address                                    |
 | ------- | --------------------- | ------------------------------------------ |
+| base-sepolia | PageName              | 0xeff07d835ebd1e6a7a785d00d4c701220aa6aea8 |
 | base-sepolia | Points                | 0xa29aeaabb5DA0CC3635576933a66c1B714f058C1 |
 | base-sepolia | Royalties             | 0x7D6DA08a9d13cEC8649215F8bbD9dcA101c22659 |
 | base-sepolia | ProfilesReverseLookup | 0x3582f474f6e9fb087651b135d6224500a89e6f44 |
