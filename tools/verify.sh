@@ -87,32 +87,43 @@ verifyProxy() {
   verify ${name} ${implementationAddress}
 }
 
-# verify LSP8DropsDigitalAsset 0x86e817172b5c07f7036bf8aa46e2db9063743a83
-# verify LSP7DropsDigitalAsset 0x1d5166e8247e70a2cf01881924a1ac6fc1b91128
-
-# verify LSP7DropsLightAsset 0x6A938ff85df044772cbc358ACE7BeD2F7798fb98
+forge build
 
 verify Points ${LIBRARY_POINTS_ADDRESS}
 verify Royalties ${LIBRARY_ROYALTIES_ADDRESS}
 
-# verify CollectorIdentifiableDigitalAsset ${CONTRACT_COLLECTOR_DIGITAL_ASSET_ADDRESS}
-# verify GenesisDigitalAsset ${CONTRACT_GENESIS_DIGITAL_ASSET_ADDRESS}
+if [ -n "${CONTRACT_COLLECTOR_DIGITAL_ASSET_ADDRESS}" ]; then
+  verify CollectorIdentifiableDigitalAsset ${CONTRACT_COLLECTOR_DIGITAL_ASSET_ADDRESS}
+fi
 
-# verifyProxy Participant ${CONTRACT_PARTICIPANT_ADDRESS}
+if [ -n "${CONTRACT_GENESIS_DIGITAL_ASSET_ADDRESS}" ]; then
+  verify GenesisDigitalAsset ${CONTRACT_GENESIS_DIGITAL_ASSET_ADDRESS}
+fi
 
-# verifyProxy LSP7Listings ${CONTRACT_LSP7_LISTINGS_ADDRESS}
-# verifyProxy LSP7Offers ${CONTRACT_LSP7_OFFERS_ADDRESS}
-# verifyProxy LSP7Marketplace ${CONTRACT_LSP7_MARKETPLACE_ADDRESS}
+verifyProxy Participant ${CONTRACT_PARTICIPANT_ADDRESS}
 
-# verifyProxy LSP8Listings ${CONTRACT_LSP8_LISTINGS_ADDRESS}
-# verifyProxy LSP8Offers ${CONTRACT_LSP8_OFFERS_ADDRESS}
-# verifyProxy LSP8Auctions ${CONTRACT_LSP8_AUCTIONS_ADDRESS}
-# verifyProxy LSP8Marketplace ${CONTRACT_LSP8_MARKETPLACE_ADDRESS}
+verifyProxy LSP7Listings ${CONTRACT_LSP7_LISTINGS_ADDRESS}
+verifyProxy LSP7Offers ${CONTRACT_LSP7_OFFERS_ADDRESS}
+verifyProxy LSP7Orders ${CONTRACT_LSP7_ORDERS_ADDRESS}
+verifyProxy LSP7Marketplace ${CONTRACT_LSP7_MARKETPLACE_ADDRESS}
 
-# verifyProxy PageName ${CONTRACT_PAGE_NAME_ADDRESS}
+verifyProxy LSP8Listings ${CONTRACT_LSP8_LISTINGS_ADDRESS}
+verifyProxy LSP8Offers ${CONTRACT_LSP8_OFFERS_ADDRESS}
+verifyProxy LSP8Auctions ${CONTRACT_LSP8_AUCTIONS_ADDRESS}
+verifyProxy LSP8Marketplace ${CONTRACT_LSP8_MARKETPLACE_ADDRESS}
 
-# verifyProxy Vault ${CONTRACT_POOL_VAULT}
-# verifyProxy Elections ${CONTRACT_ELECTIONS}
+verifyProxy PageName ${CONTRACT_PAGE_NAME_ADDRESS}
 
-# verifyProxy ProfilesOracle ${CONTRACT_PROFILES_ORACLE}
+if [ -n "${CONTRACT_POOL_VAULT}" ]; then
+  verifyProxy Vault ${CONTRACT_POOL_VAULT}
+fi
+
+if [ -n "${CONTRACT_ELECTIONS}" ]; then
+  verifyProxy Elections ${CONTRACT_ELECTIONS}
+fi
+
+if [ -n "${CONTRACT_PROFILES_ORACLE}" ]; then
+  verifyProxy ProfilesOracle ${CONTRACT_PROFILES_ORACLE}
+fi
+
 verify ProfilesReverseLookup ${CONTRACT_PROFILES_REVERSE_LOOKUP}

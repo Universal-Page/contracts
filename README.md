@@ -9,6 +9,15 @@
 | base-sepolia | Points                | 0xa29aeaabb5DA0CC3635576933a66c1B714f058C1 |
 | base-sepolia | Royalties             | 0x7D6DA08a9d13cEC8649215F8bbD9dcA101c22659 |
 | base-sepolia | ProfilesReverseLookup | 0x3582f474f6e9fb087651b135d6224500a89e6f44 |
+| base-sepolia | Participant           | 0x59e468e64c23a44d6340cb2da6a701e9a8dcdc2b |
+| base-sepolia | LSP7Listings          | 0x08e187a4adbe87e411917e0abe6d283461ca96c0 |
+| base-sepolia | LSP7Offers            | 0x44cd7d06ceb509370b75e426ea3c12824a665e36 |
+| base-sepolia | LSP7Orders            | 0xdf9defd55365b7b073cae009cf53dd830902c5a7 |
+| base-sepolia | LSP7Marketplace       | 0xc9c940a35fc8d3522085b991ce3e1a920354f19a |
+| base-sepolia | LSP8Listings          | 0xf069f9b8e0f96d742c6dfd3d78b0e382f3411207 |
+| base-sepolia | LSP8Offers            | 0xaebcc2c80abacb7e4d928d4c0a52c7bbeba4c4be |
+| base-sepolia | LSP8Auctions          | 0x39456bcd4d450e55f851f97c30df828a4e1f6c66 |
+| base-sepolia | LSP8Marketplace       | 0xe9f0feab3d50ccbe40d99f669fe1e89172908cdf |
 | lukso | PageName              | 0x39456bcd4d450e55f851f97c30df828a4e1f6c66 |
 | lukso | GenesisDigitalAsset   | 0x8da488c29fb873c9561ccf5ff44dda6c1deddc37 |
 | lukso | CollectorDigitalAsset | 0x5599d0ae8576250db2b9a9975fd3db1f6399b4fd |

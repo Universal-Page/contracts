@@ -44,8 +44,9 @@ contract Configure is Script {
     function run() external {
         address owner = vm.envAddress("OWNER_ADDRESS");
         ICollectorIdentifiableDigitalAsset collectorAsset =
-            ICollectorIdentifiableDigitalAsset(vm.envAddress("CONTRACT_COLLECTOR_DIGITAL_ASSET_ADDRESS"));
-        ILSP7DigitalAsset genesisAsset = ILSP7DigitalAsset(vm.envAddress("CONTRACT_GENESIS_DIGITAL_ASSET_ADDRESS"));
+            ICollectorIdentifiableDigitalAsset(vm.envOr("CONTRACT_COLLECTOR_DIGITAL_ASSET_ADDRESS", address(0)));
+        ILSP7DigitalAsset genesisAsset =
+            ILSP7DigitalAsset(vm.envOr("CONTRACT_GENESIS_DIGITAL_ASSET_ADDRESS", address(0)));
         Participant participant = Participant(vm.envAddress("CONTRACT_PARTICIPANT_ADDRESS"));
 
         if (address(participant.collectorAsset()) != address(collectorAsset)) {
