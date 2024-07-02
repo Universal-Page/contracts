@@ -7,6 +7,8 @@ import {Module} from "../common/Module.sol";
 import {ILSP8Listings, LSP8Listing} from "./ILSP8Listings.sol";
 import {ILSP8Offers, LSP8Offer} from "./ILSP8Offers.sol";
 
+uint256 constant CANCELATION_COOLDOWN = 1 hours;
+
 contract LSP8Offers is ILSP8Offers, Module {
     error NotPlaced(uint256 listingId, address buyer);
     error InvalidOfferDuration(uint256 secondsUntilExpiration);
@@ -14,10 +16,12 @@ contract LSP8Offers is ILSP8Offers, Module {
     error InactiveListing(uint256 listingId);
     error InactiveOffer(uint256 listingId, address buyer);
     error Unpaid(uint256 listingId, address buyer, uint256 amount);
+    error RecentlyCanceled(uint256 listingId, address buyer, uint256 cooldownTimestamp);
 
     ILSP8Listings public listings;
     // listing id -> buyer -> offer
     mapping(uint256 => mapping(address => LSP8Offer)) private _offers;
+    mapping(uint256 listingId => mapping(address buyer => uint256 cooldownTimestamp)) private _cancellationCooldown;
 
     constructor() {
         _disableInitializers();
@@ -68,13 +72,15 @@ contract LSP8Offers is ILSP8Offers, Module {
     }
 
     function cancel(uint256 listingId) external override whenNotPaused nonReentrant {
-        LSP8Offer memory offer = getOffer(listingId, msg.sender);
-        delete _offers[listingId][msg.sender];
-        (bool success,) = msg.sender.call{value: offer.price}("");
+        address buyer = msg.sender;
+        LSP8Offer memory offer = getOffer(listingId, buyer);
+        delete _offers[listingId][buyer];
+        _cancellationCooldown[listingId][buyer] = block.timestamp;
+        (bool success,) = buyer.call{value: offer.price}("");
         if (!success) {
-            revert Unpaid(listingId, msg.sender, offer.price);
+            revert Unpaid(listingId, buyer, offer.price);
         }
-        emit Canceled(listingId, msg.sender, offer.price);
+        emit Canceled(listingId, buyer, offer.price);
     }
 
     function accept(uint256 listingId, address buyer) external override whenNotPaused nonReentrant onlyMarketplace {
@@ -86,6 +92,11 @@ contract LSP8Offers is ILSP8Offers, Module {
             revert InactiveOffer(listingId, buyer);
         }
         delete _offers[listingId][buyer];
+        // verify cooldown period if the offer was recently canceled
+        uint256 cooldownTimestamp = _cancellationCooldown[listingId][buyer];
+        if ((cooldownTimestamp > 0) && (cooldownTimestamp + CANCELATION_COOLDOWN > block.timestamp)) {
+            revert RecentlyCanceled(listingId, buyer, cooldownTimestamp + CANCELATION_COOLDOWN);
+        }
         (bool success,) = msg.sender.call{value: offer.price}("");
         if (!success) {
             revert Unpaid(listingId, msg.sender, offer.price);
