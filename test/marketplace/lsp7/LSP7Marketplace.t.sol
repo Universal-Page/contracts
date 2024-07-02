@@ -15,7 +15,6 @@ import {Points} from "../../../src/common/Points.sol";
 import {Royalties, RoyaltiesInfo} from "../../../src/common/Royalties.sol";
 import {Base} from "../../../src/marketplace/common/Base.sol";
 import {LSP7Listings} from "../../../src/marketplace/lsp7/LSP7Listings.sol";
-import {LSP7Offers} from "../../../src/marketplace/lsp7/LSP7Offers.sol";
 import {LSP7Orders} from "../../../src/marketplace/lsp7/LSP7Orders.sol";
 import {LSP7Marketplace} from "../../../src/marketplace/lsp7/LSP7Marketplace.sol";
 import {Participant, GENESIS_DISCOUNT} from "../../../src/marketplace/Participant.sol";
@@ -41,7 +40,6 @@ contract LSP7MarketplaceTest is Test {
     event ValueWithdrawn(address indexed beneficiary, uint256 indexed value);
 
     LSP7Listings listings;
-    LSP7Offers offers;
     LSP7Orders orders;
     LSP7Marketplace marketplace;
     Participant participant;
@@ -75,15 +73,6 @@ contract LSP7MarketplaceTest is Test {
                 )
             )
         );
-        offers = LSP7Offers(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(new LSP7Offers()),
-                    admin,
-                    abi.encodeWithSelector(LSP7Offers.initialize.selector, owner, listings)
-                )
-            )
-        );
         orders = LSP7Orders(
             address(
                 new TransparentUpgradeableProxy(
@@ -100,7 +89,7 @@ contract LSP7MarketplaceTest is Test {
                         address(new LSP7Marketplace()),
                         admin,
                         abi.encodeWithSelector(
-                            LSP7Marketplace.initialize.selector, owner, beneficiary, listings, offers, orders, participant
+                            LSP7Marketplace.initialize.selector, owner, beneficiary, listings, orders, participant
                         )
                     )
                 )
@@ -109,12 +98,10 @@ contract LSP7MarketplaceTest is Test {
 
         vm.startPrank(owner);
         listings.grantRole(address(marketplace), MARKETPLACE_ROLE);
-        offers.grantRole(address(marketplace), MARKETPLACE_ROLE);
         orders.grantRole(address(marketplace), MARKETPLACE_ROLE);
         vm.stopPrank();
 
         assertTrue(listings.hasRole(address(marketplace), MARKETPLACE_ROLE));
-        assertTrue(offers.hasRole(address(marketplace), MARKETPLACE_ROLE));
         assertTrue(orders.hasRole(address(marketplace), MARKETPLACE_ROLE));
     }
 
@@ -123,7 +110,6 @@ contract LSP7MarketplaceTest is Test {
         assertEq(owner, marketplace.owner());
         assertEq(beneficiary, marketplace.beneficiary());
         assertEq(address(listings), address(marketplace.listings()));
-        assertEq(address(offers), address(marketplace.offers()));
         assertEq(address(orders), address(marketplace.orders()));
         assertEq(address(participant), address(marketplace.participant()));
         assertEq(0, marketplace.feePoints());
@@ -160,8 +146,6 @@ contract LSP7MarketplaceTest is Test {
         marketplace.pause();
         vm.expectRevert("Pausable: paused");
         marketplace.buy(1, 1, address(100));
-        vm.expectRevert("Pausable: paused");
-        marketplace.acceptOffer(1, address(100));
     }
 
     function test_FeePoints() public {
@@ -435,45 +419,6 @@ contract LSP7MarketplaceTest is Test {
             abi.encodeWithSelector(Base.RoyaltiesExceedThreshold.selector, 1, 10 ether, Points.realize(10 ether, 2))
         );
         marketplace.buy{value: 10 ether}(1, 10, address(bob));
-    }
-
-    function testFuzz_AcceptOffer(uint256 itemCount, uint256 itemPrice, uint256 totalPrice) public {
-        vm.assume(itemCount > 0 && itemCount <= 1e32);
-        vm.assume(itemPrice <= 1_000_000_000 ether);
-        vm.assume(totalPrice <= 1_000_000_000 ether);
-
-        (UniversalProfile alice,) = deployProfile();
-        (UniversalProfile bob,) = deployProfile();
-
-        asset.mint(address(alice), itemCount, false, "");
-        vm.prank(address(alice));
-        asset.authorizeOperator(address(marketplace), itemCount, "");
-        vm.prank(address(alice));
-        listings.list(address(asset), address(alice), itemCount, itemPrice, block.timestamp, 10 days);
-
-        vm.deal(address(bob), totalPrice);
-        vm.prank(address(bob));
-        offers.place{value: totalPrice}(1, itemCount, totalPrice, 1 hours);
-
-        vm.prank(address(alice));
-        vm.expectEmit(address(marketplace));
-        emit Sold(
-            address(asset),
-            address(alice),
-            address(bob),
-            itemCount,
-            totalPrice,
-            0,
-            0,
-            hex"010000000000000000000000000000000000000000000000000000000000000001"
-        );
-        marketplace.acceptOffer(1, address(bob));
-
-        assertFalse(listings.isListed(1));
-        assertEq(address(alice).balance, totalPrice);
-        assertEq(address(bob).balance, 0);
-        assertEq(asset.balanceOf(address(alice)), 0);
-        assertEq(asset.balanceOf(address(bob)), itemCount);
     }
 
     function testFuzz_FillOrder(uint256 itemCount, uint256 itemPrice, uint256 fillCount) public {

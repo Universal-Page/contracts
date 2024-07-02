@@ -5,7 +5,6 @@ import {ILSP7DigitalAsset} from "@lukso/lsp-smart-contracts/contracts/LSP7Digita
 import {Base} from "../common/Base.sol";
 import {IParticipant} from "../IParticipant.sol";
 import {ILSP7Listings, LSP7Listing} from "./ILSP7Listings.sol";
-import {ILSP7Offers, LSP7Offer} from "./ILSP7Offers.sol";
 import {ILSP7Orders, LSP7Order} from "./ILSP7Orders.sol";
 
 uint8 constant SALE_KIND_MASK = 0xF;
@@ -34,7 +33,6 @@ contract LSP7Marketplace is Base {
     error UnathorizedSeller(address account);
 
     ILSP7Listings public listings;
-    ILSP7Offers public offers;
     ILSP7Orders public orders;
 
     constructor() {
@@ -45,13 +43,11 @@ contract LSP7Marketplace is Base {
         address newOwner_,
         address beneficiary_,
         ILSP7Listings listings_,
-        ILSP7Offers offers_,
         ILSP7Orders orders_,
         IParticipant participant_
     ) external initializer {
         Base._initialize(newOwner_, beneficiary_, participant_);
         listings = listings_;
-        offers = offers_;
         orders = orders_;
     }
 
@@ -63,24 +59,6 @@ contract LSP7Marketplace is Base {
         listings.deduct(listingId, itemCount);
         _executeSale(
             listing.asset, itemCount, listing.owner, recipient, msg.value, abi.encodePacked(SALE_KIND_SPOT, listingId)
-        );
-    }
-
-    function acceptOffer(uint256 listingId, address buyer) external whenNotPaused nonReentrant {
-        LSP7Listing memory listing = listings.getListing(listingId);
-        if (listing.seller != msg.sender) {
-            revert UnathorizedSeller(msg.sender);
-        }
-        LSP7Offer memory offer = offers.getOffer(listingId, buyer);
-        offers.accept(listingId, buyer);
-        listings.deduct(listingId, offer.itemCount);
-        _executeSale(
-            listing.asset,
-            offer.itemCount,
-            listing.owner,
-            buyer,
-            offer.totalPrice,
-            abi.encodePacked(SALE_KIND_OFFER, listingId)
         );
     }
 

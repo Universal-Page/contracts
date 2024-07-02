@@ -21,7 +21,6 @@ contract Deploy is Script {
         address owner = vm.envAddress("OWNER_ADDRESS");
         address treasury = vm.envAddress("TREASURY_ADDRESS");
         address listings = vm.envAddress("CONTRACT_LSP7_LISTINGS_ADDRESS");
-        address offers = vm.envAddress("CONTRACT_LSP7_OFFERS_ADDRESS");
         address orders = vm.envAddress("CONTRACT_LSP7_ORDERS_ADDRESS");
         address participant = vm.envAddress("CONTRACT_PARTICIPANT_ADDRESS");
 
@@ -36,7 +35,7 @@ contract Deploy is Script {
                 new TransparentUpgradeableProxy(
                     address(marketplace),
                     admin,
-                    abi.encodeWithSelector(LSP7Marketplace.initialize.selector, owner, treasury, listings, offers, orders, participant)
+                    abi.encodeWithSelector(LSP7Marketplace.initialize.selector, owner, treasury, listings, orders, participant)
                 )
             );
             console.log(string.concat("LSP7Marketplace: deploy ", Strings.toHexString(address(proxy))));
@@ -71,7 +70,6 @@ contract Configure is Script {
         address treasury = vm.envAddress("TREASURY_ADDRESS");
         IParticipant participant = IParticipant(vm.envAddress("CONTRACT_PARTICIPANT_ADDRESS"));
         Module listings = Module(vm.envAddress("CONTRACT_LSP7_LISTINGS_ADDRESS"));
-        Module offers = Module(vm.envAddress("CONTRACT_LSP7_OFFERS_ADDRESS"));
         Module orders = Module(vm.envAddress("CONTRACT_LSP7_ORDERS_ADDRESS"));
         LSP7Marketplace marketplace = LSP7Marketplace(payable(vm.envAddress("CONTRACT_LSP7_MARKETPLACE_ADDRESS")));
 
@@ -88,11 +86,6 @@ contract Configure is Script {
         if (!listings.hasRole(address(marketplace), MARKETPLACE_ROLE)) {
             vm.broadcast(owner);
             listings.grantRole(address(marketplace), MARKETPLACE_ROLE);
-        }
-
-        if (!offers.hasRole(address(marketplace), MARKETPLACE_ROLE)) {
-            vm.broadcast(owner);
-            offers.grantRole(address(marketplace), MARKETPLACE_ROLE);
         }
 
         if (!orders.hasRole(address(marketplace), MARKETPLACE_ROLE)) {
