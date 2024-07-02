@@ -14,7 +14,7 @@ import {Points} from "../../../src/common/Points.sol";
 import {Royalties, RoyaltiesInfo} from "../../../src/common/Royalties.sol";
 import {Base} from "../../../src/marketplace/common/Base.sol";
 import {LSP8Listings} from "../../../src/marketplace/lsp8/LSP8Listings.sol";
-import {LSP8Offers} from "../../../src/marketplace/lsp8/LSP8Offers.sol";
+import {LSP8Offers, CANCELATION_COOLDOWN} from "../../../src/marketplace/lsp8/LSP8Offers.sol";
 import {LSP8Auctions} from "../../../src/marketplace/lsp8/LSP8Auctions.sol";
 import {LSP8Marketplace} from "../../../src/marketplace/lsp8/LSP8Marketplace.sol";
 import {Participant, GENESIS_DISCOUNT} from "../../../src/marketplace/Participant.sol";
@@ -517,5 +517,87 @@ contract LSP8MarketplaceTest is Test {
         vm.prank(address(alice));
         vm.expectRevert(abi.encodeWithSelector(LSP8Marketplace.Auctioned.selector, 1));
         marketplace.acceptOffer(1, address(bob));
+    }
+
+    function test_Revert_AcceptOfferIfFrontRan() public {
+        uint256 initialTime = 3 hours;
+
+        // advance block time
+        vm.warp(initialTime);
+
+        (UniversalProfile alice,) = deployProfile();
+        (UniversalProfile bob,) = deployProfile();
+
+        bytes32 tokenId = bytes32(0);
+        asset.mint(address(alice), tokenId, false, "");
+        vm.prank(address(alice));
+        asset.authorizeOperator(address(marketplace), tokenId, "");
+        vm.prank(address(alice));
+        listings.list(address(asset), tokenId, 1 ether, block.timestamp, 10 days);
+
+        vm.deal(address(bob), 10 ether);
+        vm.prank(address(bob));
+        offers.place{value: 10 ether}(1, 10 ether, 1 hours);
+
+        // cancel the offer and place a new one with a lower price
+        vm.prank(address(bob));
+        offers.cancel(1);
+
+        vm.prank(address(bob));
+        offers.place{value: 1 wei}(1, 1 wei, 1 hours);
+
+        vm.prank(address(alice));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                LSP8Offers.RecentlyCanceled.selector, 1, address(bob), initialTime + CANCELATION_COOLDOWN
+            )
+        );
+        marketplace.acceptOffer(1, address(bob));
+
+        assertTrue(listings.isListed(1));
+        assertTrue(offers.isPlacedOffer(1, address(bob)));
+        assertEq(asset.tokenOwnerOf(tokenId), address(alice));
+    }
+
+    function testFuzz_AcceptOfferAfterCooldownCancellation() public {
+        uint256 initialTime = 3 hours;
+
+        // advance block time
+        vm.warp(initialTime);
+
+        (UniversalProfile alice,) = deployProfile();
+        (UniversalProfile bob,) = deployProfile();
+
+        bytes32 tokenId = bytes32(0);
+        asset.mint(address(alice), tokenId, false, "");
+        vm.prank(address(alice));
+        asset.authorizeOperator(address(marketplace), tokenId, "");
+        vm.prank(address(alice));
+        listings.list(address(asset), tokenId, 1 ether, block.timestamp, 10 days);
+
+        vm.deal(address(bob), 10 ether);
+        vm.prank(address(bob));
+        offers.place{value: 10 ether}(1, 10 ether, 10 hours);
+
+        // cancel the offer and place a new one with a lower price
+        vm.prank(address(bob));
+        offers.cancel(1);
+
+        vm.prank(address(bob));
+        offers.place{value: 1 ether}(1, 1 ether, 10 hours);
+
+        // advance block time
+        vm.warp(initialTime + CANCELATION_COOLDOWN);
+
+        vm.prank(address(alice));
+        vm.expectEmit(address(marketplace));
+        emit Sale(1, address(asset), tokenId, address(alice), address(bob), 1 ether);
+        marketplace.acceptOffer(1, address(bob));
+
+        assertFalse(listings.isListed(1));
+        assertFalse(offers.isPlacedOffer(1, address(alice)));
+        assertEq(address(alice).balance, 1 ether);
+        assertEq(address(bob).balance, 9 ether);
+        assertEq(asset.tokenOwnerOf(tokenId), address(bob));
     }
 }
