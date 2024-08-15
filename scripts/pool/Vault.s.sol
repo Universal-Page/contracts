@@ -12,7 +12,7 @@ import {Vault} from "../../src/pool/Vault.sol";
 import {DepositContract} from "../../src/pool/IDepositContract.sol";
 
 uint32 constant SERVICE_FEE = 8_000; // 8%
-uint256 constant DEPOSIT_LIMIT = 18000 * 32 ether;
+uint256 constant DEPOSIT_LIMIT = 19500 * 32 ether;
 
 contract Deploy is Script {
     function run() external {

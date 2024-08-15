@@ -58,7 +58,7 @@ if [ -n "${SCRIPT}" ] && [ -n "${LIBRARIES}" ]; then
 fi
 
 case "${TARGET}" in
-local | testnet | mainnet | base.sepolia) ;;
+local | testnet | mainnet | base.sepolia | base) ;;
 *)
   echo -e "Unknown target: ${TARGET}"
   help

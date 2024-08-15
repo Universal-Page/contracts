@@ -5,19 +5,19 @@
 
 | network | contract / library    | address                                    |
 | ------- | --------------------- | ------------------------------------------ |
-| base-sepolia | PageName              | 0xeff07d835ebd1e6a7a785d00d4c701220aa6aea8 |
-| base-sepolia | Points                | 0xa29aeaabb5DA0CC3635576933a66c1B714f058C1 |
-| base-sepolia | Royalties             | 0x7D6DA08a9d13cEC8649215F8bbD9dcA101c22659 |
-| base-sepolia | ProfilesReverseLookup | 0x3582f474f6e9fb087651b135d6224500a89e6f44 |
-| base-sepolia | Participant           | 0x59e468e64c23a44d6340cb2da6a701e9a8dcdc2b |
-| base-sepolia | LSP7Listings          | 0x08e187a4adbe87e411917e0abe6d283461ca96c0 |
-| base-sepolia | LSP7Offers            | 0x44cd7d06ceb509370b75e426ea3c12824a665e36 |
-| base-sepolia | LSP7Orders            | 0xdf9defd55365b7b073cae009cf53dd830902c5a7 |
-| base-sepolia | LSP7Marketplace       | 0xc9c940a35fc8d3522085b991ce3e1a920354f19a |
-| base-sepolia | LSP8Listings          | 0xf069f9b8e0f96d742c6dfd3d78b0e382f3411207 |
-| base-sepolia | LSP8Offers            | 0xaebcc2c80abacb7e4d928d4c0a52c7bbeba4c4be |
-| base-sepolia | LSP8Auctions          | 0x39456bcd4d450e55f851f97c30df828a4e1f6c66 |
-| base-sepolia | LSP8Marketplace       | 0xe9f0feab3d50ccbe40d99f669fe1e89172908cdf |
+| base | PageName              | 0x679cc9e6d189e68884be00f18c5f77ff08988c97 |
+| base | Points                | 0x3582f474F6E9FB087651b135d6224500A89e6f44 |
+| base | Royalties             | 0xa29aeaabb5DA0CC3635576933a66c1B714f058C1 |
+| base | ProfilesReverseLookup | 0x7d6da08a9d13cec8649215f8bbd9dca101c22659 |
+| base | Participant           | 0xeff07d835ebd1e6a7a785d00d4c701220aa6aea8 |
+| base | LSP7Listings          | 0xe04cf97440cd191096c4103f9c48abd96184fb8d |
+| base | LSP7Offers            | 0x44cd7d06ceb509370b75e426ea3c12824a665e36 |
+| base | LSP7Orders            | 0xdf9defd55365b7b073cae009cf53dd830902c5a7 |
+| base | LSP7Marketplace       | 0xc9c940a35fc8d3522085b991ce3e1a920354f19a |
+| base | LSP8Listings          | 0xf069f9b8e0f96d742c6dfd3d78b0e382f3411207 |
+| base | LSP8Offers            | 0xaebcc2c80abacb7e4d928d4c0a52c7bbeba4c4be |
+| base | LSP8Auctions          | 0x39456bcd4d450e55f851f97c30df828a4e1f6c66 |
+| base | LSP8Marketplace       | 0xe9f0feab3d50ccbe40d99f669fe1e89172908cdf |
 | lukso | PageName              | 0x39456bcd4d450e55f851f97c30df828a4e1f6c66 |
 | lukso | GenesisDigitalAsset   | 0x8da488c29fb873c9561ccf5ff44dda6c1deddc37 |
 | lukso | CollectorDigitalAsset | 0x5599d0ae8576250db2b9a9975fd3db1f6399b4fd |
@@ -52,6 +52,19 @@
 | lukso-testnet | Royalties             | 0x1c51619209EFE37C759e4a9Ca91F1e68A96E19E3 |
 | lukso-testnet | Elections             | 0xbe69df047c7e10766cbe5e8bd2fac3dc18a9b745 |
 | lukso-testnet | ProfilesReverseLookup | 0x953eef8151770c4cc60ec27468acee85eb8d81f8 |
+| base-sepolia | PageName              | 0xeff07d835ebd1e6a7a785d00d4c701220aa6aea8 |
+| base-sepolia | Points                | 0xa29aeaabb5DA0CC3635576933a66c1B714f058C1 |
+| base-sepolia | Royalties             | 0x7D6DA08a9d13cEC8649215F8bbD9dcA101c22659 |
+| base-sepolia | ProfilesReverseLookup | 0x3582f474f6e9fb087651b135d6224500a89e6f44 |
+| base-sepolia | Participant           | 0x59e468e64c23a44d6340cb2da6a701e9a8dcdc2b |
+| base-sepolia | LSP7Listings          | 0x08e187a4adbe87e411917e0abe6d283461ca96c0 |
+| base-sepolia | LSP7Offers            | 0x44cd7d06ceb509370b75e426ea3c12824a665e36 |
+| base-sepolia | LSP7Orders            | 0xdf9defd55365b7b073cae009cf53dd830902c5a7 |
+| base-sepolia | LSP7Marketplace       | 0xc9c940a35fc8d3522085b991ce3e1a920354f19a |
+| base-sepolia | LSP8Listings          | 0xf069f9b8e0f96d742c6dfd3d78b0e382f3411207 |
+| base-sepolia | LSP8Offers            | 0xaebcc2c80abacb7e4d928d4c0a52c7bbeba4c4be |
+| base-sepolia | LSP8Auctions          | 0x39456bcd4d450e55f851f97c30df828a4e1f6c66 |
+| base-sepolia | LSP8Marketplace       | 0xe9f0feab3d50ccbe40d99f669fe1e89172908cdf |
 
 ## Development
 

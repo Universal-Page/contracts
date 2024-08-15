@@ -62,7 +62,7 @@ if [ -z "${SCRIPT_NAME}" ]; then
 fi
 
 case "${TARGET}" in
-local | testnet | mainnet | base.sepolia) ;;
+local | testnet | mainnet | base.sepolia | base) ;;
 *)
   echo -e "Unknown target: ${TARGET}"
   help
