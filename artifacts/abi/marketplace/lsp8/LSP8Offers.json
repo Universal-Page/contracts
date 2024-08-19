@@ -126,6 +126,27 @@
       },
       {
         "internalType": "uint256",
+        "name": "cooldownTimestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "RecentlyCanceled",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "listingId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "buyer",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
       }

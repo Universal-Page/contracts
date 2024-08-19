@@ -519,24 +519,6 @@
     "type": "event"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "listingId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "buyer",
-        "type": "address"
-      }
-    ],
-    "name": "acceptOffer",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "beneficiary",
     "outputs": [
@@ -621,11 +603,6 @@
         "type": "address"
       },
       {
-        "internalType": "contract ILSP7Offers",
-        "name": "offers_",
-        "type": "address"
-      },
-      {
         "internalType": "contract ILSP7Orders",
         "name": "orders_",
         "type": "address"
@@ -647,19 +624,6 @@
     "outputs": [
       {
         "internalType": "contract ILSP7Listings",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "offers",
-    "outputs": [
-      {
-        "internalType": "contract ILSP7Offers",
         "name": "",
         "type": "address"
       }
