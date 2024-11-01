@@ -12,7 +12,7 @@ import {IParticipant} from "../../../src/marketplace/IParticipant.sol";
 import {LSP8Marketplace} from "../../../src/marketplace/lsp8/LSP8Marketplace.sol";
 import {Module, MARKETPLACE_ROLE} from "../../../src/marketplace/common/Module.sol";
 
-uint32 constant FEE_POINTS = 2_500;
+uint32 constant FEE_POINTS = 3_000;
 uint32 constant ROYALTIES_THRESHOLD_POINTS = 10_000;
 
 contract Deploy is Script {
