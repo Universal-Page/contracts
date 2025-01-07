@@ -22,6 +22,7 @@ contract Deploy is Script {
         address treasury = vm.envAddress("TREASURY_ADDRESS");
         address listings = vm.envAddress("CONTRACT_LSP8_LISTINGS_ADDRESS");
         address offers = vm.envAddress("CONTRACT_LSP8_OFFERS_ADDRESS");
+        address orders = vm.envAddress("CONTRACT_LSP8_ORDERS_ADDRESS");
         address auctions = vm.envAddress("CONTRACT_LSP8_AUCTIONS_ADDRESS");
         address participant = vm.envAddress("CONTRACT_PARTICIPANT_ADDRESS");
 
@@ -36,7 +37,16 @@ contract Deploy is Script {
                 new TransparentUpgradeableProxy(
                     address(marketplace),
                     admin,
-                    abi.encodeWithSelector(LSP8Marketplace.initialize.selector, owner, treasury, listings, offers, auctions, participant)
+                    abi.encodeWithSelector(
+                        LSP8Marketplace.initialize.selector,
+                        owner,
+                        treasury,
+                        listings,
+                        offers,
+                        orders,
+                        auctions,
+                        participant
+                    )
                 )
             );
             console.log(string.concat("LSP8Marketplace: deploy ", Strings.toHexString(address(proxy))));
@@ -72,6 +82,7 @@ contract Configure is Script {
         IParticipant participant = IParticipant(vm.envAddress("CONTRACT_PARTICIPANT_ADDRESS"));
         Module listings = Module(vm.envAddress("CONTRACT_LSP8_LISTINGS_ADDRESS"));
         Module offers = Module(vm.envAddress("CONTRACT_LSP8_OFFERS_ADDRESS"));
+        Module orders = Module(vm.envAddress("CONTRACT_LSP8_ORDERS_ADDRESS"));
         Module auctions = Module(vm.envAddress("CONTRACT_LSP8_AUCTIONS_ADDRESS"));
 
         LSP8Marketplace marketplace = LSP8Marketplace(payable(vm.envAddress("CONTRACT_LSP8_MARKETPLACE_ADDRESS")));
@@ -99,6 +110,11 @@ contract Configure is Script {
         if (!offers.hasRole(address(marketplace), MARKETPLACE_ROLE)) {
             vm.broadcast(owner);
             offers.grantRole(address(marketplace), MARKETPLACE_ROLE);
+        }
+
+        if (!orders.hasRole(address(marketplace), MARKETPLACE_ROLE)) {
+            vm.broadcast(owner);
+            orders.grantRole(address(marketplace), MARKETPLACE_ROLE);
         }
 
         if (!auctions.hasRole(address(marketplace), MARKETPLACE_ROLE)) {

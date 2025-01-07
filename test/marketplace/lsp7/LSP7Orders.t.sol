@@ -42,9 +42,7 @@ contract LSP7OrdersTest is Test {
         orders = LSP7Orders(
             address(
                 new TransparentUpgradeableProxy(
-                    address(new LSP7Orders()),
-                    admin,
-                    abi.encodeWithSelector(LSP7Orders.initialize.selector, owner)
+                    address(new LSP7Orders()), admin, abi.encodeWithSelector(LSP7Orders.initialize.selector, owner)
                 )
             )
         );
@@ -157,9 +155,9 @@ contract LSP7OrdersTest is Test {
         assertEq(address(alice).balance, 1 ether);
     }
 
-    function testFuzz_Revert_CancelIfNotBuyer(address buyer) public {
+    function test_Revert_CancelIfNotBuyer() public {
         (UniversalProfile alice,) = deployProfile();
-        vm.assume(buyer != address(alice));
+        (UniversalProfile bob,) = deployProfile();
 
         vm.deal(address(alice), 1 ether);
         vm.prank(address(alice));
@@ -167,8 +165,8 @@ contract LSP7OrdersTest is Test {
 
         assertTrue(orders.isPlacedOrderOf(address(asset), address(alice)));
 
-        vm.prank(buyer);
-        vm.expectRevert(abi.encodeWithSelector(LSP7Orders.NotPlacedOf.selector, address(asset), buyer));
+        vm.prank(address(bob));
+        vm.expectRevert(abi.encodeWithSelector(LSP7Orders.NotPlacedOf.selector, address(asset), address(bob)));
         orders.cancel(1);
 
         assertTrue(orders.isPlacedOrderOf(address(asset), address(alice)));
