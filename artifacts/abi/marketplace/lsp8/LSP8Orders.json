@@ -6,7 +6,7 @@
   },
   {
     "type": "function",
-    "name": "delist",
+    "name": "cancel",
     "inputs": [
       {
         "name": "id",
@@ -19,7 +19,30 @@
   },
   {
     "type": "function",
-    "name": "getListing",
+    "name": "fill",
+    "inputs": [
+      {
+        "name": "id",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "seller",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getOrder",
     "inputs": [
       {
         "name": "id",
@@ -31,12 +54,12 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct LSP8Listing",
+        "internalType": "struct LSP8Order",
         "components": [
           {
-            "name": "seller",
-            "type": "address",
-            "internalType": "address"
+            "name": "id",
+            "type": "uint256",
+            "internalType": "uint256"
           },
           {
             "name": "asset",
@@ -44,29 +67,24 @@
             "internalType": "address"
           },
           {
-            "name": "owner",
+            "name": "buyer",
             "type": "address",
             "internalType": "address"
           },
           {
-            "name": "tokenId",
-            "type": "bytes32",
-            "internalType": "bytes32"
-          },
-          {
-            "name": "price",
+            "name": "tokenPrice",
             "type": "uint256",
             "internalType": "uint256"
           },
           {
-            "name": "startTime",
-            "type": "uint256",
-            "internalType": "uint256"
+            "name": "tokenIds",
+            "type": "bytes32[]",
+            "internalType": "bytes32[]"
           },
           {
-            "name": "endTime",
-            "type": "uint256",
-            "internalType": "uint256"
+            "name": "tokenCount",
+            "type": "uint16",
+            "internalType": "uint16"
           }
         ]
       }
@@ -130,7 +148,7 @@
   },
   {
     "type": "function",
-    "name": "isActiveListing",
+    "name": "isPlacedOrder",
     "inputs": [
       {
         "name": "id",
@@ -149,26 +167,7 @@
   },
   {
     "type": "function",
-    "name": "isListed",
-    "inputs": [
-      {
-        "name": "id",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "list",
+    "name": "isPlacedOrderOf",
     "inputs": [
       {
         "name": "asset",
@@ -176,34 +175,75 @@
         "internalType": "address"
       },
       {
-        "name": "tokenId",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
-        "name": "price",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "startTime",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "secondsUntilEndTime",
-        "type": "uint256",
-        "internalType": "uint256"
+        "name": "buyer",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "outputs": [
       {
         "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
+        "type": "bool",
+        "internalType": "bool"
       }
     ],
-    "stateMutability": "nonpayable"
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "orderOf",
+    "inputs": [
+      {
+        "name": "asset",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "buyer",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct LSP8Order",
+        "components": [
+          {
+            "name": "id",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "asset",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "buyer",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "tokenPrice",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "tokenIds",
+            "type": "bytes32[]",
+            "internalType": "bytes32[]"
+          },
+          {
+            "name": "tokenCount",
+            "type": "uint16",
+            "internalType": "uint16"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -240,6 +280,40 @@
   },
   {
     "type": "function",
+    "name": "place",
+    "inputs": [
+      {
+        "name": "asset",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tokenPrice",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "tokenCount",
+        "type": "uint16",
+        "internalType": "uint16"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
     "name": "renounceOwnership",
     "inputs": [],
     "outputs": [],
@@ -265,7 +339,7 @@
   },
   {
     "type": "function",
-    "name": "totalListings",
+    "name": "totalOrders",
     "inputs": [],
     "outputs": [
       {
@@ -291,60 +365,19 @@
   },
   {
     "type": "function",
-    "name": "unlist",
-    "inputs": [
-      {
-        "name": "id",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "unpause",
     "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
   {
-    "type": "function",
-    "name": "update",
-    "inputs": [
-      {
-        "name": "id",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "price",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "startTime",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "secondsUntilEndTime",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
     "type": "event",
-    "name": "Delisted",
+    "name": "Canceled",
     "inputs": [
       {
         "name": "id",
         "type": "uint256",
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256"
       },
       {
@@ -352,6 +385,79 @@
         "type": "address",
         "indexed": true,
         "internalType": "address"
+      },
+      {
+        "name": "buyer",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenPrice",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "indexed": false,
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "tokenCount",
+        "type": "uint16",
+        "indexed": false,
+        "internalType": "uint16"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Filled",
+    "inputs": [
+      {
+        "name": "id",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "asset",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "seller",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "buyer",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenPrice",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "indexed": false,
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "tokenCount",
+        "type": "uint16",
+        "indexed": false,
+        "internalType": "uint16"
       }
     ],
     "anonymous": false
@@ -365,61 +471,6 @@
         "type": "uint8",
         "indexed": false,
         "internalType": "uint8"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "Listed",
-    "inputs": [
-      {
-        "name": "id",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "asset",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "seller",
-        "type": "address",
-        "indexed": false,
-        "internalType": "address"
-      },
-      {
-        "name": "owner",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "tokenId",
-        "type": "bytes32",
-        "indexed": false,
-        "internalType": "bytes32"
-      },
-      {
-        "name": "price",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "startTime",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "endTime",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
       }
     ],
     "anonymous": false
@@ -458,12 +509,12 @@
   },
   {
     "type": "event",
-    "name": "Unlisted",
+    "name": "Placed",
     "inputs": [
       {
         "name": "id",
         "type": "uint256",
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256"
       },
       {
@@ -471,6 +522,30 @@
         "type": "address",
         "indexed": true,
         "internalType": "address"
+      },
+      {
+        "name": "buyer",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenPrice",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "indexed": false,
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "tokenCount",
+        "type": "uint16",
+        "indexed": false,
+        "internalType": "uint16"
       }
     ],
     "anonymous": false
@@ -489,50 +564,18 @@
     "anonymous": false
   },
   {
-    "type": "event",
-    "name": "Updated",
+    "type": "error",
+    "name": "AlreadyPlaced",
     "inputs": [
-      {
-        "name": "id",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
       {
         "name": "asset",
         "type": "address",
-        "indexed": true,
         "internalType": "address"
       },
       {
-        "name": "price",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "startTime",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "endTime",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "error",
-    "name": "AlreadyListed",
-    "inputs": [
-      {
-        "name": "id",
-        "type": "uint256",
-        "internalType": "uint256"
+        "name": "buyer",
+        "type": "address",
+        "internalType": "address"
       }
     ]
   },
@@ -554,28 +597,17 @@
   },
   {
     "type": "error",
-    "name": "InactiveListing",
+    "name": "InsufficientTokenCount",
     "inputs": [
       {
-        "name": "id",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "InsufficientAuthorization",
-    "inputs": [
-      {
-        "name": "account",
-        "type": "address",
-        "internalType": "address"
+        "name": "orderCount",
+        "type": "uint16",
+        "internalType": "uint16"
       },
       {
-        "name": "tokenId",
-        "type": "bytes32",
-        "internalType": "bytes32"
+        "name": "offeredCount",
+        "type": "uint16",
+        "internalType": "uint16"
       }
     ]
   },
@@ -592,10 +624,15 @@
   },
   {
     "type": "error",
-    "name": "InvalidListingTime",
+    "name": "InvalidAmount",
     "inputs": [
       {
-        "name": "time",
+        "name": "expected",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "actual",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -603,12 +640,39 @@
   },
   {
     "type": "error",
-    "name": "NotListed",
+    "name": "InvalidTokenCount",
+    "inputs": [
+      {
+        "name": "tokenCount",
+        "type": "uint16",
+        "internalType": "uint16"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "NotPlaced",
     "inputs": [
       {
         "name": "id",
         "type": "uint256",
         "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "NotPlacedOf",
+    "inputs": [
+      {
+        "name": "asset",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "buyer",
+        "type": "address",
+        "internalType": "address"
       }
     ]
   },
@@ -630,12 +694,28 @@
   },
   {
     "type": "error",
-    "name": "UnathorizedSeller",
+    "name": "UnfulfilledToken",
     "inputs": [
       {
-        "name": "account",
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "Unpaid",
+    "inputs": [
+      {
+        "name": "buyer",
         "type": "address",
         "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ]
   }

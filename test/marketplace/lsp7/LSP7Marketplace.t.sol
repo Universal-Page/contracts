@@ -76,9 +76,7 @@ contract LSP7MarketplaceTest is Test {
         orders = LSP7Orders(
             address(
                 new TransparentUpgradeableProxy(
-                    address(new LSP7Orders()),
-                    admin,
-                    abi.encodeWithSelector(LSP7Orders.initialize.selector, owner)
+                    address(new LSP7Orders()), admin, abi.encodeWithSelector(LSP7Orders.initialize.selector, owner)
                 )
             )
         );
@@ -424,7 +422,7 @@ contract LSP7MarketplaceTest is Test {
     function testFuzz_FillOrder(uint256 itemCount, uint256 itemPrice, uint256 fillCount) public {
         vm.assume(itemPrice < 100_000_000 ether);
         vm.assume(itemCount > 0 && itemCount < 1_000_000);
-        vm.assume(fillCount > 0 && fillCount < itemCount);
+        vm.assume(fillCount > 0 && fillCount <= itemCount);
 
         (UniversalProfile alice,) = deployProfile();
         (UniversalProfile bob,) = deployProfile();
