@@ -111,6 +111,7 @@ exportAbi "marketplace/lsp7/LSP7Marketplace"
 
 exportAbi "marketplace/lsp8/LSP8Listings"
 exportAbi "marketplace/lsp8/LSP8Offers"
+exportAbi "marketplace/lsp8/LSP8Orders"
 exportAbi "marketplace/lsp8/LSP8Auctions"
 exportAbi "marketplace/lsp8/LSP8Marketplace"
 

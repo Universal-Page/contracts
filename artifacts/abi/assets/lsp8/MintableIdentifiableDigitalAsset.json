@@ -1,1044 +1,1044 @@
 [
   {
+    "type": "constructor",
     "inputs": [
       {
-        "internalType": "string",
         "name": "name_",
-        "type": "string"
+        "type": "string",
+        "internalType": "string"
       },
       {
-        "internalType": "string",
         "name": "symbol_",
-        "type": "string"
+        "type": "string",
+        "internalType": "string"
       },
       {
-        "internalType": "address",
         "name": "newOwner_",
-        "type": "address"
+        "type": "address",
+        "internalType": "address"
       },
       {
-        "internalType": "uint256",
         "name": "tokenIdType_",
-        "type": "uint256"
+        "type": "uint256",
+        "internalType": "uint256"
       },
       {
-        "internalType": "uint256",
         "name": "lsp8TokenIdSchema_",
-        "type": "uint256"
+        "type": "uint256",
+        "internalType": "uint256"
       },
       {
-        "internalType": "uint256",
         "name": "tokenSupplyCap_",
-        "type": "uint256"
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
+    "stateMutability": "nonpayable"
   },
   {
-    "inputs": [],
-    "name": "ERC725Y_DataKeysValuesEmptyArray",
-    "type": "error"
+    "type": "fallback",
+    "stateMutability": "payable"
   },
   {
-    "inputs": [],
-    "name": "ERC725Y_DataKeysValuesLengthMismatch",
-    "type": "error"
+    "type": "receive",
+    "stateMutability": "payable"
   },
   {
-    "inputs": [],
-    "name": "ERC725Y_MsgValueDisallowed",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "storedData",
-        "type": "bytes"
-      }
-    ],
-    "name": "InvalidExtensionAddress",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
-      }
-    ],
-    "name": "InvalidFunctionSelector",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP4TokenNameNotEditable",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP4TokenSymbolNotEditable",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP4TokenTypeNotEditable",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "callIndex",
-        "type": "uint256"
-      }
-    ],
-    "name": "LSP8BatchCallFailed",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP8CannotSendToAddressZero",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP8CannotUseAddressZeroAsOperator",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP8CappedSupplyCannotMintOverCap",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP8CappedSupplyRequired",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP8InvalidTransferBatch",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "LSP8NonExistentTokenId",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "LSP8NonExistingOperator",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "address",
-        "name": "caller",
-        "type": "address"
-      }
-    ],
-    "name": "LSP8NotTokenOperator",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "tokenOwner",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "address",
-        "name": "caller",
-        "type": "address"
-      }
-    ],
-    "name": "LSP8NotTokenOwner",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "tokenReceiver",
-        "type": "address"
-      }
-    ],
-    "name": "LSP8NotifyTokenReceiverContractMissingLSP1Interface",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "tokenReceiver",
-        "type": "address"
-      }
-    ],
-    "name": "LSP8NotifyTokenReceiverIsEOA",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "LSP8OperatorAlreadyAuthorized",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "caller",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "tokenOwner",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "LSP8RevokeOperatorNotAuthorized",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP8TokenContractCannotHoldValue",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "LSP8TokenIdAlreadyMinted",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP8TokenIdFormatNotEditable",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP8TokenIdsDataEmptyArray",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP8TokenIdsDataLengthMismatch",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LSP8TokenOwnerCannotBeOperator",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "address",
-        "name": "oldOwner",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "LSP8TokenOwnerChanged",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes4",
-        "name": "functionSelector",
-        "type": "bytes4"
-      }
-    ],
-    "name": "NoExtensionFoundForFunctionSelector",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "callerAddress",
-        "type": "address"
-      }
-    ],
-    "name": "OwnableCallerNotTheOwner",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "OwnableCannotSetZeroAddressAsOwner",
-    "type": "error"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "dataKey",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "dataValue",
-        "type": "bytes"
-      }
-    ],
-    "name": "DataChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "tokenOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "operatorNotificationData",
-        "type": "bytes"
-      }
-    ],
-    "name": "OperatorAuthorizationChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "tokenOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "notified",
-        "type": "bool"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "operatorNotificationData",
-        "type": "bytes"
-      }
-    ],
-    "name": "OperatorRevoked",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "dataKey",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "dataValue",
-        "type": "bytes"
-      }
-    ],
-    "name": "TokenIdDataChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "force",
-        "type": "bool"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
-      }
-    ],
-    "name": "Transfer",
-    "type": "event"
-  },
-  {
-    "stateMutability": "payable",
-    "type": "fallback"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes",
-        "name": "operatorNotificationData",
-        "type": "bytes"
-      }
-    ],
+    "type": "function",
     "name": "authorizeOperator",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "tokenOwner",
-        "type": "address"
-      }
-    ],
-    "name": "balanceOf",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes[]",
-        "name": "data",
-        "type": "bytes[]"
-      }
-    ],
-    "name": "batchCalls",
-    "outputs": [
-      {
-        "internalType": "bytes[]",
-        "name": "results",
-        "type": "bytes[]"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "dataKey",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getData",
-    "outputs": [
-      {
-        "internalType": "bytes",
-        "name": "dataValue",
-        "type": "bytes"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32[]",
-        "name": "dataKeys",
-        "type": "bytes32[]"
-      }
-    ],
-    "name": "getDataBatch",
-    "outputs": [
-      {
-        "internalType": "bytes[]",
-        "name": "dataValues",
-        "type": "bytes[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32[]",
-        "name": "tokenIds",
-        "type": "bytes32[]"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "dataKeys",
-        "type": "bytes32[]"
-      }
-    ],
-    "name": "getDataBatchForTokenIds",
-    "outputs": [
-      {
-        "internalType": "bytes[]",
-        "name": "dataValues",
-        "type": "bytes[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "dataKey",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getDataForTokenId",
-    "outputs": [
-      {
-        "internalType": "bytes",
-        "name": "dataValue",
-        "type": "bytes"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getOperatorsOf",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "operator",
-        "type": "address"
+        "type": "address",
+        "internalType": "address"
       },
       {
-        "internalType": "bytes32",
         "name": "tokenId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "isOperatorFor",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
+        "type": "bytes32",
+        "internalType": "bytes32"
       },
       {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bool",
-        "name": "force",
-        "type": "bool"
-      },
-      {
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
-      }
-    ],
-    "name": "mint",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bool",
-        "name": "notify",
-        "type": "bool"
-      },
-      {
-        "internalType": "bytes",
         "name": "operatorNotificationData",
-        "type": "bytes"
+        "type": "bytes",
+        "internalType": "bytes"
       }
     ],
-    "name": "revokeOperator",
     "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "stateMutability": "nonpayable"
   },
   {
+    "type": "function",
+    "name": "balanceOf",
     "inputs": [
       {
-        "internalType": "bytes32",
-        "name": "dataKey",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes",
-        "name": "dataValue",
-        "type": "bytes"
-      }
-    ],
-    "name": "setData",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32[]",
-        "name": "dataKeys",
-        "type": "bytes32[]"
-      },
-      {
-        "internalType": "bytes[]",
-        "name": "dataValues",
-        "type": "bytes[]"
-      }
-    ],
-    "name": "setDataBatch",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32[]",
-        "name": "tokenIds",
-        "type": "bytes32[]"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "dataKeys",
-        "type": "bytes32[]"
-      },
-      {
-        "internalType": "bytes[]",
-        "name": "dataValues",
-        "type": "bytes[]"
-      }
-    ],
-    "name": "setDataBatchForTokenIds",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "dataKey",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes",
-        "name": "dataValue",
-        "type": "bytes"
-      }
-    ],
-    "name": "setDataForTokenId",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes4",
-        "name": "interfaceId",
-        "type": "bytes4"
-      }
-    ],
-    "name": "supportsInterface",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "index",
-        "type": "uint256"
-      }
-    ],
-    "name": "tokenAt",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "tokenOwner",
-        "type": "address"
+        "type": "address",
+        "internalType": "address"
       }
     ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "batchCalls",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "results",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getData",
+    "inputs": [
+      {
+        "name": "dataKey",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "dataValue",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getDataBatch",
+    "inputs": [
+      {
+        "name": "dataKeys",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "dataValues",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getDataBatchForTokenIds",
+    "inputs": [
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "dataKeys",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "dataValues",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getDataForTokenId",
+    "inputs": [
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataKey",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "dataValue",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getOperatorsOf",
+    "inputs": [
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isOperatorFor",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "mint",
+    "inputs": [
+      {
+        "name": "to",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "force",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "renounceOwnership",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeOperator",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "notify",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "operatorNotificationData",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setData",
+    "inputs": [
+      {
+        "name": "dataKey",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataValue",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "setDataBatch",
+    "inputs": [
+      {
+        "name": "dataKeys",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "dataValues",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "setDataBatchForTokenIds",
+    "inputs": [
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "dataKeys",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "dataValues",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setDataForTokenId",
+    "inputs": [
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataKey",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataValue",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "supportsInterface",
+    "inputs": [
+      {
+        "name": "interfaceId",
+        "type": "bytes4",
+        "internalType": "bytes4"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "tokenAt",
+    "inputs": [
+      {
+        "name": "index",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "tokenIdsOf",
-    "outputs": [
-      {
-        "internalType": "bytes32[]",
-        "name": "",
-        "type": "bytes32[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
+        "name": "tokenOwner",
+        "type": "address",
+        "internalType": "address"
       }
     ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "tokenOwnerOf",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
-    "inputs": [],
+    "type": "function",
     "name": "tokenSupplyCap",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
-    "name": "totalSupply",
     "outputs": [
       {
-        "internalType": "uint256",
         "name": "",
-        "type": "uint256"
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
+    "stateMutability": "view"
   },
   {
-    "inputs": [
+    "type": "function",
+    "name": "totalSupply",
+    "inputs": [],
+    "outputs": [
       {
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "tokenId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bool",
-        "name": "force",
-        "type": "bool"
-      },
-      {
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "transfer",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
-        "internalType": "address[]",
         "name": "from",
-        "type": "address[]"
+        "type": "address",
+        "internalType": "address"
       },
       {
-        "internalType": "address[]",
         "name": "to",
-        "type": "address[]"
+        "type": "address",
+        "internalType": "address"
       },
       {
-        "internalType": "bytes32[]",
         "name": "tokenId",
-        "type": "bytes32[]"
+        "type": "bytes32",
+        "internalType": "bytes32"
       },
       {
-        "internalType": "bool[]",
         "name": "force",
-        "type": "bool[]"
+        "type": "bool",
+        "internalType": "bool"
       },
       {
-        "internalType": "bytes[]",
         "name": "data",
-        "type": "bytes[]"
+        "type": "bytes",
+        "internalType": "bytes"
       }
     ],
-    "name": "transferBatch",
     "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "stateMutability": "nonpayable"
   },
   {
+    "type": "function",
+    "name": "transferBatch",
     "inputs": [
       {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
+        "name": "from",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "to",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "tokenId",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "force",
+        "type": "bool[]",
+        "internalType": "bool[]"
+      },
+      {
+        "name": "data",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
       }
     ],
-    "name": "transferOwnership",
     "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "stateMutability": "nonpayable"
   },
   {
-    "stateMutability": "payable",
-    "type": "receive"
+    "type": "function",
+    "name": "transferOwnership",
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "DataChanged",
+    "inputs": [
+      {
+        "name": "dataKey",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataValue",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OperatorAuthorizationChanged",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "operatorNotificationData",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OperatorRevoked",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "notified",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "operatorNotificationData",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "name": "previousOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TokenIdDataChanged",
+    "inputs": [
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataKey",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "dataValue",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Transfer",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "from",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "to",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "force",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "data",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "ERC725Y_DataKeysValuesEmptyArray",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ERC725Y_DataKeysValuesLengthMismatch",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ERC725Y_MsgValueDisallowed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidExtensionAddress",
+    "inputs": [
+      {
+        "name": "storedData",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidFunctionSelector",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP4TokenNameNotEditable",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP4TokenSymbolNotEditable",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP4TokenTypeNotEditable",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8BatchCallFailed",
+    "inputs": [
+      {
+        "name": "callIndex",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP8CannotSendToAddressZero",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8CannotUseAddressZeroAsOperator",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8CappedSupplyCannotMintOverCap",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8CappedSupplyRequired",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8InvalidTransferBatch",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8NonExistentTokenId",
+    "inputs": [
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP8NonExistingOperator",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP8NotTokenOperator",
+    "inputs": [
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "caller",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP8NotTokenOwner",
+    "inputs": [
+      {
+        "name": "tokenOwner",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "caller",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP8NotifyTokenReceiverContractMissingLSP1Interface",
+    "inputs": [
+      {
+        "name": "tokenReceiver",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP8NotifyTokenReceiverIsEOA",
+    "inputs": [
+      {
+        "name": "tokenReceiver",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP8OperatorAlreadyAuthorized",
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP8RevokeOperatorNotAuthorized",
+    "inputs": [
+      {
+        "name": "caller",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tokenOwner",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP8TokenContractCannotHoldValue",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8TokenIdAlreadyMinted",
+    "inputs": [
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LSP8TokenIdFormatNotEditable",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8TokenIdsDataEmptyArray",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8TokenIdsDataLengthMismatch",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8TokenOwnerCannotBeOperator",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LSP8TokenOwnerChanged",
+    "inputs": [
+      {
+        "name": "tokenId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "oldOwner",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "newOwner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "NoExtensionFoundForFunctionSelector",
+    "inputs": [
+      {
+        "name": "functionSelector",
+        "type": "bytes4",
+        "internalType": "bytes4"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "OwnableCallerNotTheOwner",
+    "inputs": [
+      {
+        "name": "callerAddress",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "OwnableCannotSetZeroAddressAsOwner",
+    "inputs": []
   }
 ]
