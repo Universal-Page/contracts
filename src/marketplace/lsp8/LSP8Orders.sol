@@ -186,6 +186,6 @@ contract LSP8Orders is ILSP8Orders, Module {
             revert Unpaid(msg.sender, filledValue);
         }
 
-        emit Filled(id, order.asset, seller, order.buyer, order.tokenPrice, tokenIds, uint16(tokenIdsCount));
+        emit Filled(id, order.asset, seller, order.buyer, order.tokenPrice, tokenIds, order.tokenCount);
     }
 }

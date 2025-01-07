@@ -274,7 +274,7 @@ contract LSP8OrdersTest is Test {
 
         vm.prank(marketplace);
         vm.expectEmit();
-        emit Filled(1, address(asset), address(bob), address(alice), tokenPrice, fillTokenIds, fillCount);
+        emit Filled(1, address(asset), address(bob), address(alice), tokenPrice, fillTokenIds, tokenCount);
         orders.fill(1, address(bob), fillTokenIds);
     }
 
@@ -314,7 +314,7 @@ contract LSP8OrdersTest is Test {
 
         vm.prank(marketplace);
         vm.expectEmit();
-        emit Filled(1, address(asset), address(bob), address(alice), tokenPrice, fillTokenIds, 1);
+        emit Filled(1, address(asset), address(bob), address(alice), tokenPrice, fillTokenIds, uint16(tokenIds.length));
         orders.fill(1, address(bob), fillTokenIds);
 
         assertTrue(orders.isPlacedOrder(1));
