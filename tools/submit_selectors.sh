@@ -90,10 +90,12 @@ submit "marketplace/Participant"
 
 submit "marketplace/lsp7/LSP7Listings"
 submit "marketplace/lsp7/LSP7Offers"
+submit "marketplace/lsp7/LSP7Orders"
 submit "marketplace/lsp7/LSP7Marketplace"
 
 submit "marketplace/lsp8/LSP8Listings"
 submit "marketplace/lsp8/LSP8Offers"
+submit "marketplace/lsp8/LSP8Orders"
 submit "marketplace/lsp8/LSP8Auctions"
 submit "marketplace/lsp8/LSP8Marketplace"
 

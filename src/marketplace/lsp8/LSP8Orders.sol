@@ -177,8 +177,9 @@ contract LSP8Orders is ILSP8Orders, Module {
             }
 
             _orders[order.id].tokenIds = remainingTokenIds;
-            _orders[order.id].tokenCount = order.tokenCount - uint16(tokenIdsCount);
         }
+
+        _orders[order.id].tokenCount = order.tokenCount - uint16(tokenIdsCount);
 
         uint256 filledValue = order.tokenPrice * tokenIdsCount;
         (bool success,) = msg.sender.call{value: filledValue}("");

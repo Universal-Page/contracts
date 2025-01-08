@@ -268,6 +268,16 @@ contract LSP8OrdersTest is Test {
         vm.prank(address(alice));
         orders.place{value: tokenPrice * tokenCount}(address(asset), tokenPrice, tokenIds, tokenCount);
 
+        {
+            LSP8Order memory order = orders.getOrder(1);
+            assertEq(order.tokenIds.length, tokenCount);
+            assertEq(order.tokenCount, tokenCount);
+
+            for (uint256 i = 0; i < tokenCount; i++) {
+                assertEq(order.tokenIds[i], tokenIds[i]);
+            }
+        }
+
         address marketplace = address(100);
         vm.prank(owner);
         orders.grantRole(marketplace, MARKETPLACE_ROLE);
@@ -276,6 +286,59 @@ contract LSP8OrdersTest is Test {
         vm.expectEmit();
         emit Filled(1, address(asset), address(bob), address(alice), tokenPrice, fillTokenIds, tokenCount);
         orders.fill(1, address(bob), fillTokenIds);
+
+        if (fillCount == tokenCount) {
+            assertFalse(orders.isPlacedOrder(1));
+            assertFalse(orders.isPlacedOrderOf(address(asset), address(alice)));
+        } else {
+            LSP8Order memory order = orders.getOrder(1);
+            assertEq(order.tokenIds.length, tokenCount - fillCount);
+            assertEq(order.tokenCount, tokenCount - fillCount);
+
+            for (uint256 i = 0; i < tokenCount - fillCount; i++) {
+                assertEq(order.tokenIds[i], tokenIds[fillCount + i]);
+            }
+        }
+    }
+
+    function test_FillAnyTokens() public {
+        uint256 tokenPrice = 1 ether;
+
+        bytes32[] memory tokenIds = new bytes32[](0);
+
+        bytes32[] memory fillTokenIds = new bytes32[](4);
+        for (uint256 i = 0; i < fillTokenIds.length; i++) {
+            fillTokenIds[i] = keccak256(abi.encodePacked(i));
+        }
+
+        (UniversalProfile alice,) = deployProfile();
+        (UniversalProfile bob,) = deployProfile();
+
+        vm.deal(address(alice), tokenPrice * 10);
+
+        vm.prank(address(alice));
+        orders.place{value: tokenPrice * 10}(address(asset), tokenPrice, tokenIds, 10);
+
+        {
+            LSP8Order memory order = orders.getOrder(1);
+            assertEq(order.tokenIds.length, 0);
+            assertEq(order.tokenCount, 10);
+        }
+
+        address marketplace = address(100);
+        vm.prank(owner);
+        orders.grantRole(marketplace, MARKETPLACE_ROLE);
+
+        vm.prank(marketplace);
+        vm.expectEmit();
+        emit Filled(1, address(asset), address(bob), address(alice), tokenPrice, fillTokenIds, 10);
+        orders.fill(1, address(bob), fillTokenIds);
+
+        {
+            LSP8Order memory order = orders.getOrder(1);
+            assertEq(order.tokenIds.length, 0);
+            assertEq(order.tokenCount, 6);
+        }
     }
 
     function test_CancelAfterPartialFill() public {
