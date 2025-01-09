@@ -172,6 +172,30 @@ contract LSP8OrdersTest is Test {
         assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), secondTokenIds));
     }
 
+    function test_PlaceMultipleForAnyTokens() public {
+        bytes32[] memory anyTokenIds = new bytes32[](0);
+
+        (UniversalProfile alice,) = deployProfile();
+
+        vm.deal(address(alice), 8 ether);
+
+        vm.prank(address(alice));
+        vm.expectEmit();
+        emit Placed(1, address(asset), address(alice), 1 ether, anyTokenIds, 5);
+        orders.place{value: 5 ether}(address(asset), 1 ether, anyTokenIds, 5);
+
+        vm.prank(address(alice));
+        vm.expectEmit();
+        emit Placed(2, address(asset), address(alice), 1 ether, anyTokenIds, 3);
+        orders.place{value: 3 ether}(address(asset), 1 ether, anyTokenIds, 3);
+
+        assertTrue(orders.isPlacedOrder(1));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), anyTokenIds));
+
+        assertTrue(orders.isPlacedOrder(2));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), anyTokenIds));
+    }
+
     function test_PlaceMultipleForDifferentTokens() public {
         bytes32[] memory firstTokenIds = new bytes32[](2);
         firstTokenIds[0] = keccak256("token1");

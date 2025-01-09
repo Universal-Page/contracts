@@ -59,6 +59,12 @@ interface ILSP8Orders {
         view
         returns (LSP8Order memory);
 
+    /// retrieves all orders for an asset made by a buyer
+    /// @param asset asset address
+    /// @param buyer buyer
+    /// @return orders orders
+    function ordersOf(address asset, address buyer) external view returns (LSP8Order[] memory);
+
     /// confirms an order has been placed by a buyer
     /// @param id order id
     /// @return true if the order is placed
