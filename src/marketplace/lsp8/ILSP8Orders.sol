@@ -45,14 +45,19 @@ interface ILSP8Orders {
     /// confirms an order has been placed by a buyer
     /// @param asset asset address
     /// @param buyer buyer
+    /// @param tokenIds token ids or empty for any tokens. Must be sorted in ascending order.
     /// @return true if the order is placed
-    function isPlacedOrderOf(address asset, address buyer) external view returns (bool);
+    function isPlacedOrderOf(address asset, address buyer, bytes32[] calldata tokenIds) external view returns (bool);
 
     /// retrieves an order for an asset made by a buyer or reverts if not placed
     /// @param asset asset address
     /// @param buyer buyer
+    /// @param tokenIds token ids or empty for any tokens. Must be sorted in ascending order.
     /// @return order order
-    function orderOf(address asset, address buyer) external view returns (LSP8Order memory);
+    function orderOf(address asset, address buyer, bytes32[] calldata tokenIds)
+        external
+        view
+        returns (LSP8Order memory);
 
     /// confirms an order has been placed by a buyer
     /// @param id order id

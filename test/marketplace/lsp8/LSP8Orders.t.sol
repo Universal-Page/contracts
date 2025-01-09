@@ -104,10 +104,10 @@ contract LSP8OrdersTest is Test {
         orders.fill(1, address(100), tokenIds);
     }
 
-    function testFuzz_NotPlacedOf(address someAsset, address buyer) public {
-        assertFalse(orders.isPlacedOrderOf(someAsset, buyer));
-        vm.expectRevert(abi.encodeWithSelector(LSP8Orders.NotPlacedOf.selector, someAsset, buyer));
-        orders.orderOf(someAsset, buyer);
+    function testFuzz_NotPlacedOf(address someAsset, address buyer, bytes32[] memory tokenIds) public {
+        assertFalse(orders.isPlacedOrderOf(someAsset, buyer, tokenIds));
+        vm.expectRevert(abi.encodeWithSelector(LSP8Orders.NotPlacedOf.selector, someAsset, buyer, tokenIds));
+        orders.orderOf(someAsset, buyer, tokenIds);
     }
 
     function testFuzz_NotPlaced(uint256 id) public {
@@ -131,9 +131,9 @@ contract LSP8OrdersTest is Test {
         orders.place{value: tokenPrice * tokenCount}(address(asset), tokenPrice, tokenIds, tokenCount);
 
         assertTrue(orders.isPlacedOrder(1));
-        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice)));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), tokenIds));
 
-        LSP8Order memory order = orders.orderOf(address(asset), address(alice));
+        LSP8Order memory order = orders.orderOf(address(asset), address(alice), tokenIds);
         assertEq(abi.encode(order), abi.encode(orders.getOrder(1)));
         assertEq(order.id, 1);
         assertEq(order.asset, address(asset));
@@ -141,6 +141,98 @@ contract LSP8OrdersTest is Test {
         assertEq(order.tokenPrice, tokenPrice);
         assertEq(abi.encode(order.tokenIds), abi.encode(tokenIds));
         assertEq(order.tokenCount, tokenCount);
+    }
+
+    function test_PlaceMultipleForAnyAndSomeTokens() public {
+        bytes32[] memory firstTokenIds = new bytes32[](0);
+
+        bytes32[] memory secondTokenIds = new bytes32[](3);
+        secondTokenIds[0] = keccak256("token1");
+        secondTokenIds[1] = keccak256("token2");
+        secondTokenIds[2] = keccak256("token3");
+
+        (UniversalProfile alice,) = deployProfile();
+
+        vm.deal(address(alice), 8 ether);
+
+        vm.prank(address(alice));
+        vm.expectEmit();
+        emit Placed(1, address(asset), address(alice), 1 ether, firstTokenIds, 5);
+        orders.place{value: 5 ether}(address(asset), 1 ether, firstTokenIds, 5);
+
+        vm.prank(address(alice));
+        vm.expectEmit();
+        emit Placed(2, address(asset), address(alice), 1 ether, secondTokenIds, 3);
+        orders.place{value: 3 ether}(address(asset), 1 ether, secondTokenIds, 3);
+
+        assertTrue(orders.isPlacedOrder(1));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), firstTokenIds));
+
+        assertTrue(orders.isPlacedOrder(2));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), secondTokenIds));
+    }
+
+    function test_PlaceMultipleForDifferentTokens() public {
+        bytes32[] memory firstTokenIds = new bytes32[](2);
+        firstTokenIds[0] = keccak256("token1");
+        firstTokenIds[1] = keccak256("token2");
+
+        bytes32[] memory secondTokenIds = new bytes32[](3);
+        secondTokenIds[0] = keccak256("token3");
+        secondTokenIds[1] = keccak256("token4");
+        secondTokenIds[2] = keccak256("token5");
+
+        (UniversalProfile alice,) = deployProfile();
+
+        vm.deal(address(alice), 5 ether);
+
+        vm.prank(address(alice));
+        vm.expectEmit();
+        emit Placed(1, address(asset), address(alice), 1 ether, firstTokenIds, 2);
+        orders.place{value: 2 ether}(address(asset), 1 ether, firstTokenIds, 2);
+
+        vm.prank(address(alice));
+        vm.expectEmit();
+        emit Placed(2, address(asset), address(alice), 1 ether, secondTokenIds, 3);
+        orders.place{value: 3 ether}(address(asset), 1 ether, secondTokenIds, 3);
+
+        assertTrue(orders.isPlacedOrder(1));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), firstTokenIds));
+
+        assertTrue(orders.isPlacedOrder(2));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), secondTokenIds));
+    }
+
+    function test_Revert_PlaceMultipleForOverlappingTokens() public {
+        bytes32[] memory firstTokenIds = new bytes32[](2);
+        firstTokenIds[0] = keccak256("token1");
+        firstTokenIds[1] = keccak256("token2");
+
+        bytes32[] memory secondTokenIds = new bytes32[](3);
+        secondTokenIds[0] = keccak256("token3");
+        secondTokenIds[1] = keccak256("token1");
+        secondTokenIds[2] = keccak256("token4");
+
+        (UniversalProfile alice,) = deployProfile();
+
+        vm.deal(address(alice), 5 ether);
+
+        vm.prank(address(alice));
+        vm.expectEmit();
+        emit Placed(1, address(asset), address(alice), 1 ether, firstTokenIds, 2);
+        orders.place{value: 2 ether}(address(asset), 1 ether, firstTokenIds, 2);
+
+        vm.prank(address(alice));
+        vm.expectRevert(
+            abi.encodeWithSelector(LSP8Orders.AlreadyPlaced.selector, address(asset), address(alice), secondTokenIds)
+        );
+        orders.place{value: 3 ether}(address(asset), 1 ether, secondTokenIds, 3);
+
+        assertTrue(orders.isPlacedOrder(1));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), firstTokenIds));
+
+        assertFalse(orders.isPlacedOrder(2));
+        assertFalse(orders.isPlacedOrderOf(address(asset), address(alice), secondTokenIds));
     }
 
     function test_Revert_InvalidTokenCount() public {
@@ -186,7 +278,9 @@ contract LSP8OrdersTest is Test {
         orders.place{value: 1 ether}(address(asset), 1 ether, tokenIds, 1);
 
         vm.prank(address(alice));
-        vm.expectRevert(abi.encodeWithSelector(LSP8Orders.AlreadyPlaced.selector, address(asset), address(alice)));
+        vm.expectRevert(
+            abi.encodeWithSelector(LSP8Orders.AlreadyPlaced.selector, address(asset), address(alice), tokenIds)
+        );
         orders.place{value: 1 ether}(address(asset), 1 ether, tokenIds, 1);
     }
 
@@ -218,7 +312,7 @@ contract LSP8OrdersTest is Test {
         orders.cancel(1);
 
         assertFalse(orders.isPlacedOrder(1));
-        assertFalse(orders.isPlacedOrderOf(address(asset), address(alice)));
+        assertFalse(orders.isPlacedOrderOf(address(asset), address(alice), tokenIds));
         assertEq(address(alice).balance, 1 ether);
     }
 
@@ -233,14 +327,14 @@ contract LSP8OrdersTest is Test {
         vm.prank(address(alice));
         orders.place{value: 1 ether}(address(asset), 1 ether, tokenIds, 1);
 
-        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice)));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), tokenIds));
         assertEq(address(alice).balance, 0 ether);
 
         vm.prank(address(bob));
-        vm.expectRevert(abi.encodeWithSelector(LSP8Orders.NotPlacedOf.selector, address(asset), address(bob)));
+        vm.expectRevert(abi.encodeWithSelector(LSP8Orders.NotPlacedOf.selector, address(asset), address(bob), tokenIds));
         orders.cancel(1);
 
-        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice)));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), tokenIds));
         assertEq(address(alice).balance, 0 ether);
     }
 
@@ -289,7 +383,6 @@ contract LSP8OrdersTest is Test {
 
         if (fillCount == tokenCount) {
             assertFalse(orders.isPlacedOrder(1));
-            assertFalse(orders.isPlacedOrderOf(address(asset), address(alice)));
         } else {
             LSP8Order memory order = orders.getOrder(1);
             assertEq(order.tokenIds.length, tokenCount - fillCount);
@@ -369,7 +462,7 @@ contract LSP8OrdersTest is Test {
         orders.grantRole(marketplace, MARKETPLACE_ROLE);
 
         assertTrue(orders.isPlacedOrder(1));
-        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice)));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), tokenIds));
         assertEq(address(alice).balance, 0 ether);
         assertEq(address(bob).balance, 0 ether);
         assertEq(marketplace.balance, 0 ether);
@@ -381,7 +474,7 @@ contract LSP8OrdersTest is Test {
         orders.fill(1, address(bob), fillTokenIds);
 
         assertTrue(orders.isPlacedOrder(1));
-        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice)));
+        assertTrue(orders.isPlacedOrderOf(address(asset), address(alice), cancelTokenIds));
         assertEq(address(alice).balance, 0 ether);
         assertEq(address(bob).balance, 0 ether);
         assertEq(marketplace.balance, 1 ether);
@@ -393,7 +486,6 @@ contract LSP8OrdersTest is Test {
         orders.cancel(1);
 
         assertFalse(orders.isPlacedOrder(1));
-        assertFalse(orders.isPlacedOrderOf(address(asset), address(alice)));
         assertEq(address(alice).balance, 1 ether);
         assertEq(address(bob).balance, 0 ether);
         assertEq(marketplace.balance, 1 ether);

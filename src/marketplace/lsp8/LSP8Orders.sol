@@ -5,17 +5,17 @@ import {Module} from "../common/Module.sol";
 import {ILSP8Orders, LSP8Order} from "./ILSP8Orders.sol";
 
 contract LSP8Orders is ILSP8Orders, Module {
-    error NotPlacedOf(address asset, address buyer);
+    error NotPlacedOf(address asset, address buyer, bytes32[] tokenIds);
     error NotPlaced(uint256 id);
     error InvalidTokenCount(uint16 tokenCount);
-    error AlreadyPlaced(address asset, address buyer);
+    error AlreadyPlaced(address asset, address buyer, bytes32[] tokenIds);
     error InvalidAmount(uint256 expected, uint256 actual);
     error Unpaid(address buyer, uint256 amount);
     error InsufficientTokenCount(uint16 orderCount, uint16 offeredCount);
     error UnfulfilledToken(bytes32 tokenId);
 
     uint256 public totalOrders;
-    mapping(address asset => mapping(address buyer => uint256 id)) private _orderIds;
+    mapping(address asset => mapping(address buyer => uint256[] ids)) private _orderIds;
     mapping(uint256 id => LSP8Order) private _orders;
 
     constructor() {
@@ -26,15 +26,47 @@ contract LSP8Orders is ILSP8Orders, Module {
         Module._initialize(newOwner_);
     }
 
-    function isPlacedOrderOf(address asset, address buyer) public view override returns (bool) {
-        return isPlacedOrder(_orderIds[asset][buyer]);
+    function _computeTokensKey(bytes32[] memory tokenIds) private pure returns (bytes32) {
+        bytes32 key = 0;
+        uint256 length = tokenIds.length;
+        for (uint256 i = 0; i < length; i++) {
+            key = keccak256(abi.encodePacked(key, tokenIds[i]));
+        }
+        return key;
     }
 
-    function orderOf(address asset, address buyer) external view override returns (LSP8Order memory) {
-        if (!isPlacedOrderOf(asset, buyer)) {
-            revert NotPlacedOf(asset, buyer);
+    function isPlacedOrderOf(address asset, address buyer, bytes32[] memory tokenIds)
+        public
+        view
+        override
+        returns (bool)
+    {
+        uint256[] memory orders = _orderIds[asset][buyer];
+        bytes32 tokensKey = _computeTokensKey(tokenIds);
+        for (uint256 i = 0; i < orders.length; i++) {
+            LSP8Order memory order = _orders[orders[i]];
+            if (order.tokenCount > 0 && _computeTokensKey(order.tokenIds) == tokensKey) {
+                return true;
+            }
         }
-        return _orders[_orderIds[asset][buyer]];
+        return false;
+    }
+
+    function orderOf(address asset, address buyer, bytes32[] memory tokenIds)
+        external
+        view
+        override
+        returns (LSP8Order memory)
+    {
+        uint256[] memory orders = _orderIds[asset][buyer];
+        bytes32 tokensKey = _computeTokensKey(tokenIds);
+        for (uint256 i = 0; i < orders.length; i++) {
+            LSP8Order memory order = _orders[orders[i]];
+            if (order.tokenCount > 0 && _computeTokensKey(order.tokenIds) == tokensKey) {
+                return order;
+            }
+        }
+        revert NotPlacedOf(asset, buyer, tokenIds);
     }
 
     function isPlacedOrder(uint256 id) public view override returns (bool) {
@@ -66,8 +98,20 @@ contract LSP8Orders is ILSP8Orders, Module {
         }
 
         address buyer = msg.sender;
-        if (isPlacedOrderOf(asset, buyer)) {
-            revert AlreadyPlaced(asset, buyer);
+
+        // verify buyer orders do not contain overlapping tokens
+        {
+            uint256[] memory orders = _orderIds[asset][buyer];
+            for (uint256 i = 0; i < orders.length; i++) {
+                LSP8Order memory order = _orders[orders[i]];
+                for (uint256 j = 0; j < order.tokenIds.length; j++) {
+                    for (uint256 k = 0; k < tokenIds.length; k++) {
+                        if (order.tokenIds[j] == tokenIds[k]) {
+                            revert AlreadyPlaced(asset, buyer, tokenIds);
+                        }
+                    }
+                }
+            }
         }
 
         uint256 totalValue = tokenPrice * tokenCount;
@@ -78,7 +122,7 @@ contract LSP8Orders is ILSP8Orders, Module {
         totalOrders += 1;
         uint256 orderId = totalOrders;
 
-        _orderIds[asset][buyer] = orderId;
+        _orderIds[asset][buyer].push(orderId);
         _orders[orderId] = LSP8Order({
             id: orderId,
             asset: asset,
@@ -97,11 +141,26 @@ contract LSP8Orders is ILSP8Orders, Module {
 
         LSP8Order memory order = getOrder(id);
         if (order.buyer != buyer) {
-            revert NotPlacedOf(order.asset, buyer);
+            revert NotPlacedOf(order.asset, buyer, order.tokenIds);
         }
 
         delete _orders[id];
-        delete _orderIds[order.asset][buyer];
+
+        // delete the order id from the buyer's orders
+        {
+            uint256[] storage orders = _orderIds[order.asset][order.buyer];
+            uint256 index = orders.length;
+            for (uint256 i = 0; i < orders.length; i++) {
+                if (orders[i] == id) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index < orders.length) {
+                orders[index] = orders[orders.length - 1];
+                orders.pop();
+            }
+        }
 
         uint256 remainingValue = order.tokenPrice * order.tokenCount;
         (bool success,) = buyer.call{value: remainingValue}("");
@@ -112,7 +171,7 @@ contract LSP8Orders is ILSP8Orders, Module {
         emit Canceled(id, order.asset, buyer, order.tokenPrice, order.tokenIds, order.tokenCount);
     }
 
-    function fill(uint256 id, address seller, bytes32[] calldata tokenIds)
+    function fill(uint256 id, address seller, bytes32[] memory tokenIds)
         external
         override
         whenNotPaused

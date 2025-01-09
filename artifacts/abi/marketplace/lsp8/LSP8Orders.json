@@ -178,6 +178,11 @@
         "name": "buyer",
         "type": "address",
         "internalType": "address"
+      },
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
       }
     ],
     "outputs": [
@@ -202,6 +207,11 @@
         "name": "buyer",
         "type": "address",
         "internalType": "address"
+      },
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
       }
     ],
     "outputs": [
@@ -576,6 +586,11 @@
         "name": "buyer",
         "type": "address",
         "internalType": "address"
+      },
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
       }
     ]
   },
@@ -673,6 +688,11 @@
         "name": "buyer",
         "type": "address",
         "internalType": "address"
+      },
+      {
+        "name": "tokenIds",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
       }
     ]
   },
