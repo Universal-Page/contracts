@@ -41,11 +41,10 @@ contract LSP8Orders is ILSP8Orders, Module {
         override
         returns (bool)
     {
-        uint256[] memory orders = _orderIds[asset][buyer];
+        LSP8Order[] memory orders = ordersOf(asset, buyer);
         bytes32 tokensKey = _computeTokensKey(tokenIds);
         for (uint256 i = 0; i < orders.length; i++) {
-            LSP8Order memory order = _orders[orders[i]];
-            if (order.tokenCount > 0 && _computeTokensKey(order.tokenIds) == tokensKey) {
+            if (orders[i].tokenCount > 0 && _computeTokensKey(orders[i].tokenIds) == tokensKey) {
                 return true;
             }
         }
@@ -58,15 +57,23 @@ contract LSP8Orders is ILSP8Orders, Module {
         override
         returns (LSP8Order memory)
     {
-        uint256[] memory orders = _orderIds[asset][buyer];
+        LSP8Order[] memory orders = ordersOf(asset, buyer);
         bytes32 tokensKey = _computeTokensKey(tokenIds);
         for (uint256 i = 0; i < orders.length; i++) {
-            LSP8Order memory order = _orders[orders[i]];
-            if (order.tokenCount > 0 && _computeTokensKey(order.tokenIds) == tokensKey) {
-                return order;
+            if (orders[i].tokenCount > 0 && _computeTokensKey(orders[i].tokenIds) == tokensKey) {
+                return orders[i];
             }
         }
         revert NotPlacedOf(asset, buyer, tokenIds);
+    }
+
+    function ordersOf(address asset, address buyer) public view returns (LSP8Order[] memory) {
+        uint256[] memory orderIds = _orderIds[asset][buyer];
+        LSP8Order[] memory orders = new LSP8Order[](orderIds.length);
+        for (uint256 i = 0; i < orderIds.length; i++) {
+            orders[i] = _orders[orderIds[i]];
+        }
+        return orders;
     }
 
     function isPlacedOrder(uint256 id) public view override returns (bool) {
@@ -101,12 +108,11 @@ contract LSP8Orders is ILSP8Orders, Module {
 
         // verify buyer orders do not contain overlapping tokens
         {
-            uint256[] memory orders = _orderIds[asset][buyer];
+            LSP8Order[] memory orders = ordersOf(asset, buyer);
             for (uint256 i = 0; i < orders.length; i++) {
-                LSP8Order memory order = _orders[orders[i]];
-                for (uint256 j = 0; j < order.tokenIds.length; j++) {
+                for (uint256 j = 0; j < orders[i].tokenIds.length; j++) {
                     for (uint256 k = 0; k < tokenIds.length; k++) {
-                        if (order.tokenIds[j] == tokenIds[k]) {
+                        if (orders[i].tokenIds[j] == tokenIds[k]) {
                             revert AlreadyPlaced(asset, buyer, tokenIds);
                         }
                     }
