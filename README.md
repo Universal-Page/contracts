@@ -47,7 +47,7 @@
 | lukso-testnet | LSP7Marketplace       | 0x61c3dd3476a88de7a2bae7e2bc55889185faea1e |
 | lukso-testnet | LSP8Listings          | 0x1dabeddbc94847b4ca9027073e545f67917a84f6 |
 | lukso-testnet | LSP8Offers            | 0x84c0b26747a4f997ab1bfe5110a9579de2c0aeaf |
-| lukso-testnet | LSP8Orders            | 0xf5e502235f1b21413ba96e8afb92004b7ac5b1f2 |
+| lukso-testnet | LSP8Orders            | 0x3e81a952670a5df4062296d644dd5bf05cd475cb |
 | lukso-testnet | LSP8Auctions          | 0xb20f814e55720e477640717bfbc139cf663e1ab4 |
 | lukso-testnet | LSP8Marketplace       | 0x6364738eb197115aece87591dff51d554535d1f8 |
 | lukso-testnet | Points                | 0x3582f474F6E9FB087651b135d6224500A89e6f44 |
