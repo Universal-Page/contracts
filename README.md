@@ -28,7 +28,7 @@
 | lukso | LSP7Marketplace       | 0xe04cf97440cd191096c4103f9c48abd96184fb8d |
 | lukso | LSP8Listings          | 0x4faab47b234c7f5da411429ee86cb15cb0754354 |
 | lukso | LSP8Offers            | 0xed189b51455c9714aa49b0c55529469c512b10b6 |
-| lukso | LSP8Orders            | |
+| lukso | LSP8Orders            | 0xf76b34c79b8d4eca2a05c1302a0fc3e46bf97973 |
 | lukso | LSP8Auctions          | 0x6eee8a19198bf39f2cefc24713acbdcc3c016dec |
 | lukso | LSP8Marketplace       | 0x6807c995602eaf523a95a6b97acc4da0d3894655 |
 | lukso | Points                | 0x157668416776c78EaB825D0d3969d75DC7dD7C0D |
