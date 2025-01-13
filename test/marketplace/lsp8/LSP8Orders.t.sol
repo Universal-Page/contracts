@@ -338,6 +338,85 @@ contract LSP8OrdersTest is Test {
         assertFalse(orders.isPlacedOrder(1));
         assertFalse(orders.isPlacedOrderOf(address(asset), address(alice), tokenIds));
         assertEq(address(alice).balance, 1 ether);
+
+        LSP8Order[] memory noOrders = new LSP8Order[](0);
+        assertEq(abi.encode(orders.ordersOf(address(asset), address(alice))), abi.encode(noOrders));
+    }
+
+    function test_CancelMultiple() public {
+        // Setup test tokens
+        bytes32[] memory firstTokenIds = new bytes32[](2);
+        firstTokenIds[0] = keccak256("token1");
+        firstTokenIds[1] = keccak256("token2");
+
+        bytes32[] memory secondTokenIds = new bytes32[](2);
+        secondTokenIds[0] = keccak256("token3");
+        secondTokenIds[1] = keccak256("token4");
+
+        bytes32[] memory thirdTokenIds = new bytes32[](2);
+        thirdTokenIds[0] = keccak256("token5");
+        thirdTokenIds[1] = keccak256("token6");
+
+        // Setup test accounts
+        (UniversalProfile alice,) = deployProfile();
+        uint256 tokenPrice = 1 ether;
+        vm.deal(address(alice), tokenPrice * 6); // Fund for 3 orders of 2 tokens each
+
+        // Place multiple orders
+        vm.startPrank(address(alice));
+
+        orders.place{value: tokenPrice * 2}(address(asset), tokenPrice, firstTokenIds, 2);
+        orders.place{value: tokenPrice * 2}(address(asset), tokenPrice, secondTokenIds, 2);
+        orders.place{value: tokenPrice * 2}(address(asset), tokenPrice, thirdTokenIds, 2);
+
+        // Verify orders are placed
+        assertTrue(orders.isPlacedOrder(1));
+        assertTrue(orders.isPlacedOrder(2));
+        assertTrue(orders.isPlacedOrder(3));
+        assertEq(address(alice).balance, 0);
+        assertEq(address(orders).balance, tokenPrice * 6);
+
+        // Cancel orders in different order
+        vm.expectEmit();
+        emit Canceled(2, address(asset), address(alice), tokenPrice, secondTokenIds, 2);
+        orders.cancel(2);
+
+        // Verify orders of buyer
+        LSP8Order[] memory orders1 = new LSP8Order[](2);
+        orders1[0] = orders.getOrder(1);
+        orders1[1] = orders.getOrder(3);
+        assertEq(abi.encode(orders.ordersOf(address(asset), address(alice))), abi.encode(orders1));
+
+        vm.expectEmit();
+        emit Canceled(1, address(asset), address(alice), tokenPrice, firstTokenIds, 2);
+        orders.cancel(1);
+
+        // Verify orders of buyer
+        LSP8Order[] memory orders2 = new LSP8Order[](1);
+        orders2[0] = orders.getOrder(3);
+        assertEq(abi.encode(orders.ordersOf(address(asset), address(alice))), abi.encode(orders2));
+
+        vm.expectEmit();
+        emit Canceled(3, address(asset), address(alice), tokenPrice, thirdTokenIds, 2);
+        orders.cancel(3);
+
+        vm.stopPrank();
+
+        // Verify all orders are cancelled
+        assertFalse(orders.isPlacedOrder(1));
+        assertFalse(orders.isPlacedOrder(2));
+        assertFalse(orders.isPlacedOrder(3));
+        assertFalse(orders.isPlacedOrderOf(address(asset), address(alice), firstTokenIds));
+        assertFalse(orders.isPlacedOrderOf(address(asset), address(alice), secondTokenIds));
+        assertFalse(orders.isPlacedOrderOf(address(asset), address(alice), thirdTokenIds));
+
+        // Verify full refund
+        assertEq(address(alice).balance, tokenPrice * 6);
+        assertEq(address(orders).balance, 0);
+
+        // Verify empty orders list
+        LSP8Order[] memory noOrders = new LSP8Order[](0);
+        assertEq(abi.encode(orders.ordersOf(address(asset), address(alice))), abi.encode(noOrders));
     }
 
     function test_Revert_CancelIfNotBuyer() public {
