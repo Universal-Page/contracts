@@ -51,6 +51,11 @@ contract LSP7Marketplace is Base {
         orders = orders_;
     }
 
+    function setOrders(ILSP7Orders orders_) external onlyOwner {
+        require(address(orders_) != address(0));
+        orders = orders_;
+    }
+
     function buy(uint256 listingId, uint256 itemCount, address recipient) external payable whenNotPaused nonReentrant {
         LSP7Listing memory listing = listings.getListing(listingId);
         if (listing.itemPrice * itemCount != msg.value) {

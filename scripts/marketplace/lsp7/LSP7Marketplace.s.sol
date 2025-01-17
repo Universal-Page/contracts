@@ -10,6 +10,7 @@ import {
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {IParticipant} from "../../../src/marketplace/IParticipant.sol";
 import {LSP7Marketplace} from "../../../src/marketplace/lsp7/LSP7Marketplace.sol";
+import {ILSP7Orders} from "../../../src/marketplace/lsp7/ILSP7Orders.sol";
 import {Module, MARKETPLACE_ROLE} from "../../../src/marketplace/common/Module.sol";
 
 uint32 constant FEE_POINTS = 3_000;
@@ -35,7 +36,9 @@ contract Deploy is Script {
                 new TransparentUpgradeableProxy(
                     address(marketplace),
                     admin,
-                    abi.encodeWithSelector(LSP7Marketplace.initialize.selector, owner, treasury, listings, orders, participant)
+                    abi.encodeWithSelector(
+                        LSP7Marketplace.initialize.selector, owner, treasury, listings, orders, participant
+                    )
                 )
             );
             console.log(string.concat("LSP7Marketplace: deploy ", Strings.toHexString(address(proxy))));
@@ -101,6 +104,11 @@ contract Configure is Script {
         if (address(marketplace.participant()) != address(participant)) {
             vm.broadcast(owner);
             marketplace.setParticipant(participant);
+        }
+
+        if (address(marketplace.orders()) != address(orders)) {
+            vm.broadcast(owner);
+            marketplace.setOrders(ILSP7Orders(address(orders)));
         }
     }
 }
